@@ -27,4 +27,9 @@
         android:name="com.example.madguardians.ProfileFragment"
         android:label="@string/profile_string"
         tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/staffFragment"
+        android:name="com.example.madguardians.StaffFragment"
+        android:label="fragment_staff"
+        tools:layout="@layout/fragment_staff" />
 </navigation>
