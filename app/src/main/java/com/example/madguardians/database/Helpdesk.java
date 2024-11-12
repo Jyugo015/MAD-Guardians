@@ -25,14 +25,26 @@ import androidx.room.PrimaryKey;
                     entity = Post.class,
                     parentColumns = "postId",
                     childColumns = "postId",
-                    onDelete = ForeignKey.CASCADE
+                    onDelete = ForeignKey.SET_NULL
             ),
             @ForeignKey(
                     entity = Course.class,
                     parentColumns = "courseId",
                     childColumns = "courseId",
-                    onDelete = ForeignKey.CASCADE
+                    onDelete = ForeignKey.SET_NULL
             ),
+            @ForeignKey(
+                    entity = Commnet.class,
+                    parentColumns = "commentId",
+                    childColumns = "commentId",
+                    onDelete = ForeignKey.SET_NULL
+            ),
+            @ForeignKey(
+                    entity = QuizQuestion.class,
+                    parentColumns = "quizId",
+                    childColumns = "quizId",
+                    onDelete = ForeignKey.SET_NULL
+            )
             @ForeignKey(
                     entity = Staff.class,
                     parentColumns = "staffId",
@@ -52,8 +64,14 @@ public class Helpdesk {
     private String postId;
     @Nullable
     private String courseId;
+    @Nullable
+    private String commentId;
+    @Nullable
+    private String quizId;
     @NonNull
     private String staffId;
+    @Nullable
+    private String reason;
     @NonNull
     @ColumnInfo(defaultValue = "pending")
     private String helpdeskStatus;
