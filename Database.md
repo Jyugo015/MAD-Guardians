@@ -591,7 +591,7 @@ FULL ACCESS to all tables
 - check on the data using temporary to validate
 - push to both real table and firestore
 
-### Deleting data 
+### 5. Deleting data 
 - delete straightaway on the Room database 
 - delete also in the Firestore 
 
@@ -681,6 +681,24 @@ try {
 ```
   tempDb.execSQL("DROP TABLE IF EXISTS temp_data");
   helper.close(); 
+```
+
+# Methods to Access Database 
+To use Room and Firestore, you need to insert the following codes in each activity class
+```
+//Initialize Room database 
+private AppDatabase database;
+database = AppDatabase.getDatabase(this);
+
+//Initialize Firestore
+private final RoomDatabase roomDatabase;
+firestoreManager = new FirestoreManager (database);
+```
+To use DAO methods for querying, inserting, updating and deleting data, declare each DAO instance using the database instance
+```
+UserDao userDao = database.userDao();
+DomainDao domainDao = database.domainDao();
+... other DAOs you would like to use 
 ```
 
 # Cloudinary
