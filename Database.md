@@ -581,10 +581,19 @@ FULL ACCESS to all tables
 - staff
 
 # Flow of using Database
-1. OnCreate - Retrieve data from Firestore
-2. Sync user-specific data to the tables (according to the access level)
-3. OnAction - Retrieve data from Room
-4. Updating data - Push changes to both Room and Firestore
+### 1. OnCreate - Retrieve data from Firestore
+
+### 2. Sync user-specific data to the tables (according to the access level)
+
+### 3. OnAction - Retrieve data from Room
+
+### 4. Inserting and Updating data 
+- check on the data using temporary to validate
+- push to both real table and firestore
+
+### Deleting data 
+- delete straightaway on the Room database 
+- delete also in the Firestore 
 
 >[!NOTE]
 > SnapShotListener of Firestore is used to sync changes on Firestore to Room (updates by other users)
