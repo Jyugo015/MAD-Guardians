@@ -69,13 +69,13 @@ Change to
 ```
 
 # Inserting, Updating and Querying in Room Database
-## Accessing to the database instance 
+## Accessing the database instance 
 ```
 private AppDatabase database;
 database = AppDatabase.getDatabase(this);
 ```
 
-## Accesing to the DAO instance
+## Accessing the DAO instance
 ```
 UserDao userDao = database.userDao();
 ```
@@ -229,6 +229,7 @@ public class UserAppointment {
 # Firestore
 Here are some common methods on handling data in Firestore.
 ## Data Insertion to Firestore
+with the documentId set to be the userId
 ```
 User newUser = new User("userId123", "John Doe", "email@example.com");
 // Example Firestore save
@@ -238,7 +239,15 @@ db.collection("users").document(newUser.getUserId())
     .addOnSuccessListener(doc -> Log.d("Firestore", "User added"))
     .addOnFailureListener(e -> Log.e("Firestore", "Error adding user", e));
 ```
-
+with the documentId auto generated
+```
+firestore.collection("users")
+        .add(newUser) // Firestore will auto-generate a unique document ID
+        .addOnSuccessListener(documentReference -> {
+            Log.d("Firestore", "Document added with ID: " + documentReference.getId());
+        })
+        .addOnFailureListener(e -> Log.e("Firestore", "Error adding document", e));
+```
 ## Data Retrieval from Firestore
 ### Fetch single entry based on the id (document id in Firestore)
 ```
