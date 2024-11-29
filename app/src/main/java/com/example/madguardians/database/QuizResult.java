@@ -21,7 +21,7 @@ import androidx.room.PrimaryKey;
                 ),
                 @ForeignKey(
                         entity = QuestionOption.class,
-                        parentColumns = "choiceId",
+                        parentColumns = "choice",
                         childColumns = "userAns",
                         onDelete = ForeignKey.CASCADE
                 )
@@ -42,4 +42,54 @@ public class QuizResult {
 
     @NonNull
     private String timestamp;
+
+    // Constructor
+    public QuizResult(String quizResultId, @NonNull String questionId, @NonNull String userId, @NonNull String userAns, @NonNull String timestamp) {
+        this.quizResultId = quizResultId;
+        this.questionId = questionId;
+        this.userId = userId;
+        this.userAns = userAns;
+        this.timestamp = timestamp;
+    }
+
+    // Getters and Setters
+    public String getQuizResultId() {
+        return quizResultId;
+    }
+
+    public void setQuizResultId(String quizResultId) {
+        this.quizResultId = quizResultId;
+    }
+
+    public String getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(String questionId) {
+        this.questionId = questionId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserAns() {
+        return userAns;
+    }
+
+    public void setUserAns(String userAns) {
+        this.userAns = userAns;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
 }

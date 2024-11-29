@@ -14,7 +14,6 @@ import androidx.room.TypeConverters;
         }
         )
 public class User {
-
     @PrimaryKey
     private String userId;
 
@@ -25,10 +24,11 @@ public class User {
     @NonNull
     private String email;
 
-
     private int phoneNo;
+
     @NonNull
     private String password;
+
     @NonNull
     @ColumnInfo(defaultValue = "url link of default profile pic")
     private String profilePic;
@@ -37,6 +37,20 @@ public class User {
     private String lastLogin;
 
     private int strikeLoginDays;
+
+    // Constructor
+    public User(String userId, @NonNull String name, @NonNull String email, int phoneNo,
+                @NonNull String password, @NonNull String profilePic, String lastLogin,
+                int strikeLoginDays) {
+        this.userId = userId;//user "TEMP" for all users first
+        this.name = name;
+        this.email = email;
+        this.phoneNo = phoneNo;
+        this.password = password;
+        this.profilePic = profilePic;
+        this.lastLogin = lastLogin;
+        this.strikeLoginDays = strikeLoginDays;
+    }
 
     // Getters and Setters
     public String getUserId() {
@@ -64,6 +78,7 @@ public class User {
     }
 
     public int getPhoneNo() {
+
         return phoneNo;
     }
 

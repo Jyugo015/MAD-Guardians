@@ -15,6 +15,47 @@ public class QuizQuestion {
     @NonNull
     private String question;
 
+    @NonNull
     private int questionNo;
 
+    // Constructor
+    public QuizQuestion(String questionId, @NonNull String quizId, @NonNull String question, int questionNo) {
+        this.questionId = questionId;
+        this.quizId = quizId;
+        this.question = question;
+        this.questionNo = questionNo;
+    }
+
+    // Getters and Setters
+    public String getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(String questionId) {
+        this.questionId = questionId;
+    }
+
+    public String getQuizId() {
+        return quizId;
+    }
+
+    public void setQuizId(String quizId) {
+        this.quizId = quizId;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public int getQuestionNo() {
+        return questionNo;
+    }
+
+    public void setQuestionNo(int questionNo) {
+        this.questionNo = questionNo;
+    }
 }

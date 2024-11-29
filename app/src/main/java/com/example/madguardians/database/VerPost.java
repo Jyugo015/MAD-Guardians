@@ -41,7 +41,15 @@ public class VerPost {
     @ColumnInfo(defaultValue = "pending")
     private String verifiedStatus;
 
-    // Getters and Setters
+    // Constructor
+    public VerPost(@NonNull String verPostId, @NonNull String postId, @NonNull String staffId, @NonNull String verifiedStatus) {
+        this.verPostId = verPostId;
+        this.postId = postId;
+        this.staffId = staffId;
+        this.verifiedStatus = verifiedStatus;
+    }
+
+    // Getter and Setter for verPostId
     public String getVerPostId() {
         return verPostId;
     }
@@ -50,6 +58,7 @@ public class VerPost {
         this.verPostId = verPostId;
     }
 
+    // Getter and Setter for postId
     public String getPostId() {
         return postId;
     }
@@ -58,6 +67,7 @@ public class VerPost {
         this.postId = postId;
     }
 
+    // Getter and Setter for staffId
     public String getStaffId() {
         return staffId;
     }
@@ -66,6 +76,7 @@ public class VerPost {
         this.staffId = staffId;
     }
 
+    // Getter and Setter for verifiedStatus
     public String getVerifiedStatus() {
         return verifiedStatus;
     }
