@@ -34,7 +34,7 @@ import androidx.room.PrimaryKey;
                     onDelete = ForeignKey.SET_NULL
             ),
             @ForeignKey(
-                    entity = Commnet.class,
+                    entity = Comment.class,
                     parentColumns = "commentId",
                     childColumns = "commentId",
                     onDelete = ForeignKey.SET_NULL
@@ -44,7 +44,7 @@ import androidx.room.PrimaryKey;
                     parentColumns = "quizId",
                     childColumns = "quizId",
                     onDelete = ForeignKey.SET_NULL
-            )
+            ),
             @ForeignKey(
                     entity = Staff.class,
                     parentColumns = "staffId",
@@ -75,4 +75,102 @@ public class Helpdesk {
     @NonNull
     @ColumnInfo(defaultValue = "pending")
     private String helpdeskStatus;
+
+    // Constructor
+    public Helpdesk(@NonNull String helpdeskId, @NonNull String issueId, @NonNull String userId,
+                    @Nullable String postId, @Nullable String courseId, @Nullable String commentId,
+                    @Nullable String quizId, @NonNull String staffId, @Nullable String reason,
+                    @NonNull String helpdeskStatus) {
+        this.helpdeskId = helpdeskId;
+        this.issueId = issueId;
+        this.userId = userId;
+        this.postId = postId;
+        this.courseId = courseId;
+        this.commentId = commentId;
+        this.quizId = quizId;
+        this.staffId = staffId;
+        this.reason = reason;
+        this.helpdeskStatus = helpdeskStatus;
+    }
+
+    // Getters and Setters
+    public String getHelpdeskId() {
+        return helpdeskId;
+    }
+
+    public void setHelpdeskId(String helpdeskId) {
+        this.helpdeskId = helpdeskId;
+    }
+
+    public String getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(String issueId) {
+        this.issueId = issueId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
+    }
+
+    public String getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getCommentId() {
+        return commentId;
+    }
+
+    public void setCommentId(String commentId) {
+        this.commentId = commentId;
+    }
+
+    public String getQuizId() {
+        return quizId;
+    }
+
+    public void setQuizId(String quizId) {
+        this.quizId = quizId;
+    }
+
+    public String getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(String staffId) {
+        this.staffId = staffId;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getHelpdeskStatus() {
+        return helpdeskStatus;
+    }
+
+    public void setHelpdeskStatus(String helpdeskStatus) {
+        this.helpdeskStatus = helpdeskStatus;
+    }
 }

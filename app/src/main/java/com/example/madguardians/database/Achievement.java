@@ -1,5 +1,6 @@
 package com.example.madguardians.database;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 
@@ -21,6 +22,34 @@ import androidx.room.ForeignKey;
         }
 )
 public class Achievement {
+    @NonNull
     private String userId;
+    @NonNull
     private String badgeId;
+
+    // Constructor
+    public Achievement(String userId, String badgeId) {
+        this.userId = userId;
+        this.badgeId = badgeId;
+    }
+
+    // Getter for userId
+    public String getUserId() {
+        return userId;
+    }
+
+    // Setter for userId
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    // Getter for badgeId
+    public String getBadgeId() {
+        return badgeId;
+    }
+
+    // Setter for badgeId
+    public void setBadgeId(String badgeId) {
+        this.badgeId = badgeId;
+    }
 }

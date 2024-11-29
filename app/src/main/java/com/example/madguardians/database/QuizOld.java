@@ -1,5 +1,6 @@
 package com.example.madguardians.database;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 
@@ -23,4 +24,28 @@ import androidx.room.ForeignKey;
 public class QuizOld {
     private String quizId;
     private String postId;
+
+    // Constructor
+    public QuizOld(@NonNull String quizId, @NonNull String postId) {
+        this.quizId = quizId;
+        this.postId = postId;
+    }
+
+    // Getter and Setter for quizId
+    public String getQuizId() {
+        return quizId;
+    }
+
+    public void setQuizId(String quizId) {
+        this.quizId = quizId;
+    }
+
+    // Getter and Setter for postId
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
+    }
 }
