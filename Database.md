@@ -833,6 +833,8 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
 ```
 # MsdiaHandler
 To display images, PDFs, and video, use the following method:
+```
 i. MediaHandler.displayImage(Context context, String imageUrl, ImageView imageView) ;
 ii. MediaHandler.displayPDF(String pdfUrl, WebView webView)
 iii. MediaHandler.playVideo(String videoUrl, ExoPlayer player)
+```
