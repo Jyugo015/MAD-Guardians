@@ -18,4 +18,44 @@ public class Badge {
     private String badgeName;
     @NonNull
     private String badgeImage;
+
+    // Constructor
+    public Badge(@NonNull String badgeId, @NonNull String badgeName, @NonNull String badgeImage) {
+        this.badgeId = badgeId;
+        this.badgeName = badgeName;
+        this.badgeImage = badgeImage;
+    }
+
+    // Getter for badgeId
+    @NonNull
+    public String getBadgeId() {
+        return badgeId;
+    }
+
+    // Setter for badgeId
+    public void setBadgeId(@NonNull String badgeId) {
+        this.badgeId = badgeId;
+    }
+
+    // Getter for badgeName
+    @NonNull
+    public String getBadgeName() {
+        return badgeName;
+    }
+
+    // Setter for badgeName
+    public void setBadgeName(@NonNull String badgeName) {
+        this.badgeName = badgeName;
+    }
+
+    // Getter for badgeImage
+    @NonNull
+    public String getBadgeImage() {
+        return badgeImage;
+    }
+
+    // Setter for badgeImage
+    public void setBadgeImage(@NonNull String badgeImage) {
+        this.badgeImage = badgeImage;
+    }
 }

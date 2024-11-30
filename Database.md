@@ -711,3 +711,89 @@ DomainDao domainDao = database.domainDao();
 ```
 
 # Cloudinary
+Cloudinary is the database for saving media, which are images, videos and PDF. For your information, maximum file size for image and PDF is 10MB per file, while maximum file size for video is 100MB (don't have to care about it, all the code for execption handling is implemented)
+
+There are 2 Java classes for media database: CloudinaryUploadWorker and MediaHandler.
+
+## CloudinaryUploadWorker
+As uploading files(or media) need some time, so a worker is implemented so that the files will keep uploading and saved in the database even though the activity is stopped.
+
+To utilise the worker, follow the following format in your class:
+
+```
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class YourActivity extends AppCompatActivity implements MediaHandler.MediaHandleCallback {
+
+
+    // Add the following view/element based on your activity's need
+    // a. for image viewer
+    private MediaHandler imageHandler;
+    private ImageView imageView;
+    private Button uploadImage;
+    // b. for video viewer
+    private PlayerView playerView;
+    private ExoPlayer player;
+    private MediaHandler videoHandler;
+    private Button uploadVideo;
+    // c. for PDF viewer
+    private WebView webView; 
+    private MediaHandler pdfHandler;
+    private Button uploadPDF;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_your);
+
+
+        // Register the following based on your need (if your activity need upload media function) (if just wanna show media, these 3 are not needed):
+        // a. Register the activity result launcher for image
+        uploadImage = findViewById(R.id.uploadImage);
+        imageView = findViewById(R.id.image);
+        ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        mediaHandler.handleResult(imageUri, "image");
+                    }
+                }
+        );
+
+        // b. Register the activity result launcher for video
+        uploadVideo = findViewById(R.id.uploadVideo);
+        playerView = findViewById(R.id.playerView);
+        player = new ExoPlayer.Builder(this).build();
+        playerView.setPlayer(player);
+        // Register the activity result launcher
+        ActivityResultLauncher<Intent> videoPickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri videoUri = result.getData().getData();
+                        mediaHandler.handleResult(videoUri, "video");
+                    }
+                }
+        );
+
+        // Initialize MediaHandler with the callback
+        mediaHandler = new MediaHandler(this, imagePickerLauncher, this);
+
+        // Trigger image selection
+        upload.setOnClickListener(v -> mediaHandler.selectImage());
+
+        backMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Image2Activity.this, MainActivity.class));
+                finish();
+            }
+        });
+    }
+
+}
+
+```

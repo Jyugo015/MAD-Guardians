@@ -22,11 +22,19 @@ import androidx.room.ForeignKey;
         }
 )
 public class DomainInterested {
+    @NonNull
     private String userId;
 
+    @NonNull
     private String domainId;
 
-    // Getters and Setters
+    // Constructor
+    public DomainInterested(String userId, String domainId) {
+        this.userId = userId;
+        this.domainId = domainId;
+    }
+
+    // Getter and Setter for userId
     public String getUserId() {
         return userId;
     }
@@ -35,6 +43,7 @@ public class DomainInterested {
         this.userId = userId;
     }
 
+    // Getter and Setter for domainId
     public String getDomainId() {
         return domainId;
     }

@@ -5,7 +5,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName ="quiz",
+@Entity(tableName ="quizHistory",
         foreignKeys = {
                 @ForeignKey(
                         entity = QuizQuestion.class,
@@ -32,4 +32,45 @@ public class QuizHistory {
     @NonNull
     private String timestamp;
 
+    // Constructor
+    public QuizHistory(@NonNull String quizId, @NonNull String userId, int score, @NonNull String timestamp) {
+        this.quizId = quizId;
+        this.userId = userId;
+        this.score = score;
+        this.timestamp = timestamp;
+    }
+
+    // Getters and Setters
+
+    public String getQuizId() {
+        return quizId;
+    }
+
+    public void setQuizId(String quizId) {
+        this.quizId = quizId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
 }

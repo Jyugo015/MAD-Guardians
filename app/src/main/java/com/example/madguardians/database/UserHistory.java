@@ -29,4 +29,46 @@ public class UserHistory {
     private int progress;
     @NonNull
     private String time;
+
+    // Constructor
+    public UserHistory(String postId, String userId, int progress, @NonNull String time) {
+        this.postId = postId;
+        this.userId = userId;
+        this.progress = progress;
+        this.time = time;
+    }
+
+    // Getters and Setters
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
 }

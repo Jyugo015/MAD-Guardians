@@ -10,4 +10,27 @@ public class Issue {
     private String issueId;
     @NonNull
     private String type;
+
+    // Constructor
+    public Issue(@NonNull String issueId, @NonNull String type) {
+        this.issueId = issueId;
+        this.type = type;
+    }
+
+    // Getters and Setters
+    public String getIssueId() {
+        return issueId;
+    }
+
+    public void setIssueId(String issueId) {
+        this.issueId = issueId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }

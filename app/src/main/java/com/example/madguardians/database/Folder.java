@@ -31,4 +31,48 @@ public class Folder {
     private String name;
     @Nullable
     private String rootFolder;
+
+    // Constructor
+    public Folder(@NonNull String folderId, @NonNull String userId, @NonNull String name, @Nullable String rootFolder) {
+        this.folderId = folderId;
+        this.userId = userId;
+        this.name = name;
+        this.rootFolder = rootFolder;
+    }
+
+    // Getter and Setter for folderId
+    public String getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
+
+    // Getter and Setter for userId
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    // Getter and Setter for name
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Getter and Setter for rootFolder
+    public String getRootFolder() {
+        return rootFolder;
+    }
+
+    public void setRootFolder(String rootFolder) {
+        this.rootFolder = rootFolder;
+    }
 }
