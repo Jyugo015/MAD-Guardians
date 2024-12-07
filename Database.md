@@ -522,6 +522,7 @@ db.collection("posts")
 - quizHistory
 - quizResult
 - mediaSet
+- media
 - collection
 - folder
 - userHistory
@@ -543,6 +544,7 @@ db.collection("posts")
 - timeslot
 - counselorAvailability
 - badge
+- quiz
 
 ### No Access
 - helpdesk
