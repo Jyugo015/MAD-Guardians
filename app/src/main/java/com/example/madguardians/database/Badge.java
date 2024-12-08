@@ -13,6 +13,7 @@ import androidx.room.PrimaryKey;
         )
 public class Badge {
     @PrimaryKey
+    @NonNull
     private String badgeId;
     @NonNull
     private String badgeName;

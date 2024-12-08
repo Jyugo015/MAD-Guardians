@@ -13,6 +13,7 @@ import androidx.room.PrimaryKey;
 public class Domain {
 
     @PrimaryKey
+    @NonNull
     private String domainId;
 
     @NonNull

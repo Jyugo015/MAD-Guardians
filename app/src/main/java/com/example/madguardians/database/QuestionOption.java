@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 
 @Entity(tableName = "questionOption",
         primaryKeys = {"questionId", "choice"},
@@ -14,16 +15,19 @@ import androidx.room.ForeignKey;
                         childColumns = "questionId",
                         onDelete = ForeignKey.CASCADE
                 )
-        }
+        },
+        indices = {@Index(value = "choice", unique = true)}
 )
 public class QuestionOption {
+    @NonNull
     private String questionId;
+    @NonNull
     private String choice;
-    @ColumnInfo(defaultValue = "false")
-    private boolean isCorrect;
+    @ColumnInfo(defaultValue = "0")
+    private int isCorrect;
 
     // Constructor
-    public QuestionOption(@NonNull String questionId, @NonNull String choice, boolean isCorrect) {
+    public QuestionOption(@NonNull String questionId, @NonNull String choice, int isCorrect) {
         this.questionId = questionId;
         this.choice = choice;
         this.isCorrect = isCorrect;
@@ -46,11 +50,11 @@ public class QuestionOption {
         this.choice = choice;
     }
 
-    public boolean isCorrect() {
+    public int isCorrect() {
         return isCorrect;
     }
 
-    public void setCorrect(boolean correct) {
+    public void setCorrect(int correct) {
         isCorrect = correct;
     }
 }

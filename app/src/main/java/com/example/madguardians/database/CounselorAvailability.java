@@ -24,6 +24,7 @@ import androidx.room.PrimaryKey;
 )
 public class CounselorAvailability {
     @PrimaryKey
+    @NonNull
     private String counselorAvailabilityId;
 
     @NonNull
@@ -33,12 +34,12 @@ public class CounselorAvailability {
 
     @NonNull
     private String date;
-    @ColumnInfo(defaultValue = "false")
-    private boolean isBooked;
+    @ColumnInfo(defaultValue = "0")
+    private int isBooked;
 
     // Constructor
     public CounselorAvailability(@NonNull String counselorAvailabilityId, @NonNull String counselorId,
-                                 @NonNull String timeslotId, @NonNull String date, boolean isBooked) {
+                                 @NonNull String timeslotId, @NonNull String date, int isBooked) {
         this.counselorAvailabilityId = counselorAvailabilityId;
         this.counselorId = counselorId;
         this.timeslotId = timeslotId;
@@ -87,11 +88,11 @@ public class CounselorAvailability {
     }
 
     // Getter and Setter for isBooked
-    public boolean isBooked() {
+    public int isBooked() {
         return isBooked;
     }
 
-    public void setBooked(boolean booked) {
+    public void setBooked(int booked) {
         isBooked = booked;
     }
 }

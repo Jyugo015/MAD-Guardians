@@ -39,6 +39,7 @@ import androidx.room.PrimaryKey;
 )
 public class Course {
     @PrimaryKey
+    @NonNull
     private String courseId;
     @NonNull
     private String title;

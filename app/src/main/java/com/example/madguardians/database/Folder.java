@@ -24,6 +24,7 @@ import androidx.room.PrimaryKey;
 )
 public class Folder {
     @PrimaryKey
+    @NonNull
     private String folderId;
     @NonNull
     private String userId;

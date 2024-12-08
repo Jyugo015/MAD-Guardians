@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import java.util.List;
 
@@ -17,6 +18,9 @@ public interface DomainInterestedDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<DomainInterested> list);  // Insert a list of posts into the database
+
+    @Update
+    void update(DomainInterested domainInterested);
 
     // Query to find DomainInterested by userId and domainId (primary key)
     @Query("SELECT * FROM domainInterested WHERE userId = :userId AND domainId = :domainId")

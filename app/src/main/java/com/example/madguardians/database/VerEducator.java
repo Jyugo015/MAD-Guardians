@@ -47,11 +47,13 @@ import androidx.room.Index;
         }
         )
 public class VerEducator {
+    @NonNull
     private String userId;
     @Nullable
     private String imageSetId;
     @Nullable
     private String fileSetId;
+    @NonNull
     private String domainId;
     @NonNull
     private String staffId;

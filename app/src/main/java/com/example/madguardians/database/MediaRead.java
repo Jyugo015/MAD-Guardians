@@ -1,5 +1,6 @@
 package com.example.madguardians.database;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 
@@ -7,7 +8,7 @@ import androidx.room.ForeignKey;
         primaryKeys = {"mediaId", "postId", "userId"},
         foreignKeys = {
             @ForeignKey(
-                    entity = MediaSet.class,
+                    entity = Media.class,
                     parentColumns = "mediaId",
                     childColumns = "mediaId",
                     onDelete = ForeignKey.CASCADE
@@ -27,8 +28,11 @@ import androidx.room.ForeignKey;
         }
 )
 public class MediaRead {
+    @NonNull
     private String userId;
+    @NonNull
     private String postId;
+    @NonNull
     private String mediaId;
 
     // Constructor

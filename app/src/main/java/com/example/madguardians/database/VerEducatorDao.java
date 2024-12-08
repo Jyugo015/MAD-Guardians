@@ -53,6 +53,6 @@ public interface VerEducatorDao {
     void delete(VerEducator verEducator);
 
     // Delete all VerEducator records
-    @Delete
+    @Query("DELETE FROM verEducator")
     void deleteAll();
 }
