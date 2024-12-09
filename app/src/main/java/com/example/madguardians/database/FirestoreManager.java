@@ -194,15 +194,37 @@ public class FirestoreManager {
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         for (DocumentSnapshot document : queryDocumentSnapshots) {
+                            // Use reflection to map fields dynamically
                             ContentValues values = new ContentValues();
-                            values.put("id", document.getId());
-                            values.put("email", document.getString("email"));
-                            values.put("name", document.getString("name"));
+
+                            // Get all fields of the currentChange object's class
+                            Field[] fields = currentChange.getClass().getDeclaredFields();
+                            for (Field field : fields) {
+                                field.setAccessible(true); // Make private fields accessible
+                                String fieldName = field.getName(); // Variable name
+                                Object fieldValue = document.get(fieldName); // Get corresponding value from Firestore
+
+                                if (fieldValue != null) {
+                                    if (fieldValue instanceof String) {
+                                        values.put(fieldName, (String) fieldValue);
+                                    } else if (fieldValue instanceof Integer) {
+                                        values.put(fieldName, (Integer) fieldValue);
+                                    } else if (fieldValue instanceof Boolean) {
+                                        values.put(fieldName, (Boolean) fieldValue);
+                                    } else if (fieldValue instanceof Double) {
+                                        values.put(fieldName, (Double) fieldValue);
+                                    } else if (fieldValue instanceof Long) {
+                                        values.put(fieldName, (Long) fieldValue);
+                                    }
+                                    // Add other types as necessary
+                                }
+                            }
 
                             // Insert into the temporary database
                             tempDb.insert("tempe", SQLiteDatabase.CONFLICT_FAIL, values);
                         }
-                    });
+                    })
+                    .addOnFailureListener(e -> Log.e("Firestore", "Error fetching collection: " + tableName, e));
 //            // Get all fields of the class, including private ones
 //            Field[] fields = currentChange.getClass().getDeclaredFields();
 //
@@ -1766,7 +1788,7 @@ public class FirestoreManager {
                             switch (documentChange.getType()) {
                                 case ADDED:
                                     T addedItem = documentChange.getDocument().toObject(modelClass);
-                                    onAdded.accept(addedItem);
+                                    Executor.executeTask(() -> onAdded.accept(addedItem));
                                     break;
 
                                 case MODIFIED:
