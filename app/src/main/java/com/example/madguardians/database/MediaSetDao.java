@@ -1,5 +1,6 @@
 package com.example.madguardians.database;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -29,12 +30,8 @@ public interface MediaSetDao {
     List<MediaSet> getAll();
 
     // Query to get a MediaSet by its mediaId
-    @Query("SELECT * FROM mediaSet WHERE mediaId = :mediaId LIMIT 1")
-    MediaSet getById(String mediaId);
-
-    // Query to fetch MediaSets by their mediaSetId
-    @Query("SELECT * FROM mediaSet WHERE mediaSetId = :mediaSetId")
-    List<MediaSet> getBySetId(String mediaSetId);
+    @Query("SELECT * FROM mediaSet WHERE mediaSetId = :mediaSetId LIMIT 1")
+    MediaSet getById(String mediaSetId);
 
     // Delete a MediaSet
     @Delete

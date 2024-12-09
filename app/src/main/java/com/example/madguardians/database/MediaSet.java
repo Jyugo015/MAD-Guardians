@@ -7,42 +7,20 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "mediaSet")
 public class MediaSet {
     @PrimaryKey
-    private String mediaId;
     @NonNull
-    private String mediaSetId;
-
-    @NonNull
-    private String url;
+    private String mediaSetId; // A unique ID for the set of media.
 
     // Constructor
-    public MediaSet(@NonNull String mediaId, @NonNull String mediaSetId, @NonNull String url) {
-        this.mediaId = mediaId;
+    public MediaSet(@NonNull String mediaSetId) {
         this.mediaSetId = mediaSetId;
-        this.url = url;
     }
 
-    // Getters and Setters
-    public String getMediaId() {
-        return mediaId;
-    }
-
-    public void setMediaId(String mediaId) {
-        this.mediaId = mediaId;
-    }
-
+    // Getter and Setter
     public String getMediaSetId() {
         return mediaSetId;
     }
 
     public void setMediaSetId(String mediaSetId) {
         this.mediaSetId = mediaSetId;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 }

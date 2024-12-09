@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey;
 @Entity(tableName ="issue")
 public class Issue {
     @PrimaryKey
+    @NonNull
     private String issueId;
     @NonNull
     private String type;

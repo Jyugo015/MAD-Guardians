@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey;
 @Entity(tableName= "timeslot")
 public class Timeslot {
     @PrimaryKey
+    @NonNull
     private String timeslotId;
 
     @NonNull

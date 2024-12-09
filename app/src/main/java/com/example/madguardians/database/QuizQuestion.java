@@ -5,9 +5,18 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "quizQuestion")
+@Entity(tableName = "quizQuestion",
+        foreignKeys = {
+                @ForeignKey(
+                        entity = Quiz.class,
+                        parentColumns = "quizId",
+                        childColumns = "quizId",
+                        onDelete = ForeignKey.CASCADE
+                )
+        })
 public class QuizQuestion {
     @PrimaryKey
+    @NonNull
     private String questionId;
 
     @NonNull

@@ -33,7 +33,7 @@ import androidx.room.PrimaryKey;
                         onDelete = ForeignKey.SET_NULL
                 ),
                 @ForeignKey(
-                        entity = QuizQuestion.class,
+                        entity = Quiz.class,
                         parentColumns = "quizId",
                         childColumns = "quizId",
                         onDelete = ForeignKey.SET_NULL
@@ -54,6 +54,7 @@ import androidx.room.PrimaryKey;
 )
 public class Post {
     @PrimaryKey
+    @NonNull
     private String postId;
 
     @NonNull

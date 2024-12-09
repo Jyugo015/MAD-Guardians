@@ -13,6 +13,7 @@ import androidx.room.PrimaryKey;
 )
 public class Staff {
     @PrimaryKey
+    @NonNull
     private String staffId;
 
     @NonNull
