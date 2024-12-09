@@ -12,6 +12,8 @@ import androidx.room.PrimaryKey;
                 childColumns = "mediaSetId",
                 onDelete = ForeignKey.CASCADE
         ))
+
+//for the same uploading action, same mediaSetId,
 public class Media {
     @PrimaryKey
     @NonNull
