@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
         MediaRead.class, Media.class, MediaSet.class, Notification.class, Post.class, Quiz.class,
         QuestionOption.class, QuizHistory.class, QuizOld.class, QuizQuestion.class,
         QuizResult.class, Staff.class, Timeslot.class, User.class, UserHistory.class,
-        VerEducator.class, VerPost.class}, version = 2)
+        VerEducator.class, VerPost.class}, version = 3)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract AchievementDao achievementDao();
@@ -59,7 +59,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "app_database")
-                            .addMigrations(AppDatabase.MIGRATION_1_2)
+                            .addMigrations(AppDatabase.MIGRATION_2_3)
                             .build();
                 }
             }
@@ -67,7 +67,7 @@ public abstract class AppDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+    public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             // Enable foreign key support
