@@ -910,8 +910,8 @@ public class FirestoreManager {
                                 "END;",
                         "UPDATE tempe " +
                                 "SET " +
-                                "    strike_day_count = CASE " +
-                                "        WHEN lastLogin = date('now', '-1 day') THEN strike_day_count + 1 " +
+                                "    strikeLoginDays = CASE " +
+                                "        WHEN lastLogin = date('now', '-1 day') THEN strikeLoginDays + 1 " +
                                 "        ELSE 1 " +
                                 "    END, " +
                                 "    lastLogin = date('now')"
