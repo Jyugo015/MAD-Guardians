@@ -522,6 +522,7 @@ db.collection("posts")
 - quizHistory
 - quizResult
 - mediaSet
+- media
 - collection
 - folder
 - userHistory
@@ -543,6 +544,7 @@ db.collection("posts")
 - timeslot
 - counselorAvailability
 - badge
+- quiz
 
 ### No Access
 - helpdesk
@@ -727,7 +729,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class YourActivity extends AppCompatActivity implements MediaHandler.MediaHandleCallback {
 
-
     // Add the following view/element based on your activity's need
     // a. for image viewer
     private MediaHandler imageHandler;
@@ -748,7 +749,6 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_your);
 
-
         // Register the following based on your need (if your activity need upload media function) (if just wanna show media, these 3 are not needed):
         // a. Register the activity result launcher for image
         uploadImage = findViewById(R.id.uploadImage);
@@ -762,13 +762,15 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
                     }
                 }
         );
+        imageHandler = new MediaHandler(this, imagePickerLauncher, this);
+        // Trigger image selection
+        uploadImage.setOnClickListener(v -> imageHandler.selectImage());
 
         // b. Register the activity result launcher for video
         uploadVideo = findViewById(R.id.uploadVideo);
         playerView = findViewById(R.id.playerView);
         player = new ExoPlayer.Builder(this).build();
         playerView.setPlayer(player);
-        // Register the activity result launcher
         ActivityResultLauncher<Intent> videoPickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -778,22 +780,63 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
                     }
                 }
         );
+        videoHandler = new MediaHandler(this, videoPickerLauncher, this);
+        // Trigger video selection
+        uploadVideo.setOnClickListener(v -> videoHandler.selectVideo());
 
-        // Initialize MediaHandler with the callback
-        mediaHandler = new MediaHandler(this, imagePickerLauncher, this);
-
-        // Trigger image selection
-        upload.setOnClickListener(v -> mediaHandler.selectImage());
-
-        backMain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(Image2Activity.this, MainActivity.class));
-                finish();
-            }
-        });
+        // c. Register the activity result launcher for pdf
+        uploadPDF = findViewById(R.id.uploadPDF);
+        webView = findViewById(R.id.webView);
+        ActivityResultLauncher<Intent> pdfPickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri pdfUri = result.getData().getData();
+                        mediaHandler.handleResult(pdfUri, "pdf");
+                    }
+                }
+        );
+        pdfHandler = new MediaHandler(this, pdfPickerLauncher, this);
+        // Trigger pdf selection
+        uploadPDF.setOnClickListener(v -> videoHandler.selectVideo());
     }
 
+    @Override
+    public void onMediaSelected(Object filePath, String fileType) {
+        // Handle the file path returned by the MediaHandler
+        Toast.makeText(this, "Selected " + fileType + " path: " + filePath, Toast.LENGTH_LONG).show();
+        if (fileType.equalsIgnoreCase("video")){
+            videoHandler.uploadVideoInBackground((String) filePath, "YOUR_DATABASE", player);
+        } else if (fileType.equalsIgnoreCase("image")){
+            imageHandler.uploadImageInBackground((String) filePath, "YOUR_DATABASE", imageView);
+        } else if (fileType.equalsIgnoreCase("pdf")){
+            pdfHandler.uploadPdfInBackground((byte[]) filePath, "YOUR_DATABASE", webView)
+        }
+    }
+
+    // If you are using the video player, implement the following so that the video will stop
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (player != null)
+            player.play();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (player != null) {
+            player.release();
+            player = null;
+        }
+    }
 }
 
+```
+# MsdiaHandler
+To display images, PDFs, and video, use the following method:
+```
+i. MediaHandler.displayImage(Context context, String imageUrl, ImageView imageView) ;
+ii. MediaHandler.displayPDF(String pdfUrl, WebView webView)
+iii. MediaHandler.playVideo(String videoUrl, ExoPlayer player)
 ```

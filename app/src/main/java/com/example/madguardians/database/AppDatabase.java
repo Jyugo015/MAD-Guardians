@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 @Database(entities = {Achievement.class, Appointment.class, Badge.class, ChatHistory.class,
         Collection.class, Course.class, Comment.class, Counselor.class, CounselorAvailability.class,
         Domain.class, DomainInterested.class, Folder.class, Helpdesk.class, Issue.class,
-        MediaRead.class, MediaSet.class, Notification.class, Post.class,
+        MediaRead.class, Media.class, MediaSet.class, Notification.class, Post.class, Quiz.class,
         QuestionOption.class, QuizHistory.class, QuizOld.class, QuizQuestion.class,
         QuizResult.class, Staff.class, Timeslot.class, User.class, UserHistory.class,
         VerEducator.class, VerPost.class}, version = 2)
@@ -35,9 +35,11 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract IssueDao issueDao();
     public abstract MediaReadDao mediaReadDao();
     public abstract MediaSetDao mediaSetDao();
+    public abstract MediaDao mediaDao();
     public abstract NotificationDao notificationDao();
     public abstract PostDao postDao();
     public abstract QuestionOptionDao questionOptionDao();
+    public abstract QuizDao quizDao();
     public abstract QuizHistoryDao quizHistoryDao();
     public abstract QuizOldDao quizOldDao();
     public abstract QuizQuestionDao quizQuestionDao();
@@ -100,12 +102,12 @@ public abstract class AppDatabase extends RoomDatabase {
             //update the isBooked column in counselorAvailability once a new appointment is made
             database.execSQL(
                     "CREATE TRIGGER update_isBooked_on_appointment_insert " +
-                            "AFTER INSERT ON appointments " +
+                            "AFTER INSERT ON appointment " +
                             "FOR EACH ROW " +
                             "BEGIN " +
                             "    UPDATE counselorAvailability " +
                             "    SET isBooked = 1 " +
-                            "    WHERE counselorId = NEW.counselorId; " +
+                            "    WHERE counselorAvailabilityId = NEW.counselorAvailabilityId; " +
                             "END;"
             );
 
@@ -189,7 +191,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             "email TEXT NOT NULL UNIQUE, " +
                             "password TEXT NOT NULL, " +
                             "profilePic TEXT NOT NULL DEFAULT 'url link of the default profilepic', " +
-                            "contactNo INTEGER NOT NULL UNIQUE" +
+                            "contactNo TEXT NOT NULL UNIQUE" +
                             ");"
             );
             database.execSQL("DROP TABLE counselor;");
@@ -248,7 +250,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     "domainId TEXT NOT NULL, " +
                     "PRIMARY KEY(userId, domainId), " +
                     "FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE, " +
-                    "FOREIGN KEY(domainId) REFERENCES domain(domainId)ON DELETE CASCADE);");
+                    "FOREIGN KEY(domainId) REFERENCES domain(domainId) ON DELETE CASCADE);");
 
             database.execSQL("DROP TABLE IF EXISTS domainInterested;");
             database.execSQL("ALTER TABLE domainInterested_new RENAME TO domainInterested;");
@@ -288,11 +290,22 @@ public abstract class AppDatabase extends RoomDatabase {
                             "FOREIGN KEY(commentId) REFERENCES comment(commentId) ON DELETE SET NULL, " +
                             "FOREIGN KEY(quizId) REFERENCES quizQuestion(quizId) ON DELETE SET NULL, " +
                             "FOREIGN KEY(staffId) REFERENCES staff(staffId) ON DELETE RESTRICT," +
-                            "CHECK (postId IS NOT NULL OR courseId IS NOT NULL OR commentId IS NOT NULL OR quizId IS NOT NULL)" +
+                            "CHECK (postId IS NOT NULL OR courseId IS NOT NULL OR commentId IS NOT NULL OR quizId IS NOT NULL OR helpdeskStatus = 'deleting')" +
                             ");"
             );
             database.execSQL("DROP TABLE IF EXISTS helpdesk;");
             database.execSQL("ALTER TABLE helpdesk_new RENAME TO helpdesk;");
+
+            // Add the trigger to delete records when all four columns are NULL
+            database.execSQL(
+                    "CREATE TRIGGER delete_helpdesk_when_all_null " +
+                            "AFTER UPDATE OF postId, courseId, commentId, quizId ON helpdesk " +
+                            "FOR EACH ROW " +
+                            "WHEN NEW.postId IS NULL AND NEW.courseId IS NULL AND NEW.commentId IS NULL AND NEW.quizId IS NULL " +
+                            "BEGIN " +
+                            "    DELETE FROM helpdesk WHERE helpdeskId = NEW.helpdeskId; " +
+                            "END;"
+            );
 
             //issue
             database.execSQL(
@@ -320,12 +333,22 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS mediaRead;");
             database.execSQL("ALTER TABLE mediaRead_new RENAME TO mediaRead;");
 
+            //media
+            database.execSQL(
+                    "CREATE TABLE media_new (" +
+                            "mediaId TEXT PRIMARY KEY, " +
+                            "mediaSetId TEXT NOT NULL, " +
+                            "url TEXT NOT NULL, " +
+                            "FOREIGN KEY(mediaSetId) REFERENCES mediaSet(mediaSetId) ON DELETE CASCADE" +
+                            ");"
+            );
+            database.execSQL("DROP TABLE IF EXISTS media;");
+            database.execSQL("ALTER TABLE media_new RENAME TO media;");
+
             //mediaSet
             database.execSQL(
                     "CREATE TABLE mediaSet_new (" +
-                            "mediaId TEXT PRIMARY KEY, " +
-                            "mediaSetId TEXT NOT NULL, " +
-                            "url TEXT NOT NULL " +
+                            "mediaSetId TEXT PRIMARY KEY " +
                             ");"
             );
             database.execSQL("DROP TABLE IF EXISTS mediaSet;");
@@ -363,7 +386,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             "FOREIGN KEY(imageSetId) REFERENCES mediaSet(mediaSetId) ON DELETE SET NULL, " +
                             "FOREIGN KEY(videoSetId) REFERENCES mediaSet(mediaSetId) ON DELETE SET NULL, " +
                             "FOREIGN KEY(fileSetId) REFERENCES mediaSet(mediaSetId) ON DELETE SET NULL, " +
-                            "FOREIGN KEY(quizId) REFERENCES quizQuestion(quizId) ON DELETE SET NULL, " +
+                            "FOREIGN KEY(quizId) REFERENCES quiz(quizId) ON DELETE SET NULL, " +
                             "FOREIGN KEY(domainId) REFERENCES domain(domainId) ON DELETE RESTRICT, " +
                             "FOREIGN KEY(folderId) REFERENCES folder(folderId) ON DELETE SET NULL," +
                             "CHECK (imageSetId IS NOT NULL OR videoSetId IS NOT NULL OR fileSetId IS NOT NULL OR quizId IS NOT NULL)" +
@@ -386,6 +409,15 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS questionOption;");
             database.execSQL("ALTER TABLE questionOption_new RENAME TO questionOption;");
 
+            //quiz
+            database.execSQL(
+                    "CREATE TABLE quiz_new (" +
+                            "quizId TEXT PRIMARY KEY " +
+                            ");"
+            );
+            database.execSQL("DROP TABLE IF EXISTS quiz;");
+            database.execSQL("ALTER TABLE quiz_new RENAME TO quiz;");
+
             //quizHistory
             database.execSQL(
                     "CREATE TABLE quizHistory_new (" +
@@ -393,7 +425,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             "userId TEXT NOT NULL, " +
                             "score INTEGER NOT NULL, " +
                             "timestamp TEXT NOT NULL, " +
-                            "FOREIGN KEY(quizId) REFERENCES quizQuestion(quizId) ON DELETE CASCADE, " +
+                            "FOREIGN KEY(quizId) REFERENCES quiz(quizId) ON DELETE CASCADE, " +
                             "FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE" +
                             ");"
             );
@@ -406,7 +438,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             "quizId TEXT NOT NULL, " +
                             "postId TEXT NOT NULL, " +
                             "PRIMARY KEY(quizId, postId), " +
-                            "FOREIGN KEY(quizId) REFERENCES quizQuestion(quizId) ON DELETE CASCADE, " +
+                            "FOREIGN KEY(quizId) REFERENCES quiz(quizId) ON DELETE CASCADE, " +
                             "FOREIGN KEY(postId) REFERENCES post(postId) ON DELETE CASCADE" +
                             ");"
             );
@@ -419,7 +451,8 @@ public abstract class AppDatabase extends RoomDatabase {
                             "questionId TEXT PRIMARY KEY, " +
                             "quizId TEXT NOT NULL, " +
                             "question TEXT NOT NULL, " +
-                            "questionNo INTEGER NOT NULL" +
+                            "questionNo INTEGER NOT NULL," +
+                            "FOREIGN KEY(quizId) REFERENCES quiz(quizId) ON DELETE CASCADE " +
                             ");"
             );
             database.execSQL("DROP TABLE IF EXISTS quizQuestion;");
@@ -471,9 +504,8 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("CREATE TABLE user_new (" +
                     "userId TEXT PRIMARY KEY, " +
                     "name TEXT NOT NULL DEFAULT 'bookworm', " +
-                    "gender TEXT NOT NULL, " +
                     "email TEXT NOT NULL UNIQUE, " +
-                    "phoneNo INTEGER NOT NULL UNIQUE, " +
+                    "phoneNo TEXT NOT NULL UNIQUE, " +
                     "password TEXT NOT NULL, " +
                     "profilePic TEXT NOT NULL DEFAULT 'default_profile_pic_url', " +
                     "lastLogin TEXT NOT NULL, " +

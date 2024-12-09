@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey;
             @ForeignKey(
                     entity = Issue.class,
                     parentColumns = "issueId",
-                    childColumns = "issueid",
+                    childColumns = "issueId",
                     onDelete = ForeignKey.CASCADE
             ),
             @ForeignKey(
@@ -25,25 +25,25 @@ import androidx.room.PrimaryKey;
                     entity = Post.class,
                     parentColumns = "postId",
                     childColumns = "postId",
-                    onDelete = ForeignKey.SET_NULL
+                    onDelete = ForeignKey.CASCADE
             ),
             @ForeignKey(
                     entity = Course.class,
                     parentColumns = "courseId",
                     childColumns = "courseId",
-                    onDelete = ForeignKey.SET_NULL
+                    onDelete = ForeignKey.CASCADE
             ),
             @ForeignKey(
                     entity = Comment.class,
                     parentColumns = "commentId",
                     childColumns = "commentId",
-                    onDelete = ForeignKey.SET_NULL
+                    onDelete = ForeignKey.CASCADE
             ),
             @ForeignKey(
-                    entity = QuizQuestion.class,
+                    entity = Quiz.class,
                     parentColumns = "quizId",
                     childColumns = "quizId",
-                    onDelete = ForeignKey.SET_NULL
+                    onDelete = ForeignKey.CASCADE
             ),
             @ForeignKey(
                     entity = Staff.class,
@@ -55,6 +55,7 @@ import androidx.room.PrimaryKey;
 )
 public class Helpdesk {
     @PrimaryKey
+    @NonNull
     private String helpdeskId;
     @NonNull
     private String issueId;

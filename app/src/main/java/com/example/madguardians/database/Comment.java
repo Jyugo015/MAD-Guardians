@@ -2,6 +2,7 @@ package com.example.madguardians.database;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
@@ -38,6 +39,7 @@ import androidx.room.PrimaryKey;
 )
 public class Comment {
     @PrimaryKey
+    @NonNull
     private String commentId;
     @Nullable
     private String userId;
@@ -49,14 +51,16 @@ public class Comment {
     private String rootComment;
     @Nullable
     private String replyUserId;
-    private boolean isRead;
+    @NonNull
+    @ColumnInfo(defaultValue = "0")
+    private int isRead;
     @NonNull
     private String timestamp;
 
     // Constructor
     public Comment(@NonNull String commentId, @Nullable String userId, @NonNull String postId,
                    @NonNull String comment, @Nullable String rootComment, @Nullable String replyUserId,
-                   boolean isRead, @NonNull String timestamp) {
+                   int isRead, @NonNull String timestamp) {
         this.commentId = commentId;
         this.userId = userId;
         this.postId = postId;
@@ -128,11 +132,11 @@ public class Comment {
     }
 
     // Getter and Setter for isRead
-    public boolean isRead() {
+    public int isRead() {
         return isRead;
     }
 
-    public void setRead(boolean read) {
+    public void setRead(int read) {
         isRead = read;
     }
 

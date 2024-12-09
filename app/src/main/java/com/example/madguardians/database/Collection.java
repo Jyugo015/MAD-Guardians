@@ -36,6 +36,7 @@ import androidx.room.PrimaryKey;
 )
 public class Collection {
     @PrimaryKey
+    @NonNull
     private String collectionId;
     @NonNull
     private String userId;

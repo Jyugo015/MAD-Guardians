@@ -29,6 +29,7 @@ import androidx.room.PrimaryKey;
 )
 public class QuizResult {
     @PrimaryKey
+    @NonNull
     private String quizResultId;
 
     @NonNull

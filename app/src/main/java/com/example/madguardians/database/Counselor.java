@@ -14,6 +14,7 @@ import androidx.room.PrimaryKey;
 )
 public class Counselor {
     @PrimaryKey
+    @NonNull
     private String counselorId;
 
     @NonNull
@@ -29,16 +30,18 @@ public class Counselor {
     private String profilePic;
 
     @NonNull
-    private int contactNo;
+    private String contactNo;
     // Constructor
     public Counselor(@NonNull String counselorId, @NonNull String name, @NonNull String office,
-                     @NonNull String email, @NonNull String password, @NonNull String profilePic) {
+                     @NonNull String email, @NonNull String password, @NonNull String profilePic,
+                     @NonNull String contactNo) {
         this.counselorId = counselorId;
         this.name = name;
         this.office = office;
         this.email = email;
         this.password = password;
         this.profilePic = profilePic;
+        this.contactNo = contactNo;
     }
 
     // Getter and Setter for counselorId
@@ -101,4 +104,11 @@ public class Counselor {
         this.profilePic = profilePic;
     }
 
+    public String getContactNo() {
+        return contactNo;
+    }
+
+    public void setContactNo(String contactNo) {
+        this.contactNo = contactNo;
+    }
 }

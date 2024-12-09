@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import java.util.List;
 
@@ -18,6 +19,9 @@ public interface FolderDao {
     // Insert a new Folder record
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Folder> folderList);
+
+    @Update
+    void update(Folder folder);
 
     // Query to get a Folder by its folderId
     @Query("SELECT * FROM folder WHERE folderId = :folderId")

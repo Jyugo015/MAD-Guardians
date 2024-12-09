@@ -15,6 +15,7 @@ import androidx.room.TypeConverters;
         )
 public class User {
     @PrimaryKey
+    @NonNull
     private String userId;
 
     @NonNull
@@ -24,7 +25,8 @@ public class User {
     @NonNull
     private String email;
 
-    private int phoneNo;
+    @NonNull
+    private String phoneNo;
 
     @NonNull
     private String password;
@@ -39,7 +41,7 @@ public class User {
     private int strikeLoginDays;
 
     // Constructor
-    public User(String userId, @NonNull String name, @NonNull String email, int phoneNo,
+    public User(String userId, @NonNull String name, @NonNull String email, @NonNull String phoneNo,
                 @NonNull String password, @NonNull String profilePic, String lastLogin,
                 int strikeLoginDays) {
         this.userId = userId;//user "TEMP" for all users first
@@ -77,12 +79,11 @@ public class User {
         this.email = email;
     }
 
-    public int getPhoneNo() {
-
+    public String getPhoneNo() {
         return phoneNo;
     }
 
-    public void setPhoneNo(int phoneNo) {
+    public void setPhoneNo(String phoneNo) {
         this.phoneNo = phoneNo;
     }
 

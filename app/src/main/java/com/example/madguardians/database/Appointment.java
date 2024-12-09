@@ -7,12 +7,12 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 
 @Entity(tableName = "appointment",
-        primaryKeys = {"counselorAvailability", "userId"},
+        primaryKeys = {"counselorAvailabilityId", "userId"},
         foreignKeys = {
             @ForeignKey(
                     entity= CounselorAvailability.class,
                     parentColumns = "counselorAvailabilityId",
-                    childColumns = "counselorAvailability",
+                    childColumns = "counselorAvailabilityId",
                     onDelete = ForeignKey.RESTRICT
             ),
             @ForeignKey(
@@ -25,14 +25,16 @@ import androidx.room.Index;
         indices = {@Index(value ={"counselorAvailabilityId"}, unique = true)}
 )
 public class Appointment {
+    @NonNull
     private String counselorAvailabilityId;
+    @NonNull
     private String userId;
 
-    @ColumnInfo(defaultValue = "true")
-    private boolean isOnline;
+    @ColumnInfo(defaultValue = "1")
+    private int isOnline;
 
     // Constructor
-    public Appointment(@NonNull String counselorAvailabilityId, @NonNull String userId, boolean isOnline) {
+    public Appointment(@NonNull String counselorAvailabilityId, @NonNull String userId, int isOnline) {
         this.counselorAvailabilityId = counselorAvailabilityId;
         this.userId = userId;
         this.isOnline = isOnline;
@@ -61,12 +63,12 @@ public class Appointment {
     }
 
     // Getter for isOnline
-    public boolean isOnline() {
+    public int isOnline() {
         return isOnline;
     }
 
     // Setter for isOnline
-    public void setOnline(boolean online) {
+    public void setOnline(int online) {
         isOnline = online;
     }
 }

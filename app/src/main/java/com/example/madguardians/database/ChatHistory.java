@@ -35,7 +35,7 @@ import androidx.room.PrimaryKey;
             @ForeignKey(
                     entity = MediaSet.class,
                     parentColumns = "mediaSetId",
-                    childColumns = "mediaSetId",
+                    childColumns = "mediaId",
                     onDelete = ForeignKey.SET_NULL
             ),
             @ForeignKey(
@@ -48,6 +48,7 @@ import androidx.room.PrimaryKey;
 )
 public class ChatHistory {
     @PrimaryKey
+    @NonNull
     private String messageId;
     @Nullable
     private String senderUserId;
