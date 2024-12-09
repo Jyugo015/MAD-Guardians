@@ -32,6 +32,7 @@ import androidx.room.PrimaryKey;
 public class VerPost {
 
     @PrimaryKey
+    @NonNull
     private String verPostId;
     @NonNull
     private String postId;

@@ -18,6 +18,7 @@ import androidx.room.PrimaryKey;
 )
 public class Notification {
     @PrimaryKey
+    @NonNull
     private String notificationId;
     @NonNull
     private String userId;

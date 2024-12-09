@@ -8,7 +8,7 @@ import androidx.room.ForeignKey;
         primaryKeys = {"quizId", "postId"},
         foreignKeys = {
                 @ForeignKey(
-                        entity = QuizQuestion.class,
+                        entity = Quiz.class,
                         parentColumns = "quizId",
                         childColumns = "quizId",
                         onDelete = ForeignKey.CASCADE
@@ -22,7 +22,9 @@ import androidx.room.ForeignKey;
         }
 )
 public class QuizOld {
+    @NonNull
     private String quizId;
+    @NonNull
     private String postId;
 
     // Constructor

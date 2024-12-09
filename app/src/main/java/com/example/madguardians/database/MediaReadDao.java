@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import java.util.List;
 
@@ -18,6 +19,9 @@ public interface MediaReadDao {
     // Insert a list of new media read record
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<MediaRead> mediaRead);
+
+    @Update
+    void update(MediaRead mediaRead);
 
     // Query to get a media read by userId, postId, and mediaId
     @Query("SELECT * FROM mediaRead WHERE userId = :userId AND postId = :postId AND mediaId = :mediaId")

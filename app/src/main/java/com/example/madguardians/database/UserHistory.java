@@ -23,7 +23,9 @@ import androidx.room.ForeignKey;
         }
 )
 public class UserHistory {
+    @NonNull
     private String postId;
+    @NonNull
     private String userId;
     @ColumnInfo(defaultValue = "1")
     private int progress;

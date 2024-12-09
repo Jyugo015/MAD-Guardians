@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.madguardians"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -56,6 +56,7 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-firestore")
 
     // for cloudinary
     implementation("com.cloudinary:cloudinary-android:2.8.0")

@@ -19,6 +19,8 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.madguardians.R;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,7 +67,9 @@ public class CloudinaryUploadWorker extends Worker {
             } else if (fileType.equalsIgnoreCase("video")) {
                 response = cloudinary.uploader().upload(filePath, ObjectUtils.asMap("resource_type", "video"));
             } else if (fileType.equalsIgnoreCase("pdf")) {
-                response = cloudinary.uploader().upload(filePath, ObjectUtils.asMap("resource_type", "raw"));
+                File file = new File(filePath);
+                byte[] bytes = Files.readAllBytes(file.toPath());
+                response = cloudinary.uploader().upload(bytes, ObjectUtils.asMap("resource_type", "raw"));
             }
             Log.d("TAG", "doWork: here1");
             if (response != null) {

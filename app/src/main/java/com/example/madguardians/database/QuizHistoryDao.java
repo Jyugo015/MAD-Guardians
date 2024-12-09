@@ -46,6 +46,6 @@ public interface QuizHistoryDao {
     void delete(QuizHistory quizHistory);
 
     // Delete all quiz history records
-    @Delete
+    @Query("DELETE FROM quizHistory")
     void deleteAll();
 }
