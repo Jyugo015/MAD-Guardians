@@ -32,13 +32,19 @@ import java.util.Map;
 import java.lang.reflect.Field;
 import java.util.function.Consumer;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class FirestoreManager {
     private final FirebaseFirestore firestore;
     private final AppDatabase database;
+    private ExecutorService executorService;
 
     public FirestoreManager(AppDatabase database) {
         this.firestore = FirebaseFirestore.getInstance();
         this.database = database;
+        // Create a single-threaded executor to run database operations in the background
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     public void clearTables() {
@@ -76,9 +82,20 @@ public class FirestoreManager {
     }
 
     public void onLoginSyncUser(String userId) {
-        clearTables();
-        syncUserPartial(userId);
-        syncUserFull();
+        // Perform the database operations asynchronously
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                // Call the potentially long-running operations here
+                try {
+                    clearTables();
+                    syncUserPartial(userId);
+                    syncUserFull();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void onLoginSyncStaff() {
