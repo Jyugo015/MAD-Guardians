@@ -662,11 +662,11 @@ public class FirestoreManager {
                                 "CHECK (postId IS NOT NULL OR courseId IS NOT NULL OR commentId IS NOT NULL OR quizId IS NOT NULL OR helpdeskStatus = 'deleting')" +
                                 ");",
                         "CREATE TRIGGER delete_helpdesk_when_all_null " +
-                                "AFTER UPDATE OF postId, courseId, commentId, quizId ON helpdesk " +
+                                "AFTER UPDATE OF postId, courseId, commentId, quizId ON tempe " +
                                 "FOR EACH ROW " +
                                 "WHEN NEW.postId IS NULL AND NEW.courseId IS NULL AND NEW.commentId IS NULL AND NEW.quizId IS NULL " +
                                 "BEGIN " +
-                                "    DELETE FROM helpdesk WHERE helpdeskId = NEW.helpdeskId; " +
+                                "    DELETE FROM tempe WHERE helpdeskId = NEW.helpdeskId; " +
                                 "END;"
                 };
                 return sql;
@@ -842,20 +842,20 @@ public class FirestoreManager {
                                 "lastLogin TEXT NOT NULL, " +
                                 "strikeLoginDays INTEGER NOT NULL);",
                         "CREATE TRIGGER check_unique_username " +
-                                "BEFORE INSERT ON user " +
+                                "BEFORE INSERT ON tempe " +
                                 "WHEN NEW.name != 'bookworm' " + // Only check non-default usernames
                                 "BEGIN " +
                                 "    SELECT RAISE(FAIL, 'Username already exists') " +
-                                "    WHERE (SELECT COUNT(*) FROM user WHERE name = NEW.name) > 0; " +
+                                "    WHERE (SELECT COUNT(*) FROM tempe WHERE name = NEW.name) > 0; " +
                                 "END;",
                         "CREATE TRIGGER check_unique_username_update " +
-                                "BEFORE UPDATE ON user " +
+                                "BEFORE UPDATE ON tempe " +
                                 "WHEN NEW.name != 'bookworm' AND OLD.name != NEW.name " + // Only check when username changes
                                 "BEGIN " +
                                 "    SELECT RAISE(FAIL, 'Username already exists') " +
-                                "    WHERE (SELECT COUNT(*) FROM user WHERE name = NEW.name) > 0; " +
+                                "    WHERE (SELECT COUNT(*) FROM tempe WHERE name = NEW.name) > 0; " +
                                 "END;",
-                        "UPDATE users " +
+                        "UPDATE tempe " +
                                 "SET " +
                                 "    strike_day_count = CASE " +
                                 "        WHEN last_login_date = date('now', '-1 day') THEN strike_day_count + 1 " +

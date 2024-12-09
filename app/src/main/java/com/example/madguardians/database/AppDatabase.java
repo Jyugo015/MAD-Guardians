@@ -541,7 +541,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
             // Add a query to update streak counts for all users
             database.execSQL(
-                    "UPDATE users " +
+                    "UPDATE user " +
                             "SET " +
                             "    strike_day_count = CASE " +
                             "        WHEN last_login_date = date('now', '-1 day') THEN strike_day_count + 1 " +
