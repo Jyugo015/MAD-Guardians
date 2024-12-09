@@ -1,6 +1,4 @@
 package com.example.madguardians;
-import static com.example.madguardians.EditProfileFragment.PICK_IMAGE_REQUEST;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
