@@ -544,10 +544,10 @@ public abstract class AppDatabase extends RoomDatabase {
                     "UPDATE user " +
                             "SET " +
                             "    strike_day_count = CASE " +
-                            "        WHEN last_login_date = date('now', '-1 day') THEN strike_day_count + 1 " +
+                            "        WHEN lastLogin = date('now', '-1 day') THEN strike_day_count + 1 " +
                             "        ELSE 1 " +
                             "    END, " +
-                            "    last_login_date = date('now')"
+                            "    lastLogin = date('now')"
             );
 
             //userHistory
