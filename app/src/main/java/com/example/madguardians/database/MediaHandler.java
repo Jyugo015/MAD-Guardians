@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Base64;
@@ -32,7 +33,6 @@ import androidx.work.WorkRequest;
 
 import com.bumptech.glide.Glide;
 import com.cloudinary.utils.ObjectUtils;
-import com.example.madguardians.database.CloudinaryUploadWorker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -44,11 +44,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.logging.Handler;
 
 public class MediaHandler {
 
     public interface MediaHandleCallback {
-        void onMediaSelected(Object filePath, String fileType);
+        void onMediaSelected(String filePath, String fileType);
     }
     private final Context context;
     private final ActivityResultLauncher<Intent> activityResultLauncher;
@@ -149,7 +150,7 @@ public class MediaHandler {
                                 byte[] filePathBytes = getBytesFromUri(uri);
                                 String filePath = saveBytesToCacheFile(filePathBytes);
                                 Log.d("TAG", "handleResult: path: " + filePath);
-                                callback.onMediaSelected(filePathBytes, "pdf");
+                                callback.onMediaSelected(filePath, "pdf");
                             } else
                                 Toast.makeText(context, "The file is too large (Maximum 10MB), please try another file", Toast.LENGTH_LONG).show();
                         }
@@ -260,10 +261,11 @@ public class MediaHandler {
                 });
     }
 
-    public void uploadPdfInBackground(byte[] filePath, String database, @Nullable WebView webView) {
+    public void uploadPdfInBackground(String filePath, String database, @Nullable WebView webView) {
         Toast.makeText(context, "Uploading pdf", Toast.LENGTH_LONG).show();
         Data data = new Data.Builder()
-                .putByteArray("filePath", filePath)
+//                .putByteArray("filePath", filePath)
+                .putString("filePath", filePath)
                 .putString("fileType", "pdf")
                 .build();
 
@@ -336,13 +338,6 @@ public class MediaHandler {
     private static void displayPDF(String pdfUrl, WebView webView) {
         Log.d("Cloudinary URL", pdfUrl);
         webView.loadUrl("https://docs.google.com/gview?embedded=true&url=" + pdfUrl);
-//        webView.getSettings().setJavaScriptEnabled(true);
-//        webView.getSettings().setAllowFileAccess(true);
-//        webView.getSettings().setDomStorageEnabled(true);
-//        webView.setWebViewClient(new WebViewClient());
-//        webView.loadUrl(pdfUrl);
-        String modifiedPdfUrl = pdfUrl.replace("/raw/", "/fl_attachment/");
-        webView.loadUrl("https://docs.google.com/gview?embedded=true&url=" + modifiedPdfUrl);
     }
 
     private static void playVideo(String videoUrl, ExoPlayer player) {
