@@ -505,7 +505,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     "userId TEXT PRIMARY KEY, " +
                     "name TEXT NOT NULL DEFAULT 'bookworm', " +
                     "email TEXT NOT NULL UNIQUE, " +
-                    "phoneNo TEXT NOT NULL UNIQUE, " +
+                    "phoneNo TEXT UNIQUE, " +
                     "password TEXT NOT NULL, " +
                     "profilePic TEXT NOT NULL DEFAULT 'default_profile_pic_url', " +
                     "lastLogin TEXT NOT NULL, " +
