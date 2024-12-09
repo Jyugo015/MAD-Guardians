@@ -1788,7 +1788,7 @@ public class FirestoreManager {
                             switch (documentChange.getType()) {
                                 case ADDED:
                                     T addedItem = documentChange.getDocument().toObject(modelClass);
-                                    onAdded.accept(addedItem);
+                                    Executor.executeTask(() -> onAdded.accept(addedItem));
                                     break;
 
                                 case MODIFIED:
