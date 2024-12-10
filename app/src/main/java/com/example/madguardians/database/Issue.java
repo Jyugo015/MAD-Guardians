@@ -12,6 +12,9 @@ public class Issue {
     @NonNull
     private String type;
 
+    public Issue() {
+    }
+
     // Constructor
     public Issue(@NonNull String issueId, @NonNull String type) {
         this.issueId = issueId;

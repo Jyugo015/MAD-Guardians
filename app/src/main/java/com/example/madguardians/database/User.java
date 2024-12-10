@@ -41,6 +41,9 @@ public class User {
 
     private int strikeLoginDays;
 
+    public User() {
+    }
+
     // Constructor
     public User(String userId, @NonNull String name, @NonNull String email, @Nullable String phoneNo,
                 @NonNull String password, @NonNull String profilePic, String lastLogin,

@@ -44,6 +44,9 @@ public class Collection {
     private String postId;
     @Nullable
     private String courseId;
+
+
+
     @Nullable
     private String folderId;
 
@@ -57,6 +60,8 @@ public class Collection {
         this.folderId = folderId;
     }
 
+    public Collection() {
+    }
     // Getter and Setter for collectionId
     @NonNull
     public String getCollectionId() {

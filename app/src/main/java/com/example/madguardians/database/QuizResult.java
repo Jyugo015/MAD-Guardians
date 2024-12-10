@@ -44,6 +44,9 @@ public class QuizResult {
     @NonNull
     private String timestamp;
 
+    public QuizResult() {
+    }
+
     // Constructor
     public QuizResult(String quizResultId, @NonNull String questionId, @NonNull String userId, @NonNull String userAns, @NonNull String timestamp) {
         this.quizResultId = quizResultId;

@@ -47,6 +47,8 @@ import androidx.room.PrimaryKey;
         }
 )
 public class ChatHistory {
+
+
     @PrimaryKey
     @NonNull
     private String messageId;
@@ -70,6 +72,8 @@ public class ChatHistory {
     @Nullable
     private String readTime;
 
+    public ChatHistory() {
+    }
     // Constructor
     public ChatHistory(@NonNull String messageId, @Nullable String senderUserId,
                        @Nullable String recipientUserId, @Nullable String senderCounselorId,
