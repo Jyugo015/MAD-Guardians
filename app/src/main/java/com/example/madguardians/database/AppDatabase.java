@@ -846,6 +846,8 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS helpdesk;");
             database.execSQL("ALTER TABLE helpdesk_new RENAME TO helpdesk;");
 
+            database.execSQL(
+                    "DROP TRIGGER IF EXISTS delete_helpdesk_when_all_null;");
             // Add the trigger to delete records when all four columns are NULL
             database.execSQL(
                     "CREATE TRIGGER delete_helpdesk_when_all_null " +
@@ -1082,6 +1084,10 @@ public abstract class AppDatabase extends RoomDatabase {
             // Rename new tables to the original table names
             database.execSQL("ALTER TABLE user_new RENAME TO user;");
 
+            database.execSQL(
+                    "DROP TRIGGER IF EXISTS check_unique_username;");
+            database.execSQL(
+                    "DROP TRIGGER IF EXISTS check_unique_username_update;");
             //check if the username is unique before inserting or updating the username other than "bookworm"
             database.execSQL(
                     "CREATE TRIGGER check_unique_username " +
