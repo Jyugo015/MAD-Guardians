@@ -681,7 +681,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     "FOREIGN KEY (replyMessage) REFERENCES chatHistory(messageId) ON DELETE SET NULL);");
 
             database.execSQL("DROP TABLE chatHistory;");
-            database.execSQL("ALTER TABLE chatHistory_new RENAME TO badge;");
+            database.execSQL("ALTER TABLE chatHistory_new RENAME TO chatHistory;");
 
             //collection
             database.execSQL("DROP TABLE IF EXISTS collection_new;");
