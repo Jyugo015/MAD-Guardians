@@ -40,6 +40,9 @@ public class Appointment {
         this.isOnline = isOnline;
     }
 
+    public Appointment() {
+    }
+
     // Getter for counselorAvailabilityId
     @NonNull
     public String getCounselorAvailabilityId() {
@@ -68,7 +71,7 @@ public class Appointment {
     }
 
     // Setter for isOnline
-    public void setOnline(int online) {
-        isOnline = online;
+    public void setIsOnline(int isOnline) {
+        this.isOnline = isOnline;
     }
 }

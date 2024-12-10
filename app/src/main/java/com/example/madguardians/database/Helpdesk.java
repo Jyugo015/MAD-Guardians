@@ -77,6 +77,9 @@ public class Helpdesk {
     @ColumnInfo(defaultValue = "pending")
     private String helpdeskStatus;
 
+    public Helpdesk() {
+    }
+
     // Constructor
     public Helpdesk(@NonNull String helpdeskId, @NonNull String issueId, @NonNull String userId,
                     @Nullable String postId, @Nullable String courseId, @Nullable String commentId,

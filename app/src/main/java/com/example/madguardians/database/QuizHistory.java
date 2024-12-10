@@ -33,6 +33,9 @@ public class QuizHistory {
     @NonNull
     private String timestamp;
 
+    public QuizHistory() {
+    }
+
     // Constructor
     public QuizHistory(@NonNull String quizId, @NonNull String userId, int score, @NonNull String timestamp) {
         this.quizId = quizId;

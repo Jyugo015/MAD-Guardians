@@ -25,6 +25,9 @@ public class Staff {
     @NonNull
     private String password;
 
+    public Staff() {
+    }
+
     // Constructor
     public Staff(@NonNull String staffId, @NonNull String name, @NonNull String email, @NonNull String password) {
         this.staffId = staffId;

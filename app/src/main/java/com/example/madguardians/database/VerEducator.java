@@ -61,6 +61,9 @@ public class VerEducator {
     @ColumnInfo(defaultValue = "pending")
     private String verifiedStatus;
 
+    public VerEducator() {
+    }
+
     // Constructor
     public VerEducator(String userId, @Nullable String imageSetId, @Nullable String fileSetId,
                        String domainId, @NonNull String staffId, @NonNull String verifiedStatus) {

@@ -82,6 +82,9 @@ public class Post {
     @NonNull
     private String date;
 
+    public Post() {
+    }
+
     // Constructor
     public Post(String postId, @NonNull String userId, @NonNull String title, @NonNull String description,
                 @Nullable String imageSetId, @Nullable String videoSetId, @Nullable String fileSetId,

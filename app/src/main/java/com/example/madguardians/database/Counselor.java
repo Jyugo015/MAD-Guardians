@@ -43,6 +43,8 @@ public class Counselor {
         this.profilePic = profilePic;
         this.contactNo = contactNo;
     }
+    public Counselor() {
+    }
 
     // Getter and Setter for counselorId
     @NonNull
@@ -103,6 +105,8 @@ public class Counselor {
     public void setProfilePic(@NonNull String profilePic) {
         this.profilePic = profilePic;
     }
+
+
 
     public String getContactNo() {
         return contactNo;
