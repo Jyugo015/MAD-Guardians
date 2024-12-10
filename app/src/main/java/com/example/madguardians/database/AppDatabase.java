@@ -1,6 +1,7 @@
 package com.example.madguardians.database;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
@@ -637,7 +638,10 @@ public abstract class AppDatabase extends RoomDatabase {
                     "FOREIGN KEY (userId) REFERENCES user(userId) ON DELETE CASCADE);");
 
             database.execSQL("DROP TABLE appointment;");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_appointment_counselorAvailabilityId " +
+                    "ON appointment_new (counselorAvailabilityId);");
             database.execSQL("ALTER TABLE appointment_new RENAME TO appointment;");
+
 
             //update the isBooked column in counselorAvailability once a new appointment is made
             database.execSQL(
@@ -654,17 +658,24 @@ public abstract class AppDatabase extends RoomDatabase {
             //badge
             database.execSQL("DROP TABLE IF EXISTS badge_new;");
             database.execSQL("CREATE TABLE IF NOT EXISTS badge_new (" +
-                    "badgeId TEXT PRIMARY KEY, " +
+                    "badgeId TEXT NOT NULL PRIMARY KEY, " +
                     "badgeName TEXT NOT NULL UNIQUE, " +
                     "badgeImage TEXT NOT NULL UNIQUE);");
 
+
             database.execSQL("DROP TABLE badge;");
+            // Create unique index for badgeName and badgeImage
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_badge_badgeName " +
+                    "ON badge_new (badgeName);");
+
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_badge_badgeImage " +
+                    "ON badge_new (badgeImage);");
             database.execSQL("ALTER TABLE badge_new RENAME TO badge;");
 
             //chatHistory
             database.execSQL("DROP TABLE IF EXISTS chatHistory_new;");
             database.execSQL("CREATE TABLE IF NOT EXISTS chatHistory_new (" +
-                    "messageId TEXT PRIMARY KEY, " +
+                    "messageId TEXT NOT NULL PRIMARY KEY, " +
                     "senderUserId TEXT, " +
                     "recipientUserId TEXT, " +
                     "senderCounselorId TEXT, " +
@@ -688,7 +699,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS collection_new;");
             database.execSQL(
                     "CREATE TABLE collection_new (" +
-                            "collectionId TEXT PRIMARY KEY, " +
+                            "collectionId TEXT NOT NULL PRIMARY KEY, " +
                             "userId TEXT NOT NULL, " +
                             "postId TEXT, " +
                             "courseId TEXT, " +
@@ -708,7 +719,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS comment_new;");
             database.execSQL(
                     "CREATE TABLE comment_new (" +
-                            "commentId TEXT PRIMARY KEY, " +
+                            "commentId TEXT NOT NULL PRIMARY KEY, " +
                             "userId TEXT, " +
                             "postId TEXT NOT NULL, " +
                             "comment TEXT NOT NULL, " +
@@ -730,7 +741,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS counselor_new;");
             database.execSQL(
                     "CREATE TABLE counselor_new (" +
-                            "counselorId TEXT PRIMARY KEY, " +
+                            "counselorId TEXT NOT NULL PRIMARY KEY, " +
                             "name TEXT NOT NULL, " +
                             "office TEXT NOT NULL, " +
                             "email TEXT NOT NULL UNIQUE, " +
@@ -740,13 +751,15 @@ public abstract class AppDatabase extends RoomDatabase {
                             ");"
             );
             database.execSQL("DROP TABLE counselor;");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_counselor_email ON counselor_new(email);");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_counselor_contactNo ON counselor_new(contactNo);");
             database.execSQL("ALTER TABLE counselor_new RENAME TO counselor;");
 
             //counselorAvailability
             database.execSQL("DROP TABLE IF EXISTS counselorAvailability_new;");
             database.execSQL(
                     "CREATE TABLE counselorAvailability_new (" +
-                            "counselorAvailabilityId TEXT PRIMARY KEY, " +
+                            "counselorAvailabilityId TEXT NOT NULL PRIMARY KEY, " +
                             "counselorId TEXT NOT NULL, " +
                             "timeslotId TEXT NOT NULL, " +
                             "date TEXT NOT NULL, " +
@@ -762,7 +775,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS course_new;");
             database.execSQL(
                     "CREATE TABLE course_new (" +
-                            "courseId TEXT PRIMARY KEY, " +
+                            "courseId TEXT NOT NULL PRIMARY KEY, " +
                             "title TEXT NOT NULL, " +
                             "description TEXT NOT NULL, " +
                             "coverImage TEXT NOT NULL, " +
@@ -785,11 +798,12 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS domain_new;");
             database.execSQL(
                     "CREATE TABLE domain_new (" +
-                            "domainId TEXT PRIMARY KEY, " +
+                            "domainId TEXT NOT NULL PRIMARY KEY, " +
                             "domainName TEXT NOT NULL UNIQUE " +
                             ");"
             );
             database.execSQL("DROP TABLE domain;");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_domain_domainName ON domain_new(domainName);");
             database.execSQL("ALTER TABLE domain_new RENAME TO domain;");
 
             // domainInterested
@@ -808,7 +822,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS folder_new;");
             database.execSQL(
                     "CREATE TABLE folder_new (" +
-                            "folderId TEXT PRIMARY KEY, " +
+                            "folderId TEXT NOT NULL PRIMARY KEY, " +
                             "userId TEXT NOT NULL, " +
                             "name TEXT NOT NULL, " +
                             "rootFolder TEXT, " +
@@ -824,7 +838,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS helpdesk_new;");
             database.execSQL(
                     "CREATE TABLE helpdesk_new (" +
-                            "helpdeskId TEXT PRIMARY KEY, " +
+                            "helpdeskId TEXT NOT NULL PRIMARY KEY, " +
                             "issueId TEXT NOT NULL, " +
                             "userId TEXT NOT NULL, " +
                             "postId TEXT, " +
@@ -836,10 +850,10 @@ public abstract class AppDatabase extends RoomDatabase {
                             "helpdeskStatus TEXT NOT NULL DEFAULT 'pending', " +
                             "FOREIGN KEY(issueId) REFERENCES issue(issueId) ON DELETE CASCADE, " +
                             "FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE, " +
-                            "FOREIGN KEY(postId) REFERENCES post(postId) ON DELETE SET NULL, " +
-                            "FOREIGN KEY(courseId) REFERENCES course(courseId) ON DELETE SET NULL, " +
-                            "FOREIGN KEY(commentId) REFERENCES comment(commentId) ON DELETE SET NULL, " +
-                            "FOREIGN KEY(quizId) REFERENCES quizQuestion(quizId) ON DELETE SET NULL, " +
+                            "FOREIGN KEY(postId) REFERENCES post(postId) ON DELETE CASCADE, " +
+                            "FOREIGN KEY(courseId) REFERENCES course(courseId) ON DELETE CASCADE, " +
+                            "FOREIGN KEY(commentId) REFERENCES comment(commentId) ON DELETE CASCADE, " +
+                            "FOREIGN KEY(quizId) REFERENCES quiz(quizId) ON DELETE CASCADE, " +
                             "FOREIGN KEY(staffId) REFERENCES staff(staffId) ON DELETE RESTRICT," +
                             "CHECK (postId IS NOT NULL OR courseId IS NOT NULL OR commentId IS NOT NULL OR quizId IS NOT NULL OR helpdeskStatus = 'deleting')" +
                             ");"
@@ -864,7 +878,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS issue_new;");
             database.execSQL(
                     "CREATE TABLE issue_new (" +
-                            "issueId TEXT PRIMARY KEY, " +
+                            "issueId TEXT NOT NULL PRIMARY KEY, " +
                             "type TEXT NOT NULL " +
                             ");"
             );
@@ -880,7 +894,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             "postId TEXT NOT NULL, " +
                             "userId TEXT NOT NULL, " +
                             "PRIMARY KEY(mediaId, postId, userId), " +
-                            "FOREIGN KEY(mediaId) REFERENCES mediaSet(mediaId) ON DELETE CASCADE, " +
+                            "FOREIGN KEY(mediaId) REFERENCES media(mediaId) ON DELETE CASCADE, " +
                             "FOREIGN KEY(postId) REFERENCES post(postId) ON DELETE CASCADE, " +
                             "FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE" +
                             ");"
@@ -892,7 +906,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS media_new;");
             database.execSQL(
                     "CREATE TABLE media_new (" +
-                            "mediaId TEXT PRIMARY KEY, " +
+                            "mediaId TEXT NOT NULL PRIMARY KEY, " +
                             "mediaSetId TEXT NOT NULL, " +
                             "url TEXT NOT NULL, " +
                             "FOREIGN KEY(mediaSetId) REFERENCES mediaSet(mediaSetId) ON DELETE CASCADE" +
@@ -905,7 +919,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS mediaSet_new;");
             database.execSQL(
                     "CREATE TABLE mediaSet_new (" +
-                            "mediaSetId TEXT PRIMARY KEY " +
+                            "mediaSetId TEXT NOT NULL PRIMARY KEY " +
                             ");"
             );
             database.execSQL("DROP TABLE IF EXISTS mediaSet;");
@@ -915,7 +929,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS notification_new;");
             database.execSQL(
                     "CREATE TABLE notification_new (" +
-                            "notificationId TEXT PRIMARY KEY, " +
+                            "notificationId TEXT NOT NULL PRIMARY KEY, " +
                             "userId TEXT NOT NULL, " +
                             "message TEXT NOT NULL, " +
                             "deliveredTime TEXT, " +
@@ -930,7 +944,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS post_new;");
             database.execSQL(
                     "CREATE TABLE post_new (" +
-                            "postId TEXT PRIMARY KEY, " +
+                            "postId TEXT NOT NULL PRIMARY KEY, " +
                             "userId TEXT NOT NULL, " +
                             "title TEXT NOT NULL, " +
                             "description TEXT NOT NULL, " +
@@ -967,13 +981,14 @@ public abstract class AppDatabase extends RoomDatabase {
             );
 
             database.execSQL("DROP TABLE IF EXISTS questionOption;");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_questionOption_choice ON questionOption_new(choice);");
             database.execSQL("ALTER TABLE questionOption_new RENAME TO questionOption;");
 
             //quiz
             database.execSQL("DROP TABLE IF EXISTS quiz_new;");
             database.execSQL(
                     "CREATE TABLE quiz_new (" +
-                            "quizId TEXT PRIMARY KEY " +
+                            "quizId TEXT NOT NULL PRIMARY KEY " +
                             ");"
             );
             database.execSQL("DROP TABLE IF EXISTS quiz;");
@@ -983,7 +998,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS quizHitory_new;");
             database.execSQL(
                     "CREATE TABLE quizHistory_new (" +
-                            "quizId TEXT PRIMARY KEY, " +
+                            "quizId TEXT NOT NULL PRIMARY KEY, " +
                             "userId TEXT NOT NULL, " +
                             "score INTEGER NOT NULL, " +
                             "timestamp TEXT NOT NULL, " +
@@ -1012,7 +1027,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS quizQuestion_new;");
             database.execSQL(
                     "CREATE TABLE IF NOT EXISTS quizQuestion_new (" +
-                            "questionId TEXT PRIMARY KEY, " +
+                            "questionId TEXT NOT NULL PRIMARY KEY, " +
                             "quizId TEXT NOT NULL, " +
                             "question TEXT NOT NULL, " +
                             "questionNo INTEGER NOT NULL," +
@@ -1020,13 +1035,13 @@ public abstract class AppDatabase extends RoomDatabase {
                             ");"
             );
             database.execSQL("DROP TABLE IF EXISTS quizQuestion;");
-            database.execSQL("ALTER TABLE quizQuestion_new RENAME TO quizQestion;");
+            database.execSQL("ALTER TABLE quizQuestion_new RENAME TO quizQuestion;");
 
             //quizResult
             database.execSQL("DROP TABLE IF EXISTS quizResult_new;");
             database.execSQL(
                     "CREATE TABLE IF NOT EXISTS quizResult_new (" +
-                            "quizResultId TEXT PRIMARY KEY, " +
+                            "quizResultId TEXT NOT NULL PRIMARY KEY, " +
                             "questionId TEXT NOT NULL, " +
                             "userId TEXT NOT NULL, " +
                             "userAns TEXT NOT NULL, " +
@@ -1044,7 +1059,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE IF EXISTS staff_new;");
             database.execSQL(
                     "CREATE TABLE IF NOT EXISTS staff_new (" +
-                            "staffId TEXT PRIMARY KEY, " +
+                            "staffId TEXT NOT NULL PRIMARY KEY, " +
                             "name TEXT NOT NULL UNIQUE, " +
                             "email TEXT NOT NULL UNIQUE, " +
                             "password TEXT NOT NULL " +
@@ -1052,14 +1067,15 @@ public abstract class AppDatabase extends RoomDatabase {
             );
 
             database.execSQL("DROP TABLE IF EXISTS staff;");
-
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_staff_email ON staff_new(email);");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_staff_name ON staff_new(name);");
             database.execSQL("ALTER TABLE staff_new RENAME TO staff;");
 
             //timeslot
             database.execSQL("DROP TABLE IF EXISTS timeslot_new;");
             database.execSQL(
                     "CREATE TABLE IF NOT EXISTS timeslot_new (" +
-                            "timeslotId TEXT PRIMARY KEY, " +
+                            "timeslotId TEXT NOT NULL PRIMARY KEY, " +
                             "startTime INTEGER NOT NULL, " +
                             "endTime INTEGER NOT NULL " +
                             ");"
@@ -1070,17 +1086,19 @@ public abstract class AppDatabase extends RoomDatabase {
             // user
             database.execSQL("DROP TABLE IF EXISTS user_new;");
             database.execSQL("CREATE TABLE user_new (" +
-                    "userId TEXT PRIMARY KEY, " +
+                    "userId TEXT NOT NULL PRIMARY KEY, " +
                     "name TEXT NOT NULL DEFAULT 'bookworm', " +
                     "email TEXT NOT NULL UNIQUE, " +
                     "phoneNo TEXT UNIQUE, " +
                     "password TEXT NOT NULL, " +
-                    "profilePic TEXT NOT NULL DEFAULT 'default_profile_pic_url', " +
-                    "lastLogin TEXT NOT NULL, " +
+                    "profilePic TEXT NOT NULL DEFAULT 'url link of default profile pic', " +
+                    "lastLogin TEXT, " +
                     "strikeLoginDays INTEGER NOT NULL);");
 
             // Drop the old tables (assuming there is no data migration needed)
             database.execSQL("DROP TABLE IF EXISTS user;");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_user_email ON user_new(email);");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_user_phoneNo ON user_new(phoneNo);");
 
             // Rename new tables to the original table names
             database.execSQL("ALTER TABLE user_new RENAME TO user;");
@@ -1157,13 +1175,15 @@ public abstract class AppDatabase extends RoomDatabase {
                             ");"
             );
             database.execSQL("DROP TABLE IF EXISTS verEducator;");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_verEducator_imageSetId ON verEducator_new(imageSetId);");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_verEducator_fileSetId ON verEducator_new(fileSetId);");
             database.execSQL("ALTER TABLE verEducator_new RENAME TO verEducator;");
 
             //verPost
             database.execSQL("DROP TABLE IF EXISTS verPost_new;");
             database.execSQL(
                     "CREATE TABLE IF NOT EXISTS verPost_new (" +
-                            "verPostId TEXT PRIMARY KEY, " +
+                            "verPostId TEXT NOT NULL PRIMARY KEY, " +
                             "postId TEXT NOT NULL UNIQUE, " +
                             "staffId TEXT NOT NULL, " +
                             "verifiedStatus TEXT NOT NULL DEFAULT 'pending', " +
@@ -1173,7 +1193,7 @@ public abstract class AppDatabase extends RoomDatabase {
             );
 
             database.execSQL("DROP TABLE IF EXISTS verPost;");
-
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_verPost_postId ON verPost_new(postId);");
             database.execSQL("ALTER TABLE verPost_new RENAME TO verPost;");
         }
     };
