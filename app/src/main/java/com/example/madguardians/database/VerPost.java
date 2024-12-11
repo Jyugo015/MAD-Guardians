@@ -42,6 +42,9 @@ public class VerPost {
     @ColumnInfo(defaultValue = "pending")
     private String verifiedStatus;
 
+    public VerPost() {
+    }
+
     // Constructor
     public VerPost(@NonNull String verPostId, @NonNull String postId, @NonNull String staffId, @NonNull String verifiedStatus) {
         this.verPostId = verPostId;

@@ -24,6 +24,9 @@ public class Media {
     @NonNull
     private String url;
 
+    public Media() {
+    }
+
     // Constructor
     public Media(@NonNull String mediaId, @NonNull String mediaSetId, @NonNull String url) {
         this.mediaId = mediaId;

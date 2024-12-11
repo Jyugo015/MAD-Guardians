@@ -26,6 +26,9 @@ public class QuestionOption {
     @ColumnInfo(defaultValue = "0")
     private int isCorrect;
 
+    public QuestionOption() {
+    }
+
     // Constructor
     public QuestionOption(@NonNull String questionId, @NonNull String choice, int isCorrect) {
         this.questionId = questionId;
@@ -54,7 +57,7 @@ public class QuestionOption {
         return isCorrect;
     }
 
-    public void setCorrect(int correct) {
-        isCorrect = correct;
+    public void setIsCorrect(int isCorrect) {
+        this.isCorrect = isCorrect;
     }
 }

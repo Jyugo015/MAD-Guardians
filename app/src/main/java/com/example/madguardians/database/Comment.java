@@ -70,6 +70,8 @@ public class Comment {
         this.isRead = isRead;
         this.timestamp = timestamp;
     }
+    public Comment() {
+    }
 
     // Getter and Setter for commentId
     @NonNull
@@ -136,8 +138,8 @@ public class Comment {
         return isRead;
     }
 
-    public void setRead(int read) {
-        isRead = read;
+    public void setIsRead(int isRead) {
+        this.isRead = isRead;
     }
 
     // Getter and Setter for timestamp

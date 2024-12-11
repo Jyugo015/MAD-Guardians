@@ -19,6 +19,9 @@ public class Domain {
     @NonNull
     private String domainName;
 
+    public Domain() {
+    }
+
     // Constructor
     public Domain(@NonNull String domainId, @NonNull String domainName) {
         this.domainId = domainId;

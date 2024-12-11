@@ -15,6 +15,9 @@ public class Timeslot {
     @NonNull
     private int endTime;
 
+    public Timeslot() {
+    }
+
     // Constructor
     public Timeslot(String timeslotId, @NonNull int startTime, @NonNull int endTime) {
         this.timeslotId = timeslotId;
