@@ -20,6 +20,9 @@ public class Badge {
     @NonNull
     private String badgeImage;
 
+    public Badge() {
+    }
+
     // Constructor
     public Badge(@NonNull String badgeId, @NonNull String badgeName, @NonNull String badgeImage) {
         this.badgeId = badgeId;

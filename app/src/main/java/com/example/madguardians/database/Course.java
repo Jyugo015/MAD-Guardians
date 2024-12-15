@@ -58,6 +58,9 @@ public class Course {
     @NonNull
     private String date;
 
+    public Course() {
+    }
+
     // Constructor
     public Course(@NonNull String courseId, @NonNull String title, @NonNull String description,
                   @NonNull String coverImage, @Nullable String post1, @Nullable String post2,

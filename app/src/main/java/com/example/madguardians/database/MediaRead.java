@@ -35,6 +35,9 @@ public class MediaRead {
     @NonNull
     private String mediaId;
 
+    public MediaRead() {
+    }
+
     // Constructor
     public MediaRead(String userId, String postId, String mediaId) {
         this.userId = userId;

@@ -80,7 +80,7 @@
 			android:background="@drawable/edit_text_rectangle"
 			android:fontFamily="@font/inter"
 			android:hint="@string/email_string"
-			android:inputType="textPassword"
+			android:inputType="textEmailAddress"
 			android:padding="10dp"
 			android:textColor="@color/already_have_an_account__color"
 			android:textSize="20sp"

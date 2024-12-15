@@ -1,6 +1,4 @@
 package com.example.madguardians;
-//import static com.example.madguardians.EditProfileFragment.PICK_IMAGE_REQUEST;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +19,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.DomainDao;
+import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.NetworkAvailability;
 import com.example.madguardians.database.UserDao;
@@ -42,10 +41,7 @@ public class MainActivity extends AppCompatActivity {
         //Initilaize FirestoreManager
         firestoreManager = new FirestoreManager (database);
 
-        // Use the database as needed
-        UserDao userDao = database.userDao();
-
-        firestoreManager.onLoginSyncUser("");
+        Executor.executeTask(() -> firestoreManager.onLoginSyncUser(""));
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

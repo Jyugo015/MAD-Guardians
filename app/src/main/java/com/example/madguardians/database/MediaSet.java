@@ -15,6 +15,9 @@ public class MediaSet {
         this.mediaSetId = mediaSetId;
     }
 
+    public MediaSet() {
+    }
+
     // Getter and Setter
     public String getMediaSetId() {
         return mediaSetId;

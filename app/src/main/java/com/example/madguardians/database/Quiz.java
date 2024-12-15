@@ -10,6 +10,9 @@ public class Quiz{
     @NonNull
     private String quizId; // A unique ID for the set of media.
 
+    public Quiz() {
+    }
+
     // Constructor
     public Quiz(@NonNull String quizId) {
         this.quizId = quizId;

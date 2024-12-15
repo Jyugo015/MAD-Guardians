@@ -33,6 +33,9 @@ public class Folder {
     @Nullable
     private String rootFolder;
 
+    public Folder() {
+    }
+
     // Constructor
     public Folder(@NonNull String folderId, @NonNull String userId, @NonNull String name, @Nullable String rootFolder) {
         this.folderId = folderId;

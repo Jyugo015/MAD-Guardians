@@ -28,6 +28,9 @@ public class DomainInterested {
     @NonNull
     private String domainId;
 
+    public DomainInterested() {
+    }
+
     // Constructor
     public DomainInterested(String userId, String domainId) {
         this.userId = userId;

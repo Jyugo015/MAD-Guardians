@@ -32,6 +32,9 @@ public class UserHistory {
     @NonNull
     private String time;
 
+    public UserHistory() {
+    }
+
     // Constructor
     public UserHistory(String postId, String userId, int progress, @NonNull String time) {
         this.postId = postId;

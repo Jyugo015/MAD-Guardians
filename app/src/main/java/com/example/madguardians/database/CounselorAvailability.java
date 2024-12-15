@@ -47,6 +47,9 @@ public class CounselorAvailability {
         this.isBooked = isBooked;
     }
 
+    public CounselorAvailability() {
+    }
+
     // Getter and Setter for counselorAvailabilityId
     @NonNull
     public String getCounselorAvailabilityId() {
@@ -92,7 +95,7 @@ public class CounselorAvailability {
         return isBooked;
     }
 
-    public void setBooked(int booked) {
-        isBooked = booked;
+    public void setIsBooked(int isBooked) {
+        this.isBooked = isBooked;
     }
 }
