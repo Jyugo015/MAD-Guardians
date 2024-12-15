@@ -21,10 +21,63 @@
         android:id="@+id/nav_consult"
         android:name="com.example.madguardians.ui.consult.ConsultFragment"
         android:label="@string/consult_string"
-        tools:layout="@layout/fragment_consult" />
+        tools:layout="@layout/fragment_consult" >
+        <action
+            android:id="@+id/action_nav_consult_to_appointmentFragment"
+            app:destination="@id/appointmentFragment" />
+        <action
+            android:id="@+id/action_nav_consult_to_chatFragment"
+            app:destination="@id/chatFragment" />
+        <action
+            android:id="@+id/action_nav_consult_to_chatHistoryFragment"
+            app:destination="@id/chatHistoryFragment" />
+    </fragment>
     <fragment
         android:id="@+id/nav_profile"
         android:name="com.example.madguardians.ProfileFragment"
         android:label="@string/profile_string"
         tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.madguardians.ui.consult.ChatFragment"
+        android:label="fragment_chat"
+        tools:layout="@layout/fragment_chat" />
+    <fragment
+        android:id="@+id/appointmentFragment"
+        android:name="com.example.madguardians.ui.consult.AppointmentFragment"
+        android:label="fragment_appointment"
+        tools:layout="@layout/fragment_appointment" >
+        <action
+            android:id="@+id/action_appointmentFragment_to_appointmentSetFragment"
+            app:destination="@id/appointmentSetFragment" />
+        <action
+            android:id="@+id/action_appointmentFragment_to_appointmentScheduleFragment"
+            app:destination="@id/appointmentScheduleFragment" />
+        <action
+            android:id="@+id/action_appointmentFragment_to_appointmentBookingFragment"
+            app:destination="@id/appointmentBookingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/appointmentScheduleFragment"
+        android:name="com.example.madguardians.ui.consult.AppointmentScheduleFragment"
+        android:label="Appointment Schedule"
+        tools:layout="@layout/fragment_appointment_schedule" />
+    <fragment
+        android:id="@+id/appointmentSetFragment"
+        android:name="com.example.madguardians.ui.consult.AppointmentSetFragment"
+        android:label="Appointment Setting"
+        tools:layout="@layout/fragment_appointment_set" />
+    <fragment
+        android:id="@+id/appointmentBookingFragment"
+        android:name="com.example.madguardians.ui.consult.AppointmentBookingFragment"
+        android:label="Appointment Booking"
+        tools:layout="@layout/fragment_appointment_booking" />
+    <fragment
+        android:id="@+id/chatHistoryFragment"
+        android:name="com.example.madguardians.ui.consult.ChatHistoryFragment"
+        android:label="ChatHistoryFragment" >
+        <action
+            android:id="@+id/action_chatHistoryFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
 </navigation>

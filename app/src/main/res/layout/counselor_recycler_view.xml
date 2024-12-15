@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- Counselor Image -->
+    <ImageButton
+        android:id="@+id/counselor_image"
+        android:layout_width="112dp"
+        android:layout_height="112dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginEnd="16dp"
+        android:background="@null"
+        android:scaleType="centerInside"
+        android:contentDescription="Counselor Image"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <!-- Counselor Name -->
+    <TextView
+        android:id="@+id/counselor_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/counselor_image"
+        android:layout_alignTop="@id/counselor_image"
+        android:layout_marginBottom="4dp"
+        android:text="Dr. Sarah Tan"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#000" />
+
+    <!-- Specialization -->
+    <TextView
+        android:id="@+id/counselor_skill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/counselor_image"
+        android:layout_below="@id/counselor_name"
+        android:layout_marginBottom="4dp"
+        android:text="Specialization: Mental Health"
+        android:textSize="14sp"
+        android:textColor="#555" />
+
+    <!-- Experience -->
+    <TextView
+        android:id="@+id/counselor_experience"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/counselor_image"
+        android:layout_below="@id/counselor_skill"
+        android:text="Experience: 10 years"
+        android:textSize="14sp"
+        android:textColor="#555" />
+</RelativeLayout>
