@@ -28,7 +28,7 @@ public class CounselorAdapter extends RecyclerView.Adapter<CounselorAdapter.Coun
 
     Context context;
     List<CounselorModel> counselors;
-    private String userName = "Test User 1";
+    private String userName ;
     private String selectedDate;
 
     public CounselorAdapter(Context context, List<CounselorModel> counselors, String selectedDate) {
@@ -49,18 +49,18 @@ public class CounselorAdapter extends RecyclerView.Adapter<CounselorAdapter.Coun
 
         String userID = FirebaseUtil.currentUserId();
 
-//        FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                userName = task.getResult();
-//                if (userName != null) {
-//                    Log.d("Username", "Username retrieved successfully");
-//                } else {
-//                    Log.d("Username", "No such user name");
-//                }
-//            } else {
-//                Log.d("Username", "Failed to get username");
-//            }
-//        });
+        FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                userName = task.getResult();
+                if (userName != null) {
+                    Log.d("Username", "Username retrieved successfully");
+                } else {
+                    Log.d("Username", "No such user name");
+                }
+            } else {
+                Log.d("Username", "Failed to get username");
+            }
+        });
 
         holder.TVName.setText(counselors.get(position).getName());
         holder.TVSkill.setText(counselors.get(position).getSkill());

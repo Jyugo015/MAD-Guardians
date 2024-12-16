@@ -1,6 +1,7 @@
 package com.example.madguardians.ui.consult.utils_lo;
 
 import android.media.MediaRouter;
+import android.util.Log;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -17,8 +18,8 @@ import java.util.List;
 public class FirebaseUtil {
 
     public static String currentUserId() {
-        //!!!!!! Need to replace after authentication done
-        return "0q4AGraAU7WOlP4lYEMS";
+        return "0007";
+//                FirebaseAuth.getInstance().getUid();
     }
 
     public static boolean isLoggedIn() {
@@ -26,13 +27,12 @@ public class FirebaseUtil {
     }
 
     public static DocumentReference currentUserDetail() {
-        return FirebaseFirestore.getInstance().collection("users").document(currentUserId());
+        return FirebaseFirestore.getInstance().collection("user").document(currentUserId());
     }
     public static void isCounselor(SimpleCallback callback) {
         String currentUserId = FirebaseUtil.currentUserId();
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
-        // Query the Firestore database
         firestore.collection("counselors")
                 .document(currentUserId)
                 .get()
@@ -66,7 +66,8 @@ public class FirebaseUtil {
 
 
     public static DocumentReference getUser(String userId) {
-        return FirebaseFirestore.getInstance().collection("users").document(userId);
+        Log.e("UserID","Current UserID is : "+ userId);
+        return FirebaseFirestore.getInstance().collection("user").document(userId);
     }
 
 
@@ -116,7 +117,9 @@ public class FirebaseUtil {
         DocumentReference userDoc = getUser(userId);
         return userDoc.get().continueWith(task -> {
             if (task.isSuccessful() && task.getResult() != null && task.getResult().exists()) {
-                return task.getResult().getString("username");
+                return task.getResult().getString("name");
+            }else{
+                Log.e("Username","The username is not found using userID");
             }
             return null;
         });

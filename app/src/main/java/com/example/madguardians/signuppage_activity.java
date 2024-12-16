@@ -89,14 +89,18 @@ public class signuppage_activity extends Activity {
 			// Check if the username already exists in the database
 			Executor.executeTask(() -> {
 				// Query the database to check if username already exists
-				boolean usernameExists = AppDatabase.getDatabase(getApplicationContext())
-						.userDao()
-						.usernameExists(user.getName());
+				boolean usernameExists = false;
+
+//						AppDatabase.getDatabase(getApplicationContext())
+//						.userDao()
+//						.usernameExists(user.getName());
 
 				// Query the database to check if email already exists
-				boolean emailExists = AppDatabase.getDatabase(getApplicationContext())
-						.userDao()
-						.emailExists(user.getEmail());
+				boolean emailExists = false;
+
+//						AppDatabase.getDatabase(getApplicationContext())
+//						.userDao()
+//						.emailExists(user.getEmail());
 
 				if (usernameExists) {
 					// If username exists, show a toast message to the user
