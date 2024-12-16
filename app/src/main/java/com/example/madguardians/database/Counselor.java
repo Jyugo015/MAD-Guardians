@@ -28,7 +28,6 @@ public class Counselor {
     @NonNull
     @ColumnInfo(defaultValue = "url link of the default profilepic")
     private String profilePic;
-
     @NonNull
     private String contactNo;
     // Constructor

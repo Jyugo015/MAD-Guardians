@@ -90,7 +90,7 @@ public class resetpasswordpage extends AppCompatActivity {
 
                             // Update the user in Firestore
                             FirestoreManager firestoreManager = new FirestoreManager(appDatabase);
-                            Executor.executeTask(() -> firestoreManager.onInsertUpdate("user", user, getApplicationContext()));
+                            Executor.executeTask(() -> firestoreManager.onInsertUpdate("update","user", user, getApplicationContext()));
 
                             // Redirect to login page on the main thread
                             runOnUiThread(() -> {

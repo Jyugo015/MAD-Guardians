@@ -25,8 +25,8 @@ import androidx.room.Index;
                 @ForeignKey(
                         entity = Staff.class,
                         parentColumns = "staffId",
-                        childColumns = "staffId",
-                        onDelete = ForeignKey.RESTRICT
+                        childColumns = "staffId"
+                        //no action done upon the deletion of staff
                 ),
                 @ForeignKey(
                         entity = MediaSet.class,
@@ -61,18 +61,24 @@ public class VerEducator {
     @ColumnInfo(defaultValue = "pending")
     private String verifiedStatus;
 
+    @NonNull
+    public String timestamp;
     public VerEducator() {
     }
 
     // Constructor
-    public VerEducator(String userId, @Nullable String imageSetId, @Nullable String fileSetId,
-                       String domainId, @NonNull String staffId, @NonNull String verifiedStatus) {
+
+    public VerEducator(@NonNull String userId, @Nullable String imageSetId,
+                       @Nullable String fileSetId, @NonNull String domainId,
+                       @NonNull String staffId, @NonNull String verifiedStatus,
+                       @NonNull String timestamp) {
         this.userId = userId;
         this.imageSetId = imageSetId;
         this.fileSetId = fileSetId;
         this.domainId = domainId;
         this.staffId = staffId;
         this.verifiedStatus = verifiedStatus;
+        this.timestamp = timestamp;
     }
 
     // Getters and Setters
@@ -126,5 +132,14 @@ public class VerEducator {
 
     public void setVerifiedStatus(@NonNull String verifiedStatus) {
         this.verifiedStatus = verifiedStatus;
+    }
+
+    @NonNull
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(@NonNull String timestamp) {
+        this.timestamp = timestamp;
     }
 }

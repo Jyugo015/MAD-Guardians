@@ -48,8 +48,8 @@ import androidx.room.PrimaryKey;
             @ForeignKey(
                     entity = Staff.class,
                     parentColumns = "staffId",
-                    childColumns = "staffId",
-                    onDelete = ForeignKey.RESTRICT
+                    childColumns = "staffId"
+                    //no action done on deletion of staff
             )
         }
 )
