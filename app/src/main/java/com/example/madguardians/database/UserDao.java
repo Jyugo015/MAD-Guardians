@@ -44,12 +44,8 @@ public interface UserDao {
     @Query("UPDATE user SET strikeLoginDays = :strikeLoginDays WHERE userId = :userId")
     void updateStrikeLoginDays(String userId, int strikeLoginDays);
 
-    // Delete a User
-    @Delete
-    void delete(User user);
-
-    @Query("DELETE FROM user")
-    void deleteAll();
+    @Query("SELECT userId FROM user ORDER BY userId DESC LIMIT 1")
+    String getLastUserId();
 
     // Check if username exists
     @Query("SELECT COUNT(*) > 0 FROM user WHERE name = :username")
@@ -58,5 +54,12 @@ public interface UserDao {
     // Check if username exists
     @Query("SELECT COUNT(*) > 0 FROM user WHERE email = :email")
     boolean emailExists(String email);
+
+    // Delete a User
+    @Delete
+    void delete(User user);
+
+    @Query("DELETE FROM user")
+    void deleteAll();
 
 }

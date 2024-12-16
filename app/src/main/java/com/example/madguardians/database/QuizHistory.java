@@ -29,6 +29,7 @@ public class QuizHistory {
     @NonNull
     private String userId;
 
+    @NonNull
     private int score;
     @NonNull
     private String timestamp;
