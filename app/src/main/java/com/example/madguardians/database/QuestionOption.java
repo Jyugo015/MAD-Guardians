@@ -23,6 +23,7 @@ public class QuestionOption {
     private String questionId;
     @NonNull
     private String choice;
+    @NonNull
     @ColumnInfo(defaultValue = "0")
     private int isCorrect;
 

@@ -44,9 +44,6 @@ public class Collection {
     private String postId;
     @Nullable
     private String courseId;
-
-
-
     @Nullable
     private String folderId;
 

@@ -35,6 +35,7 @@ public class CounselorAvailability {
     @NonNull
     private String date;
     @ColumnInfo(defaultValue = "0")
+    @NonNull
     private int isBooked;
 
     // Constructor

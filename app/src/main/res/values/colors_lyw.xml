@@ -27,4 +27,18 @@
     <color name="volunteer_color">#FFEEEE</color>
     <color name="colorSelected">#FFFF00</color>
     <color name="colorUnselected">#F8ECEC</color>
+
+    <color name="remember_the_password__color">#A1A1A1</color>
+    <color name="pick_3_to_customize_your_home_feed_color">#787878</color>
+    <color name="upload_education_qualification_color">#0400FF</color>
+
+    <color name="_bg__viewcollectionspage_color">#F7F0F0</color>
+    <color name="rectangle_22_color">#F3F3F3</color>
+    <color name="search_color">#A1A1A1</color>
+    <color name="tab_name_color">#E4321A</color>
+    <color name="rectangle_9_color">#E95744</color>
+    <color name="tab_name_ek1_color">#697386</color>
+    <color name="line_7_color">#E4E8EE</color>
+    <color name="rectangle_2901_color">#D9D9D9</color>
+
 </resources>
