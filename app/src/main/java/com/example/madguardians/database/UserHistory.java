@@ -28,6 +28,7 @@ public class UserHistory {
     @NonNull
     private String userId;
     @ColumnInfo(defaultValue = "1")
+    @NonNull
     private int progress;
     @NonNull
     private String time;

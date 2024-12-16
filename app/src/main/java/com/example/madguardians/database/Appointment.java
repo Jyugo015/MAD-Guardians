@@ -30,6 +30,7 @@ public class Appointment {
     @NonNull
     private String userId;
 
+    @NonNull
     @ColumnInfo(defaultValue = "1")
     private int isOnline;
 

@@ -19,10 +19,8 @@ import androidx.room.PrimaryKey;
                 @ForeignKey(
                         entity = Staff.class,
                         parentColumns = "staffId",
-                        childColumns = "staffId",
-                        onDelete = ForeignKey.RESTRICT
-                        //prevent the staff to be deleted if they are in charge
-                        //of verification of a post
+                        childColumns = "staffId"
+                        //no action done upon deletion of staff
                 )
         },
         indices = {
@@ -36,21 +34,27 @@ public class VerPost {
     private String verPostId;
     @NonNull
     private String postId;
-    @NonNull
+    @Nullable
     private String staffId;
     @NonNull
     @ColumnInfo(defaultValue = "pending")
     private String verifiedStatus;
 
+    @NonNull
+    private String timestamp;
+
     public VerPost() {
     }
 
     // Constructor
-    public VerPost(@NonNull String verPostId, @NonNull String postId, @NonNull String staffId, @NonNull String verifiedStatus) {
+    public VerPost(@NonNull String verPostId, @NonNull String postId,
+                   @NonNull String staffId, @NonNull String verifiedStatus,
+                   @NonNull String timestamp) {
         this.verPostId = verPostId;
         this.postId = postId;
         this.staffId = staffId;
         this.verifiedStatus = verifiedStatus;
+        this.timestamp = timestamp;
     }
 
     // Getter and Setter for verPostId
@@ -87,5 +91,13 @@ public class VerPost {
 
     public void setVerifiedStatus(String verifiedStatus) {
         this.verifiedStatus = verifiedStatus;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(@NonNull String timestamp) {
+        this.timestamp = timestamp;
     }
 }
