@@ -2,6 +2,7 @@ package com.example.madguardians.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -23,6 +24,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.lang.reflect.Field;
@@ -173,11 +175,24 @@ public class FirestoreManager {
                     @Override
                     public void onCreate(@NonNull SupportSQLiteDatabase db) {
                         // Create a temporary table schema with constraints
+                        System.out.println("Creating table: " + tableName);
+                        System.out.println("Executing SQL: " + Arrays.toString(getTemporaryExecSQL(tableName)));
+
                         if (getTemporaryExecSQL(tableName) != null) {
                             for (String sql : getTemporaryExecSQL(tableName)) {
+                                System.out.println("Executing SQL: " + sql);
                                 db.execSQL(sql);
                             }
                         }
+
+                        // Verify if the table was created using query() method
+                        Cursor cursor = db.query("SELECT name FROM sqlite_master WHERE type='table' AND name='tempe'");
+                        if (cursor != null && cursor.moveToFirst()) {
+                            System.out.println("Table exists: tempe");
+                        } else {
+                            System.out.println("Table does not exist: tempe");
+                        }
+                        cursor.close();
                     }
 
                     @Override
@@ -219,10 +234,23 @@ public class FirestoreManager {
                                     // Add other types as necessary
                                 }
                             }
+//                            SupportSQLiteDatabase tempDb = helper.getWritableDatabase();
+                            if (tempDb.isOpen()) {
+                                System.out.println("Database is open.");
+                            } else {
+                                System.out.println("Database is not open.");
+                            }
 
-                            // Insert into the temporary database
-                            tempDb.insert("tempe", SQLiteDatabase.CONFLICT_FAIL, values);
-                        }
+                            tempDb.beginTransaction();
+                            try {
+                                // Perform insert or other operations
+                                tempDb.insert("tempe", SQLiteDatabase.CONFLICT_FAIL, values);
+                                tempDb.setTransactionSuccessful();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                tempDb.endTransaction();
+                            } }
                     })
                     .addOnFailureListener(e -> Log.e("Firestore", "Error fetching collection: " + tableName, e));
 //            // Get all fields of the class, including private ones

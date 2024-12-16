@@ -50,4 +50,13 @@ public interface UserDao {
 
     @Query("DELETE FROM user")
     void deleteAll();
+
+    // Check if username exists
+    @Query("SELECT COUNT(*) > 0 FROM user WHERE name = :username")
+    boolean usernameExists(String username);
+
+    // Check if username exists
+    @Query("SELECT COUNT(*) > 0 FROM user WHERE email = :email")
+    boolean emailExists(String email);
+
 }

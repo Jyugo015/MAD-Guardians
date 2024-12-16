@@ -36,12 +36,20 @@ public class resetpasswordpage extends AppCompatActivity {
     private AppDatabase appDatabase;
     private UserDao userDao;
     private String userId;
+    private String email;
 
         @Override
         protected void onCreate (Bundle savedInstanceState){
             super.onCreate(savedInstanceState);
             EdgeToEdge.enable(this);
             setContentView(R.layout.activity_resetpasswordpage);
+
+            email = getIntent().getStringExtra("email");
+            if (email == null) {
+                Toast.makeText(this, "Email not received", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
 
             password = findViewById(R.id.new_password);
             confirmPassword = findViewById(R.id.confirmed_password);
@@ -66,12 +74,16 @@ public class resetpasswordpage extends AppCompatActivity {
                 // Get the text input from the EditText fields
                 String newPassword = password.getText().toString();
                 String confirmPasswordText = confirmPassword.getText().toString();
+                if (newPassword.isEmpty() || confirmPasswordText.isEmpty()) {
+                    Toast.makeText(this, "Please enter a new password", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 // Check if passwords match
                 if (newPassword.equals(confirmPasswordText)) {
                     // Fetch the user by userId asynchronously
                     Executor.executeTask(() -> {
-                        User user = userDao.getById(userId);
+                        User user = userDao.getByEmail(email);
                         if (user != null) {
                             // Update the user's password
                             user.setPassword(newPassword);
