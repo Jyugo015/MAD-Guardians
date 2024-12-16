@@ -27,23 +27,23 @@
         android:name="com.example.madguardians.ProfileFragment"
         android:label="@string/profile_string"
         tools:layout="@layout/fragment_profile" />
-    <fragment
-        android:id="@+id/editProfileFragment"
-        android:name="com.example.madguardians.EditProfileFragment"
-        android:label="fragment_edit_profile"
-        tools:layout="@layout/fragment_edit_profile" />
-    <fragment
-        android:id="@+id/educationQualificationFragment"
-        android:name="com.example.madguardians.EducationQualificationFragment"
-        android:label="fragment_education_qualification"
-        tools:layout="@layout/fragment_education_qualification" />
-    <fragment
-        android:id="@+id/notificationFragment"
-        android:name="com.example.madguardians.notification.notificationFragment"
-        android:label="fragment_notification"
-        tools:layout="@layout/fragment_notification" />
-    <fragment
-        android:id="@+id/collectionFragment"
-        android:name="com.example.madguardians.collection.CollectionFragment"
-        android:label="CollectionFragment" />
+<!--    <fragment-->
+<!--        android:id="@+id/editProfileFragment"-->
+<!--        android:name="com.example.madguardians.EditProfileFragment"-->
+<!--        android:label="fragment_edit_profile"-->
+<!--        tools:layout="@layout/fragment_edit_profile" />-->
+<!--    <fragment-->
+<!--        android:id="@+id/educationQualificationFragment"-->
+<!--        android:name="com.example.madguardians.EducationQualificationFragment"-->
+<!--        android:label="fragment_education_qualification"-->
+<!--        tools:layout="@layout/fragment_education_qualification" />-->
+<!--    <fragment-->
+<!--        android:id="@+id/notificationFragment"-->
+<!--        android:name="com.example.madguardians.notification.notificationFragment"-->
+<!--        android:label="fragment_notification"-->
+<!--        tools:layout="@layout/fragment_notification" />-->
+<!--    <fragment-->
+<!--        android:id="@+id/collectionFragment"-->
+<!--        android:name="com.example.madguardians.collection.CollectionFragment"-->
+<!--        android:label="CollectionFragment" />-->
 </navigation>
