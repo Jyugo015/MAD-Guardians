@@ -806,11 +806,11 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
         // Handle the file path returned by the MediaHandler
         Toast.makeText(this, "Selected " + fileType + " path: " + filePath, Toast.LENGTH_LONG).show();
         if (fileType.equalsIgnoreCase("video")){
-            videoHandler.uploadVideoInBackground((String) filePath, "YOUR_DATABASE", player);
+            videoHandler.uploadVideoInBackground(filePath, "YOUR_DATABASE", player);
         } else if (fileType.equalsIgnoreCase("image")){
-            imageHandler.uploadImageInBackground((String) filePath, "YOUR_DATABASE", imageView);
+            imageHandler.uploadImageInBackground(filePath, "YOUR_DATABASE", imageView);
         } else if (fileType.equalsIgnoreCase("pdf")){
-            pdfHandler.uploadPdfInBackground((byte[]) filePath, "YOUR_DATABASE", webView)
+            pdfHandler.uploadPdfInBackground(filePath, "YOUR_DATABASE", webView)
         }
     }
 
