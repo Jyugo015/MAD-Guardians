@@ -1,18 +1,25 @@
 package com.example.madguardians;
-
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.DomainDao;
+import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.NetworkAvailability;
 import com.example.madguardians.database.UserDao;
@@ -25,9 +32,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
         configureSignUpButton();
         configureLoginInButton();
-        firestoreManager.onLoginSyncUser("");
+
+        // Initialize the database
+        database = AppDatabase.getDatabase(this);
+        //Initilaize FirestoreManager
+        firestoreManager = new FirestoreManager (database);
+
+        Executor.executeTask(() -> firestoreManager.onLoginSyncUser(""));
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -35,13 +49,6 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Initialize the database
-        database = AppDatabase.getDatabase(this);
-        //Initilaize FirestoreManager
-        firestoreManager = new FirestoreManager (database);
-
-        // Use the database as needed
-        UserDao userDao = database.userDao();
 //        DomainDao domainDao = database.domainDao();
 
         // Check Internet connection

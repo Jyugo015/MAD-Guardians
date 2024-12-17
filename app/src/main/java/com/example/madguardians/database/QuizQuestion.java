@@ -27,6 +27,9 @@ public class QuizQuestion {
     @NonNull
     private int questionNo;
 
+    public QuizQuestion() {
+    }
+
     // Constructor
     public QuizQuestion(String questionId, @NonNull String quizId, @NonNull String question, int questionNo) {
         this.questionId = questionId;

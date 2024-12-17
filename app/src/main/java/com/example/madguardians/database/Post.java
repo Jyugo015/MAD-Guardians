@@ -56,10 +56,8 @@ public class Post {
     @PrimaryKey
     @NonNull
     private String postId;
-
     @NonNull
     private String userId;
-
     @NonNull
     private String title;
     @NonNull
@@ -70,17 +68,17 @@ public class Post {
     private String videoSetId;
     @Nullable
     private String fileSetId;
-
     @Nullable
     private String quizId;
-
     @NonNull
     private String domainId;
     @Nullable
     private String folderId;
-
     @NonNull
     private String date;
+
+    public Post() {
+    }
 
     // Constructor
     public Post(String postId, @NonNull String userId, @NonNull String title, @NonNull String description,

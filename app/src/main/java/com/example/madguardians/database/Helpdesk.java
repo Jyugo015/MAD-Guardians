@@ -48,8 +48,8 @@ import androidx.room.PrimaryKey;
             @ForeignKey(
                     entity = Staff.class,
                     parentColumns = "staffId",
-                    childColumns = "staffId",
-                    onDelete = ForeignKey.RESTRICT
+                    childColumns = "staffId"
+                    //no action done on deletion of staff
             )
         }
 )
@@ -76,6 +76,9 @@ public class Helpdesk {
     @NonNull
     @ColumnInfo(defaultValue = "pending")
     private String helpdeskStatus;
+
+    public Helpdesk() {
+    }
 
     // Constructor
     public Helpdesk(@NonNull String helpdeskId, @NonNull String issueId, @NonNull String userId,

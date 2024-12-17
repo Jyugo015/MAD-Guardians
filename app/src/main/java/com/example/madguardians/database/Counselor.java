@@ -28,7 +28,6 @@ public class Counselor {
     @NonNull
     @ColumnInfo(defaultValue = "url link of the default profilepic")
     private String profilePic;
-
     @NonNull
     private String contactNo;
     // Constructor
@@ -42,6 +41,8 @@ public class Counselor {
         this.password = password;
         this.profilePic = profilePic;
         this.contactNo = contactNo;
+    }
+    public Counselor() {
     }
 
     // Getter and Setter for counselorId
@@ -103,6 +104,8 @@ public class Counselor {
     public void setProfilePic(@NonNull String profilePic) {
         this.profilePic = profilePic;
     }
+
+
 
     public String getContactNo() {
         return contactNo;

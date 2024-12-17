@@ -35,6 +35,7 @@ public class CounselorAvailability {
     @NonNull
     private String date;
     @ColumnInfo(defaultValue = "0")
+    @NonNull
     private int isBooked;
 
     // Constructor
@@ -45,6 +46,9 @@ public class CounselorAvailability {
         this.timeslotId = timeslotId;
         this.date = date;
         this.isBooked = isBooked;
+    }
+
+    public CounselorAvailability() {
     }
 
     // Getter and Setter for counselorAvailabilityId
@@ -92,7 +96,7 @@ public class CounselorAvailability {
         return isBooked;
     }
 
-    public void setBooked(int booked) {
-        isBooked = booked;
+    public void setIsBooked(int isBooked) {
+        this.isBooked = isBooked;
     }
 }

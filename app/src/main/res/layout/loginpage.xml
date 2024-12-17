@@ -80,7 +80,7 @@
 			android:background="@drawable/edit_text_rectangle"
 			android:fontFamily="@font/inter"
 			android:hint="@string/email_string"
-			android:inputType="textPassword"
+			android:inputType="textEmailAddress"
 			android:padding="10dp"
 			android:textColor="@color/already_have_an_account__color"
 			android:textSize="20sp"
@@ -110,7 +110,7 @@
 			android:layout_marginStart="252dp"
 			android:layout_marginTop="92dp"
 			android:contentDescription="line_24"
-			android:src="@drawable/icon_passwoard_seen"
+			android:src="@drawable/icon_password_seen"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent" />
 

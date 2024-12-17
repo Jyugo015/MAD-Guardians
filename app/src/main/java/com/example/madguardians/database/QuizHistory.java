@@ -29,9 +29,13 @@ public class QuizHistory {
     @NonNull
     private String userId;
 
+    @NonNull
     private int score;
     @NonNull
     private String timestamp;
+
+    public QuizHistory() {
+    }
 
     // Constructor
     public QuizHistory(@NonNull String quizId, @NonNull String userId, int score, @NonNull String timestamp) {

@@ -29,6 +29,9 @@ public class Notification {
     @Nullable
     private String readTime;
 
+    public Notification() {
+    }
+
     // Constructor
     public Notification(String notificationId, @NonNull String userId, @NonNull String message,
                         @Nullable String deliveredTime, @Nullable String readTime) {

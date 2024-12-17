@@ -1,6 +1,7 @@
 package com.example.madguardians.database;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
@@ -25,7 +26,7 @@ public class User {
     @NonNull
     private String email;
 
-    @NonNull
+    @Nullable
     private String phoneNo;
 
     @NonNull
@@ -35,14 +36,19 @@ public class User {
     @ColumnInfo(defaultValue = "url link of default profile pic")
     private String profilePic;
 
-    @TypeConverters(TimestampConverter.class)
+    @NonNull
     private String lastLogin;
 
+    @NonNull
     private int strikeLoginDays;
 
+    public User() {
+    }
+
     // Constructor
-    public User(String userId, @NonNull String name, @NonNull String email, @NonNull String phoneNo,
-                @NonNull String password, @NonNull String profilePic, String lastLogin,
+    public User(@NonNull String userId, @NonNull String name, @NonNull String email,
+                @Nullable String phoneNo, @NonNull String password,
+                @NonNull String profilePic, @NonNull String lastLogin,
                 int strikeLoginDays) {
         this.userId = userId;//user "TEMP" for all users first
         this.name = name;

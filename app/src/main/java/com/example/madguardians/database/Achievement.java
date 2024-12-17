@@ -27,8 +27,12 @@ public class Achievement {
     @NonNull
     private String badgeId;
 
+    // No-argument constructor
+    public Achievement() {
+        // This is required for Firestore to deserialize the object.
+    }
     // Constructor
-    public Achievement(String userId, String badgeId) {
+    public Achievement(@NonNull String userId, @NonNull String badgeId) {
         this.userId = userId;
         this.badgeId = badgeId;
     }

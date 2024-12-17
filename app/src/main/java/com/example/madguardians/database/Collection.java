@@ -57,6 +57,8 @@ public class Collection {
         this.folderId = folderId;
     }
 
+    public Collection() {
+    }
     // Getter and Setter for collectionId
     @NonNull
     public String getCollectionId() {

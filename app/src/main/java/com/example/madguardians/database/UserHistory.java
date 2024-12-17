@@ -28,9 +28,13 @@ public class UserHistory {
     @NonNull
     private String userId;
     @ColumnInfo(defaultValue = "1")
+    @NonNull
     private int progress;
     @NonNull
     private String time;
+
+    public UserHistory() {
+    }
 
     // Constructor
     public UserHistory(String postId, String userId, int progress, @NonNull String time) {

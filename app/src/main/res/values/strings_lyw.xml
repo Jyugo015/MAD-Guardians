@@ -41,4 +41,71 @@
     <string name="title_activity_nav_vew_bnv">NavVewBNV</string>
     <string name="logout_string">Logout</string>
 
+    <string name="forget_password_string">Forget Password</string>
+    <string name="enter_your_registered_email_below_string">Enter your registered email below</string>
+    <string name="remember_the_password__string">Remember the password?   </string>
+    <string name="submit_string">Submit</string>
+
+    <string name="code_string">Code</string>
+    <string name="new_password_string">New Password</string>
+    <string name="reset_string">Reset Password</string>
+
+    <string name="what_are_you_interested_in__string">What are you interested in?</string>
+    <string name="pick_3_to_customize_your_home_feed_string">Pick 3 to customize your home feed</string>
+    <string name="language_string">Language</string>
+    <string name="physics_string">Physics</string>
+    <string name="biology_string">Biology</string>
+    <string name="mathematics_string">Mathematics</string>
+    <string name="chemistry_string">Chemistry</string>
+    <string name="computer_science_string">Computer Science</string>
+    <string name="next_string">Next</string>
+
+    <string name="hi__username_string">Hi, username</string>
+    <string name="achievement_string">Achievement</string>
+    <string name="good_educator_string">Good Educator</string>
+    <string name="top_1_educator_string">Top 1 Educator</string>
+    <string name="hit_20_favourites_string">Hit 20 favourites</string>
+    <string name="hit_100_points_string">Hit 100 points</string>
+    <string name="view_learning_history_string">View Learning History</string>
+    <string name="fundamental_of_java__netbean__string">Fundamental of Java I (Netbean)</string>
+    <string name="fundamental_of_java__netbean__ek1_string">Fundamental of Java II (Netbean)</string>
+    <string name="fundamental_of_java__netbean__ek2_string">Fundamental of Java III (Netbean)</string>
+    <string name="fundamental_of_java__netbean__ek3_string">Fundamental of Java IV (Netbean)</string>
+    <string name="_19_years_old_string">19 years old</string>
+    <string name="upload_education_qualification_string"><u>Upload education qualification</u></string>
+    <string name="xxxxxxxx_gmail_com_string">xxxxxxxx@gmail.com</string>
+
+    <string name="back_string">Back</string>
+    <string name="xxx_string">XXX</string>
+    <string name="age_string">Age</string>
+    <string name="_19_string">19</string>
+    <string name="gender_string">Gender</string>
+    <string name="female_string">Female</string>
+    <string name="lywdd_gmail_com_string">lywdd@gmail.com</string>
+    <string name="________string">......</string>
+    <string name="phone_number_string">Phone Number</string>
+    <string name="__60xx_xxxxxxx_string">+60XX-XXXXXXX</string>
+    <string name="education_qualification_string">Education Qualification</string>
+    <string name="xxx_ek1_string">XXX</string>
+    <string name="save_profile_string">Save Profile</string>
+
+    <string name="upload_string">Upload</string>
+    <string name="spm_certificate__string">SPM Certificate </string>
+    <string name="upload_ek1_string">Upload</string>
+    <string name="pre_university_certificates_string">Pre-University Certificates</string>
+    <string name="__stpm__matriculation__a_levels__foundation_program_certificates__string">(STPM, Matriculation, A-Levels, Foundation Program certificates)</string>
+    <string name="upload_ek2_string">Upload</string>
+    <string name="relevant_certificate_string">Relevant Certificate</string>
+    <string name="__extracurricular__tutoring_jobs__portfolio__string">(Extracurricular, Tutoring Jobs, Portfolio)</string>
+    <string name="upload_ek3_string">Upload</string>
+    <string name="transcript___academic_records_string">Transcript / Academic Records</string>
+    <string name="upload_ek4_string">Upload</string>
+    <string name="achievements_in_competitions_string">Achievements in Competitions</string>
+    <string name="upload_ek5_string">Upload</string>
+    <string name="diploma_or_degree_string">Diploma or Degree</string>
+    <string name="save_change_string">Save Change</string>
+
+    <string name="ViewAhcievement_string"><u>View All</u></string>
+
+
 </resources>

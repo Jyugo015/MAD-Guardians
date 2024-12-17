@@ -30,6 +30,7 @@ public class Appointment {
     @NonNull
     private String userId;
 
+    @NonNull
     @ColumnInfo(defaultValue = "1")
     private int isOnline;
 
@@ -38,6 +39,9 @@ public class Appointment {
         this.counselorAvailabilityId = counselorAvailabilityId;
         this.userId = userId;
         this.isOnline = isOnline;
+    }
+
+    public Appointment() {
     }
 
     // Getter for counselorAvailabilityId
@@ -68,7 +72,7 @@ public class Appointment {
     }
 
     // Setter for isOnline
-    public void setOnline(int online) {
-        isOnline = online;
+    public void setIsOnline(int isOnline) {
+        this.isOnline = isOnline;
     }
 }
