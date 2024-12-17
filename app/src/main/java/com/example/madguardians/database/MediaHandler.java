@@ -329,18 +329,18 @@ public class MediaHandler {
     }
 
     // Display Image
-    private static void displayImage(Context context, String imageUrl, ImageView imageView) {
+    public static void displayImage(Context context, String imageUrl, ImageView imageView) {
         Log.d("Cloudinary URL", imageUrl);
         Glide.with(context).load(imageUrl).into(imageView);
     }
 
     // Display PDF
-    private static void displayPDF(String pdfUrl, WebView webView) {
+    public static void displayPDF(String pdfUrl, WebView webView) {
         Log.d("Cloudinary URL", pdfUrl);
         webView.loadUrl("https://docs.google.com/gview?embedded=true&url=" + pdfUrl);
     }
 
-    private static void playVideo(String videoUrl, ExoPlayer player) {
+    public static void playVideo(String videoUrl, ExoPlayer player) {
 //        mediaItem = MediaItem.fromUri(Uri.parse(toHTTPS("http://res.cloudinary.com/dmgpozfee/video/upload/v1731385187/cgtajcgfoloqc4calfov.mp4")));
         MediaItem mediaItem = MediaItem.fromUri(Uri.parse(videoUrl));
         player.setMediaItem(mediaItem);

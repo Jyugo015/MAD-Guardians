@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- coursepage1 colors -->
+
+	<color name="colorPrimary">#008577</color>
+	<color name="colorPrimaryDark">#00574B</color>
+	<color name="colorAccent">#D81B60</color>
+	<color name="purple_200">#FFBB86FC</color>
+	<color name="purple_500">#FF6200EE</color>
+	<color name="purple_700">#FF3700B3</color>
+	<color name="teal_200">#FF03DAC5</color>
+	<color name="teal_700">#FF018786</color>
+	<color name="black">#FF000000</color>
+	<color name="white">#FFFFFFFF</color>
+
+	<color name="_bg__coursepage1_color">#F7F0F0</color>
+	<color name="bg_color">#FFFFFF</color>
+	<color name="pic_container_color">#EEFFEC</color>
+	<color name="profile_container_color">#2F7A44</color>
+	<color name="fundamental_of_java__netbean__color">#000000</color>
+	<color name="_5_views_color">#A1A1A1</color>
+	<color name="pic_container_ek1_color">#D1F4CD</color>
+	<color name="level1_block_ek1_color">#ffffff</color>
+	<color name="rectangle_10_color">#C5192D</color>
+	<color name="volunteer_color">#FFEEEE</color>
+</resources>

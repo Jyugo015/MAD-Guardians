@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- coursepage1 strings -->
+
+	<string name="app_name">Main</string>
+	<string name="ek_img_content">ExportKit Image</string>
+	<string name="profile_string">Profile</string>
+	<string name="fundamental_of_java__netbean__string">Fundamental of Java (Netbean)</string>
+	<string name="back_string">Back</string>
+	<string name="author_name_string">Author name</string>
+	<string name="description_string">Lorem ipsum dolor sit amet. Et laborum saepe sed exercitationem ullam et veritatis vitae. Ad officia nemo eum fugit Quis vel laborum itaque eum delectus quis aut inventore consectetur quo laudantium esse.</string>
+	<string name="_5_views_string">5 views</string>
+	<string name="computer_science_string">Computer Science</string>
+	<string name="_5_comments_string">5 comments</string>
+	<string name="add_to_favourite_string">Add to favourite</string>
+	<string name="date__17_10_2024_string">Date: 17/10/2024</string>
+	<string name="level_1_string">Level 1</string>
+	<string name="level_2_string">Level 2</string>
+	<string name="level_3_string">Level 3</string>
+	<string name="volunteer_string">Volunteer</string>
+	<string name="home_ek1_string">Home</string>
+	<string name="consult_string">Consult </string>
+	<string name="profile_ek1_string">Profile</string>
+	<string name="courses_string">Courses</string>
+</resources>
