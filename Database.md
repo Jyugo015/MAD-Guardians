@@ -758,7 +758,7 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri imageUri = result.getData().getData();
-                        mediaHandler.handleResult(imageUri, "image");
+                        imageHandler.handleResult(imageUri, "image");
                     }
                 }
         );
@@ -776,7 +776,7 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri videoUri = result.getData().getData();
-                        mediaHandler.handleResult(videoUri, "video");
+                        videoHandler.handleResult(videoUri, "video");
                     }
                 }
         );
@@ -792,7 +792,7 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri pdfUri = result.getData().getData();
-                        mediaHandler.handleResult(pdfUri, "pdf");
+                        pdfHandler.handleResult(pdfUri, "pdf");
                     }
                 }
         );
