@@ -798,7 +798,7 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
         );
         pdfHandler = new MediaHandler(this, pdfPickerLauncher, this);
         // Trigger pdf selection
-        uploadPDF.setOnClickListener(v -> videoHandler.selectVideo());
+        uploadPDF.setOnClickListener(v -> videoHandler.selectPdf());
     }
 
     @Override
