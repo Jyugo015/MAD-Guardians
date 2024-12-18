@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 
@@ -114,13 +115,18 @@ protected void onCreate(Bundle savedInstanceState) {
 
     Toolbar toolbar =findViewById(R.id.TBMainAct);
     setSupportActionBar(toolbar);
+    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
     NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.NavHostFragment);
     NavController navController = navHostFragment.getNavController();
 
     BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_nav);
     NavigationUI.setupWithNavController(bottomNavigationView, navController);
-    AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).setOpenableLayout(findViewById(R.id.DLMain)).build();
+    AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+            R.id.nav_home,
+            R.id.nav_consult,
+            R.id.nav_profile
+    ).setOpenableLayout(findViewById(R.id.DLMain)).build();
     NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
     DrawerLayout drawerLayout = findViewById(R.id.DLMain);
