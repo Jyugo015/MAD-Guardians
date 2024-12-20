@@ -32,16 +32,20 @@ import android.widget.Toast;
 import android.content.SharedPreferences;
 
 import com.example.madguardians.database.AppDatabase;
+import com.example.madguardians.database.Executor;
+import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
 import com.example.madguardians.ui.home.HomeFragment;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class loginpage_activity extends Activity {
 	private EditText emailEditText, passwordEditText;
 	private Button loginButton;
 	private TextView signUpTextView, forgotPasswordTextView;
 	private ImageView passwordToggle;
-
 	private UserDao userDao;
 
 
@@ -108,6 +112,7 @@ public class loginpage_activity extends Activity {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				LocalDate today= LocalDate.now();
 				User user = userDao.getByEmail(email);
 				runOnUiThread(() -> {
 					if (user != null && user.getPassword().equals(password)) {
@@ -116,6 +121,33 @@ public class loginpage_activity extends Activity {
 
 						// Get userId
 						String userId = user.getUserId();
+						int strikeLoginDay = user.getStrikeLoginDays();
+						String lastLoginString = user.getLastLogin();
+
+						// Check if the lastLogin is a special marker or a date
+						if (lastLoginString.equals("SignUpDone")) {
+							strikeLoginDay = 1; // Reset strikeLoginDay for new signups
+						} else {
+							try {
+								// Attempt to parse the last login date
+								LocalDate lastLogin = LocalDate.parse(lastLoginString);
+								if (lastLogin.isEqual(today.minusDays(1))) {
+									strikeLoginDay++; // Increment if logged in yesterday
+								} else if (!lastLogin.isEqual(today)) {
+									strikeLoginDay = 1; // Reset if not logged in yesterday or today
+								}
+							} catch (DateTimeParseException e) {
+								strikeLoginDay = 1; // Reset if the last login date is invalid
+							}
+						}
+
+						user.setStrikeLoginDays(strikeLoginDay);
+						user.setLastLogin(today.toString());
+
+						Executor.executeTask(() -> {
+						// If username does not exist, proceed to insert the user
+						FirestoreManager firestoreManager = new FirestoreManager(AppDatabase.getDatabase(getApplicationContext()));
+						firestoreManager.onInsertUpdate("update","user", user, getApplicationContext());});
 
 						// Get SharedPreferences
 						SharedPreferences sharedPreferences = getSharedPreferences("user_preferences", MODE_PRIVATE);

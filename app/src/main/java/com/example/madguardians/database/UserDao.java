@@ -44,6 +44,7 @@ public interface UserDao {
     @Query("UPDATE user SET strikeLoginDays = :strikeLoginDays WHERE userId = :userId")
     void updateStrikeLoginDays(String userId, int strikeLoginDays);
 
+    // Get the last userId
     @Query("SELECT userId FROM user ORDER BY userId DESC LIMIT 1")
     String getLastUserId();
 
