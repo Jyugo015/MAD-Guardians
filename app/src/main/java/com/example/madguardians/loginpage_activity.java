@@ -147,8 +147,9 @@ public class loginpage_activity extends Activity {
 						Executor.executeTask(() -> {
 						// If username does not exist, proceed to insert the user
 						FirestoreManager firestoreManager = new FirestoreManager(AppDatabase.getDatabase(getApplicationContext()));
-						firestoreManager.onInsertUpdate("update","user", user, getApplicationContext());});
-
+						firestoreManager.onInsertUpdate("update","user", user, getApplicationContext());
+							firestoreManager.onLoginSyncUser(userId);
+						});
 						// Get SharedPreferences
 						SharedPreferences sharedPreferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
 
