@@ -34,10 +34,11 @@ import android.content.SharedPreferences;
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
+import com.example.madguardians.database.Staff;
 import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
 import com.example.madguardians.ui.home.HomeFragment;
-
+import com.example.madguardians.database.StaffDao;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
@@ -47,6 +48,7 @@ public class loginpage_activity extends Activity {
 	private TextView signUpTextView, forgotPasswordTextView;
 	private ImageView passwordToggle;
 	private UserDao userDao;
+	private StaffDao staffDao;
 
 
 	@Override
@@ -60,6 +62,7 @@ public class loginpage_activity extends Activity {
 // Initialize database and DAO
 		AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
 		userDao = db.userDao();
+		staffDao = db.staffDao();
 
 		// Initialize views
 		emailEditText = findViewById(R.id.email);
@@ -114,6 +117,8 @@ public class loginpage_activity extends Activity {
 			public void run() {
 				LocalDate today= LocalDate.now();
 				User user = userDao.getByEmail(email);
+				Staff staff = staffDao.getByEmail(email);
+
 				runOnUiThread(() -> {
 					if (user != null && user.getPassword().equals(password)) {
 						// Login successful
@@ -162,7 +167,24 @@ public class loginpage_activity extends Activity {
 						Intent intent = new Intent(loginpage_activity.this, NavVewBnv.class);
 						startActivity(intent);
 						finish();
-					} else {
+					} else if (staff != null && staff.getPassword().equals(password)) {
+						// Login successful for staff
+						Toast.makeText(loginpage_activity.this, "Login Successful as Staff", Toast.LENGTH_SHORT).show();
+
+
+
+
+						// Save staffId in SharedPreferences
+						SharedPreferences sharedPreferences = getSharedPreferences("staff_preferences", MODE_PRIVATE);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString("staff_id", staff.getStaffId());
+						editor.apply();
+						// Navigate to staff-specific activity
+						Intent intent = new Intent(loginpage_activity.this, NavVewBnvStaff.class);
+						startActivity(intent);
+						finish();
+					}
+					else {
 						// Login failed
 						Toast.makeText(loginpage_activity.this, "Invalid email or password", Toast.LENGTH_SHORT).show();
 					}

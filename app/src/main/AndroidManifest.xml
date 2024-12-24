@@ -36,6 +36,11 @@
             android:label="@string/title_activity_nav_vew_bnv"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".NavVewBnvStaff"
+            android:exported="false"
+            android:label="@string/title_activity_nav_vew_bnv"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
