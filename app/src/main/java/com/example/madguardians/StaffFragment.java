@@ -1,64 +1,136 @@
 package com.example.madguardians;
 
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.fragment.app.Fragment;
 
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link StaffFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
+import com.example.madguardians.database.AppDatabase;
+import com.example.madguardians.database.Staff;
+import com.example.madguardians.database.StaffDao;
+
+
 public class StaffFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Button handlePostButton;
+    private Button handleReportedPostButton;
+    private Button handleReportedCommentButton;
+    private Button handleEducatorButton;
+    private TextView handlePostText;
+    private TextView handleReportedPostText;
+    private TextView handleReportedCommentText;
+    private TextView handleEducatorText;
+    // Get SharedPreferences
+    SharedPreferences sharedPreferences;
+    String staffId;
+    private AppDatabase appDatabase;
+    private StaffDao staffDao;
+    private TextView tvStaffName;
+    private TextView tvEmail,tvUserId;
+    private TextView tvAge;
+
 
     public StaffFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment StaffFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static StaffFragment newInstance(String param1, String param2) {
-        StaffFragment fragment = new StaffFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+
+        View view = inflater.inflate(R.layout.fragment_staff, container, false);
+
+
+        tvStaffName = view.findViewById(R.id.TVUsername);
+        tvEmail = view.findViewById(R.id.TVEmail);
+        tvUserId = view.findViewById(R.id.TVUserId);
+//        tvAge = view.findViewById(R.id.TVAge);
+        // Get SharedPreferences
+        sharedPreferences = requireContext().getSharedPreferences("staff_preferences", getContext().MODE_PRIVATE);
+        staffId = sharedPreferences.getString("staff_id", null); // Retrieve logged-in staff ID
+
+
+        // Initialize database and DAO
+        appDatabase = AppDatabase.getDatabase(getContext());
+        staffDao = appDatabase.staffDao();
+        displayStaffDetails();
+        handlePostText = view.findViewById(R.id.handlePostText);
+        handleReportedPostText = view.findViewById(R.id.handleReportedPostText);
+        handleReportedCommentText = view.findViewById(R.id.handleReportedCommentText);
+        handleEducatorText = view.findViewById(R.id.handleEducatorText);
+        View.OnClickListener OCLHandlePost = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handlePostFragment);
+            }
+        };
+
+
+        View.OnClickListener OCLHandleReportedPost = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleReportedPostFragment);
+            }
+        };
+        View.OnClickListener OCLHandleReportedComment = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleReportedCommentFragment);
+            }
+        };
+        View.OnClickListener OCLHandleEducator = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleEducatorFragment);
+            }
+        };
+//        handlePostButton.setOnClickListener(OCLHandlePost);
+//        handleReportedPostButton.setOnClickListener(OCLHandleReportedPost);
+//        handleReportedCommentButton.setOnClickListener(OCLHandleReportedComment);
+//        handleEducatorButton.setOnClickListener(OCLHandleEducator);
+        handlePostText.setOnClickListener(OCLHandlePost);
+        handleReportedPostText.setOnClickListener(OCLHandleReportedPost);
+        handleReportedCommentText.setOnClickListener(OCLHandleReportedComment);
+        handleEducatorText.setOnClickListener(OCLHandleEducator);
+
+
+        return view;
+    }
+
+
+    private void displayStaffDetails() {
+        if (staffId != null) {
+            new Thread(() -> {
+                Staff staff = staffDao.getById(staffId);
+                if (staff != null) {
+                    Log.d("StaffFragment", "Staff found: " + staff.getName());
+                    requireActivity().runOnUiThread(() -> {
+                        tvStaffName.setText(staff.getName());
+                        tvEmail.setText(staff.getEmail());
+                        tvUserId.setText(staff.getStaffId());
+
+
+                    });
+                } else {
+                    Log.d("StaffFragment", "Staff not found for ID: " + staffId);
+                }
+            }).start();
+        } else {
+            Log.d("StaffFragment", "staffId is null");
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_staff, container, false);
     }
 }

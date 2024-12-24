@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation_staff"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.madguardians.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+<!--    <fragment-->
+<!--        android:id="@+id/nav_volunteer"-->
+<!--        android:name="com.example.madguardians.ui.volunteer.VolunteerFragment"-->
+<!--        android:label="@string/volunteer_string"-->
+<!--        tools:layout="@layout/fragment_volunteer" />-->
+
+    <fragment
+        android:id="@+id/nav_consult"
+        android:name="com.example.madguardians.ui.consult.ConsultFragment"
+        android:label="@string/consult_string"
+        tools:layout="@layout/fragment_consult" />
+
+    <fragment
+        android:id="@+id/nav_staff"
+        android:name="com.example.madguardians.StaffFragment"
+        android:label="Profile Staff"
+        tools:layout="@layout/fragment_staff" >
+        <action
+            android:id="@+id/action_nav_staff_to_handlePostFragment"
+            app:destination="@id/handlePostFragment" />
+        <action
+            android:id="@+id/action_nav_staff_to_handleReportedPostFragment"
+            app:destination="@id/handleReportedPostFragment" />
+        <action
+            android:id="@+id/action_nav_staff_to_handleReportedCommentFragment"
+            app:destination="@id/handleReportedCommentFragment" />
+        <action
+            android:id="@+id/action_nav_staff_to_handleEducatorFragment"
+            app:destination="@id/handleEducatorFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/handlePostFragment"
+        android:name="com.example.madguardians.ui.staff.HandlePostFragment"
+        android:label="Handle Post"
+        tools:layout="@layout/staff_fragment_handle_post_hzw" />
+    <fragment
+        android:id="@+id/handleReportedPostFragment"
+        android:name="com.example.madguardians.ui.staff.HandleReportedPostFragment"
+        android:label="Handle Reported Post"
+        tools:layout="@layout/staff_fragment_handle_reported_post_hzw" />
+    <fragment
+        android:id="@+id/handleReportedCommentFragment"
+        android:name="com.example.madguardians.ui.staff.HandleReportedCommentFragment"
+        android:label="Handle Reported Comment"
+        tools:layout="@layout/staff_fragment_handle_reported_comment_hzw" />
+    <fragment
+        android:id="@+id/handleEducatorFragment"
+        android:name="com.example.madguardians.ui.staff.HandleEducatorFragment"
+        android:label="Handle Educator"
+        tools:layout="@layout/staff_fragment_handle_educator_hzw" />
+</navigation>

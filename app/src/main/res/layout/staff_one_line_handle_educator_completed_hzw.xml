@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/CVOuter"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/custom_red"
+        app:cardCornerRadius="54dp"
+        app:cardElevation="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Inner CardView -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/CVInner"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:layout_gravity="center"
+            android:clipToOutline="true"
+            app:cardCornerRadius="50dp"
+            app:cardElevation="0dp">
+
+            <!-- ImageView inside the Inner CardView -->
+            <ImageView
+                android:id="@+id/IVPost"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tools:srcCompat="@tools:sample/avatars" />
+        </androidx.cardview.widget.CardView>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/TVEducatorName"
+        android:layout_width="250dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="Course Title"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/CVOuter"
+        app:layout_constraintTop_toTopOf="@+id/CVOuter" />
+
+    <TextView
+        android:id="@+id/TVViewProof"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="4dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="@string/view_proof"
+        app:layout_constraintStart_toStartOf="@+id/TVEducatorName"
+        app:layout_constraintTop_toBottomOf="@+id/TVEducatorName" />
+
+    <TextView
+        android:id="@+id/TVRequestEDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Date"
+        android:textSize="8sp"
+        app:layout_constraintEnd_toEndOf="@+id/TVEducatorName"
+        app:layout_constraintTop_toBottomOf="@+id/TVEducatorName" />
+
+    <TextView
+        android:id="@+id/TVStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Approved"
+        android:textSize="8sp"
+        app:layout_constraintEnd_toEndOf="@+id/TVRequestEDate"
+        app:layout_constraintTop_toBottomOf="@+id/TVRequestEDate" />
+
+    <Button
+        android:id="@+id/BTNDelete"
+        android:layout_width="100dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/hzw_green_button_shape"
+        android:fontFamily="@font/inter"
+        android:text="Delete"
+        android:textColor="@color/bg_white_color"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/TVStatus"
+        app:layout_constraintTop_toBottomOf="@+id/TVStatus" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="15dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/BTNDelete" />
+</androidx.constraintlayout.widget.ConstraintLayout>
