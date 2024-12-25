@@ -36,6 +36,9 @@ public interface AchievementDao {
     @Query("SELECT * FROM achievement WHERE badgeId = :badgeId")
     List<Achievement> getByBadgeId(String badgeId);
 
+    @Query("SELECT COUNT(*) FROM achievement WHERE userId = :userId AND badgeId = :badgeId")
+    int countUserAchievement(String userId, String badgeId);
+
     // Delete a specific achievement
     @Delete
     void delete(Achievement achievement);

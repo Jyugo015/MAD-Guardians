@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_edit_profile"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".EditProfileFragment">
+
+
+    <View
+        android:id="@+id/bg"
+        android:layout_width="393dp"
+        android:layout_height="851dp"
+        android:layout_marginTop="0dp"
+        android:background="@drawable/bg_white_shape"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <ImageView
+        android:id="@+id/profile"
+        android:layout_width="103dp"
+        android:layout_height="102dp"
+        android:layout_marginStart="232dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/circular_border"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_profile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/email"
+        android:layout_width="113dp"
+        android:layout_height="43.62dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="184dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/email_string"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/mail"
+        android:layout_width="324dp"
+        android:layout_height="74dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="196dp"
+        android:fontFamily="@font/inter"
+        android:hint="@string/lywdd_gmail_com_string"
+        android:inputType="textEmailAddress"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/phone_number"
+        android:layout_width="203dp"
+        android:layout_height="40.46dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="300dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/phone_number_string"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/ETnumber"
+        android:layout_width="316dp"
+        android:layout_height="77dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="316dp"
+        android:fontFamily="@font/inter"
+        android:hint="@string/__60xx_xxxxxxx_string"
+        android:inputType="phone"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/education_qualification"
+        android:layout_width="272dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="416dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/education_qualification_string"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/verifiedContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="32dp"
+        android:padding="3dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/education_qualification">
+        <!-- dynamic add TextView-->
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/save_profile"
+        android:layout_width="283dp"
+        android:layout_height="54dp"
+        android:layout_marginTop="592dp"
+        android:background="@drawable/save_profile_button"
+        android:fontFamily="@font/inter"
+        android:text="@string/save_profile_string"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="113dp"
+        android:layout_height="41.03dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="72dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/name_string"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/ETname"
+        android:layout_width="304dp"
+        android:layout_height="73dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="88dp"
+        android:fontFamily="@font/inter"
+        android:hint="@string/name_string"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

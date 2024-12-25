@@ -31,7 +31,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.content.SharedPreferences;
 
+import com.example.madguardians.database.Achievement;
+import com.example.madguardians.database.AchievementDao;
 import com.example.madguardians.database.AppDatabase;
+import com.example.madguardians.database.Badge;
+import com.example.madguardians.database.BadgeDao;
 import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.Staff;
@@ -49,6 +53,9 @@ public class loginpage_activity extends Activity {
 	private ImageView passwordToggle;
 	private UserDao userDao;
 	private StaffDao staffDao;
+	private BadgeDao badgeDao;
+	private AchievementDao achievementDao;
+	private AppDatabase db;
 
 
 	@Override
@@ -60,9 +67,10 @@ public class loginpage_activity extends Activity {
 //		configureloginButton();
 
 // Initialize database and DAO
-		AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+		db = AppDatabase.getDatabase(getApplicationContext());
 		userDao = db.userDao();
 		staffDao = db.staffDao();
+		badgeDao = db.badgeDao();
 
 		// Initialize views
 		emailEditText = findViewById(R.id.email);
@@ -155,6 +163,7 @@ public class loginpage_activity extends Activity {
 						firestoreManager.onInsertUpdate("update","user", user, getApplicationContext());
 							firestoreManager.onLoginSyncUser(userId);
 						});
+						checkAndAssignAchievement(userId);
 						// Get SharedPreferences
 						SharedPreferences sharedPreferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
 
@@ -201,6 +210,37 @@ public class loginpage_activity extends Activity {
 			toggleIcon.setImageResource(R.drawable.icon_password_seen); // Use your hidden icon
 		}
 		editText.setSelection(editText.getText().length()); // Move cursor to end
+	}
+	public void checkAndAssignAchievement(String userId) {
+		Executor.executeTask(() -> {
+			if (achievementDao == null) {
+				achievementDao = AppDatabase.getDatabase(getApplicationContext()).achievementDao();
+			}
+			User user = userDao.getById(userId);
+			if (user == null) {
+				throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
+			}
+
+			Badge badge = badgeDao.getById("B0001");
+			if (badge == null) {
+				throw new IllegalArgumentException("Badge with ID B0001 does not exist.");
+			}
+			if (user != null && user.getStrikeLoginDays() >= 10) {
+				boolean hasAchievement = achievementDao.countUserAchievement(userId, "B0001") > 0;
+				if (!hasAchievement) {
+					Achievement achievement = new Achievement();
+					achievement.setBadgeId("B0001");
+					achievement.setUserId(userId);
+					FirestoreManager firestoreManager = new FirestoreManager(AppDatabase.getDatabase(getApplicationContext()));
+					firestoreManager.onInsertUpdate("insert","achievement", achievement, getApplicationContext());
+					System.out.println("Achievement B0001 added to user " + userId);
+				} else {
+					System.out.println("User " + userId + " already has achievement B0001");
+				}
+			} else {
+				System.out.println("User " + userId + " does not meet the criteria for achievement B0001");
+			}
+		});
 	}
 	private void configureSignUpButton() {
 		TextView TVsign_up = (TextView) findViewById(R.id.TVsign_up);
