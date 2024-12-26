@@ -55,13 +55,13 @@
     <fragment
         android:id="@+id/chatFragment"
         android:name="com.example.madguardians.ui.consult.ChatFragment"
-        android:label="fragment_chat"
+        android:label="Let's Chat"
         tools:layout="@layout/fragment_chat" />
     <fragment
         android:id="@+id/appointmentFragment"
         android:name="com.example.madguardians.ui.consult.AppointmentFragment"
-        android:label="fragment_appointment"
-        tools:layout="@layout/fragment_appointment" >
+        android:label="Appointment Overview"
+        tools:layout="@layout/fragment_appointment">
         <action
             android:id="@+id/action_appointmentFragment_to_appointmentSetFragment"
             app:destination="@id/appointmentSetFragment" />
@@ -80,7 +80,7 @@
     <fragment
         android:id="@+id/appointmentSetFragment"
         android:name="com.example.madguardians.ui.consult.AppointmentSetFragment"
-        android:label="Appointment Setting"
+        android:label="Available Time Selection"
         tools:layout="@layout/fragment_appointment_set" />
     <fragment
         android:id="@+id/appointmentBookingFragment"
@@ -90,28 +90,11 @@
     <fragment
         android:id="@+id/chatHistoryFragment"
         android:name="com.example.madguardians.ui.consult.ChatHistoryFragment"
-        android:label="ChatHistoryFragment" >
+        android:label="Chat History">
         <action
             android:id="@+id/action_chatHistoryFragment_to_chatFragment"
             app:destination="@id/chatFragment" />
     </fragment>
-
-    <fragment
-        tools:layout="@layout/fragment_profile">
-        <action
-            android:id="@+id/action_nav_profile_to_educationQualificationFragment"
-            app:destination="@id/educationQualificationFragment" />
-        <action
-            android:id="@+id/action_nav_profile_to_collectionFragment"
-            app:destination="@id/collectionFragment" />
-        <action
-            android:id="@+id/action_nav_profile_to_editProfileFragment"
-            app:destination="@id/editProfileFragment" />
-        <action
-            android:id="@+id/action_nav_profile_to_notificationFragment"
-            app:destination="@id/notificationFragment" />
-    </fragment>
-
 
     <fragment
         android:id="@+id/educationQualificationFragment"

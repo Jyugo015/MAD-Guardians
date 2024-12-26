@@ -50,6 +50,7 @@ public class AppointmentScheduleAdapter extends RecyclerView.Adapter<Appointment
             holder.timeSlot.setText(timeSlot);
             holder.counselorName.setText(cName);
 
+
             holder.rejectButton.setOnClickListener(v -> rejectAppointment(appointment));
 
         }
@@ -61,7 +62,7 @@ public class AppointmentScheduleAdapter extends RecyclerView.Adapter<Appointment
 
         public class AppointmentViewHolder extends RecyclerView.ViewHolder {
             TextView userName, userEmail, date, timeSlot, counselorName;
-            Button approveButton, rejectButton;
+            Button rejectButton;
 
             public AppointmentViewHolder(View itemView) {
                 super(itemView);
@@ -76,18 +77,22 @@ public class AppointmentScheduleAdapter extends RecyclerView.Adapter<Appointment
 
 
 
-        private void rejectAppointment(AppointmentModel appointment) {
-            FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-            firestore.collection("appointments")
-                    .document(appointment.getDate())
-                    .collection(appointment.getCounselorName())
-                    .document(appointment.getTimeSlot())
-                    .delete()
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(context, "Appointment canceled", Toast.LENGTH_SHORT).show();
-                        appointments.remove(appointment);
-                        notifyDataSetChanged();
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(context, "Failed to cancel appointment", Toast.LENGTH_SHORT).show());
-        }
+    private void rejectAppointment(AppointmentModel appointment) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection("appointments")
+                .document(appointment.getDate())
+                .collection(appointment.getCounselorName())
+                .document(appointment.getTimeSlot())
+                .update("userName",null, "bookStatus", false)
+                .addOnSuccessListener(aVoid -> {
+                    appointment.setUserName(null);
+                    appointment.setBookStatus(false);
+                    Toast.makeText(context, "Appointment canceled", Toast.LENGTH_SHORT).show();
+
+                    // Update RecyclerView without removing the slot
+                    int index = appointments.indexOf(appointment);
+                    notifyItemChanged(index);
+                })
+                .addOnFailureListener(e -> Toast.makeText(context, "Failed to cancel appointment", Toast.LENGTH_SHORT).show());
+    }
     }

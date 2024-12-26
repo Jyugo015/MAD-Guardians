@@ -50,7 +50,6 @@ public class PastAppointmentsFragment extends Fragment {
         recyclerView.setAdapter(appointmentAdapter);
 
         String userID = FirebaseUtil.currentUserId(getContext());
-
         FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 userName = task.getResult();
@@ -68,11 +67,15 @@ public class PastAppointmentsFragment extends Fragment {
         List<String> dateList = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
 
+        // Generate 14 past dates
         for (int i = -14; i <= 0; i++) {
             Calendar tempCalendar = (Calendar) calendar.clone();
             tempCalendar.add(Calendar.DAY_OF_YEAR, i);
             dateList.add(getFormattedDate(tempCalendar.getTime()));
         }
+
+        // counselor list
+        String[] counselors = {"Test Counselor 1", "Mr. John Lee", "Ms. Aisha Rahim", "Dr. Emily Wong", "Mr. Michael Tan"};
 
         isCounselor(new FirebaseUtil.SimpleCallback() {
             @Override
@@ -81,7 +84,9 @@ public class PastAppointmentsFragment extends Fragment {
                     if (isCounselor) {
                         fetchAppointmentsSchedule(date);
                     } else {
-                        fetchUserAppointments(date);
+                        for (String counselor : counselors) {
+                            fetchUserAppointments(date, counselor);
+                        }
                     }
                 }
             }
@@ -90,7 +95,7 @@ public class PastAppointmentsFragment extends Fragment {
             public void onError(Exception e) {
                 Log.e("Error", "Failed to check if user is counselor", e);
             }
-        },getActivity());
+        }, getActivity());
     }
 
     private void fetchAppointmentsSchedule(String date) {
@@ -98,8 +103,8 @@ public class PastAppointmentsFragment extends Fragment {
 
         firestore.collection("appointments")
                 .document(date)
-                .collection(counselorName)
-                .whereEqualTo("counselorName", counselorName)
+                .collection(userName)
+                .whereEqualTo("counselorName", userName)
                 .whereEqualTo("bookStatus", true)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -107,7 +112,7 @@ public class PastAppointmentsFragment extends Fragment {
                         for (DocumentSnapshot document : task.getResult()) {
                             AppointmentModel appointment = document.toObject(AppointmentModel.class);
                             if (appointment != null) {
-                                populateAppointmentDetails(appointment, document, date);
+                                populateAppointmentDetails(appointment, document, date, userName);
                             }
                         }
                     }
@@ -115,7 +120,7 @@ public class PastAppointmentsFragment extends Fragment {
                 .addOnFailureListener(e -> Log.e("Error", "Failed to fetch schedule: " + e.getMessage()));
     }
 
-    private void fetchUserAppointments(String date) {
+    private void fetchUserAppointments(String date, String counselorName) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
         firestore.collection("appointments")
@@ -128,7 +133,7 @@ public class PastAppointmentsFragment extends Fragment {
                         for (DocumentSnapshot document : task.getResult()) {
                             AppointmentModel appointment = document.toObject(AppointmentModel.class);
                             if (appointment != null) {
-                                populateAppointmentDetails(appointment, document, date);
+                                populateAppointmentDetails(appointment, document, date, counselorName);
                             }
                         }
                     }
@@ -136,7 +141,7 @@ public class PastAppointmentsFragment extends Fragment {
                 .addOnFailureListener(e -> Log.e("Error", "Failed to fetch user appointments: " + e.getMessage()));
     }
 
-    private void populateAppointmentDetails(AppointmentModel appointment, DocumentSnapshot document, String date) {
+    private void populateAppointmentDetails(AppointmentModel appointment, DocumentSnapshot document, String date, String counselorName) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
         firestore.collection("user")

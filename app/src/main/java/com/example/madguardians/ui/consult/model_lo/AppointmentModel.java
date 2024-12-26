@@ -9,6 +9,7 @@ public class AppointmentModel {
     private String timeSlot;
     private String venue;
     private String counselorName;
+    private boolean bookStatus;
 
     // Getters and setters
     public String getUserName() {
@@ -61,6 +62,14 @@ public class AppointmentModel {
 
     public String getCounselorName() {
         return counselorName;
+    }
+
+    public boolean isBookStatus() {
+        return bookStatus;
+    }
+
+    public void setBookStatus(boolean bookStatus) {
+        this.bookStatus = bookStatus;
     }
 
     public void setCounselorName(String counselorName) {

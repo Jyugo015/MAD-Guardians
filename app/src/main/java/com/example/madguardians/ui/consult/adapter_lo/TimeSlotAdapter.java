@@ -1,5 +1,7 @@
 package com.example.madguardians.ui.consult.adapter_lo;
 
+import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import com.example.madguardians.R;
 import com.example.madguardians.ui.consult.model_lo.TimeSlotModel;
 import com.example.madguardians.ui.consult.model_lo.UserModel;
 import com.example.madguardians.ui.consult.utils_lo.FirebaseUtil;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,22 +50,34 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TimeSlotModel timeSlot = timeSlots.get(position);
         holder.bookButton.setText(timeSlot.getTime());
+
         boolean isSelected = buttonStates.get(position);
-
-        // Change the button's background color based on selection state
         int color = isSelected
-                ? holder.itemView.getContext().getResources().getColor(R.color.colorAccent)
-                : holder.itemView.getContext().getResources().getColor(R.color.colorPrimary);
-        holder.bookButton.setBackgroundColor(color);
+                ? ContextCompat.getColor(holder.itemView.getContext(), R.color.colorAccent)
+                : ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary);
 
-        // Set click listener to toggle selection state
+        // Apply color
+        holder.bookButton.setBackground(new ColorDrawable(color));
+
+        // Add logs to confirm
+        Log.d("ButtonColor", "Applying color: " + color + " to position: " + position);
+
+        // Set click listener
         holder.bookButton.setOnClickListener(v -> {
             boolean newState = !buttonStates.get(position);
             buttonStates.set(position, newState);
-            listener.onTimeSlotSelected(timeSlot, newState);
-            notifyItemChanged(position); // Update the specific item
+
+            if (newState) {
+                listener.onTimeSlotSelected(timeSlot, true);
+            } else {
+                listener.onTimeSlotSelected(timeSlot, false);
+            }
+
+            notifyItemChanged(position); // Notify the change for that item
         });
     }
+
+
 
 
 

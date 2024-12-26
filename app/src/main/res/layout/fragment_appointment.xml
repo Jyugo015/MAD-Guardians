@@ -11,42 +11,15 @@
     tools:context=".AppointmentPage">
 
     <!-- Top Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/top_bar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:background="#FFFFFF"
-        android:elevation="4dp"
-        android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/top_bar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Appointment Schedule"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Calendar View -->
     <CalendarView
         android:id="@+id/calendarView"
         android:layout_width="380dp"
         android:layout_height="288dp"
-        android:layout_marginTop="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar" />
+        tools2:layout_editor_absoluteY="48dp" />
 
 
     <Button

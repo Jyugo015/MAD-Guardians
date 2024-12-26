@@ -35,11 +35,12 @@ public class AppointmentBookingFragment extends Fragment {
             View view = inflater.inflate(R.layout.fragment_appointment_booking , container, false);
             RecyclerView recyclerView = view.findViewById(R.id.booking_recycler_view);
 
-
+            long todayInMillis = System.currentTimeMillis();
 
 
             List<CounselorModel> counselors = new ArrayList<>();
             calanderView = view.findViewById(R.id.calendarView);
+            calanderView.setMinDate(todayInMillis);
             calanderView.setOnDateChangeListener((calanderView, year, month, dayOfMonth)->{
                 selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
                 counselors.add(new CounselorModel("Test Counselor 1", "Mental Health Specialist", R.drawable.st_counselor, "30 years experience","T7qJoeJsvAXlAHjUXNUB",true));

@@ -51,12 +51,12 @@ public class ConsultFragment extends Fragment {
 //        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 //        Map<String, Object> counselorData = new HashMap<>();
 //        counselorData.put("online", true);
-//        counselorData.put("skill", "Mental Health Specialist");
-//        counselorData.put("name", "Test Counselor 1");
-//        counselorData.put("experience", "30 years experience");
+//        counselorData.put("skill", "Career Guidance Counselor");
+//        counselorData.put("name", "Mr. John Lee");
+//        counselorData.put("experience", "8 years experience");
 //
 //        firestore.collection("counselors")
-//                .document("0010")
+//                .document("U0018")
 //                .set(counselorData, SetOptions.merge()) // Ensures it updates or adds missing fields
 //                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Document updated successfully!"))
 //                .addOnFailureListener(e -> Log.e("Firestore", "Error updating document", e));
@@ -70,10 +70,11 @@ public class ConsultFragment extends Fragment {
         });
 
         binding.btnSeekAdvice.setOnClickListener(v -> {
-            chatResponse.setText("SEEK ADVICE FROM COUNSELOR");
+            chatResponse.setText("Seek Advice From Counselor");
             chatResponse.setVisibility(View.VISIBLE);
+            directingResponse.setText("Searching counselor....");
             new Handler().postDelayed(()->{
-                directingResponse.setText("Searching counselor....");
+
             },1000);
 
 
@@ -99,7 +100,7 @@ public class ConsultFragment extends Fragment {
         binding.btnMakeAppointment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                chatResponse.setText("MAKE AN APPOINTMENT");
+                chatResponse.setText("Make an Appointment");
                 chatResponse.setVisibility(View.VISIBLE);
                 new Handler().postDelayed(()->{
                     directingResponse.setText("Redirecting to appointment page");
