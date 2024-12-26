@@ -47,7 +47,9 @@ public class forgetpasswordpage extends AppCompatActivity {
 
             // Run the email existence check on a background thread
             Executor.executeTask(() -> {
-                boolean emailExists = userDao.emailExists(email);
+                boolean emailExists = false;
+
+//                        userDao.emailExists(email);
 
                 // Run UI code on the main thread
                 runOnUiThread(() -> {

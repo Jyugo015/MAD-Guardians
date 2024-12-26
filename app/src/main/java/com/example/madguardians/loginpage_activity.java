@@ -23,6 +23,7 @@ import android.os.Bundle;
 
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -43,8 +44,13 @@ import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
 import com.example.madguardians.ui.home.HomeFragment;
 import com.example.madguardians.database.StaffDao;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class loginpage_activity extends Activity {
 	private EditText emailEditText, passwordEditText;

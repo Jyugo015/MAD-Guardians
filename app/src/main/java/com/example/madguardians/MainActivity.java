@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -37,7 +38,13 @@ public class MainActivity extends AppCompatActivity {
         configureLoginInButton();
 
         // Initialize the database
-        database = AppDatabase.getDatabase(this);
+        try {
+            database = AppDatabase.getDatabase(this);
+            Log.d("MainActivity", "Database initialized successfully.");
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error initializing database", e);
+        }
+
         //Initilaize FirestoreManager
         firestoreManager = new FirestoreManager (database);
 
