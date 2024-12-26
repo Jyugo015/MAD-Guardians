@@ -47,16 +47,21 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TimeSlotModel timeSlot = timeSlots.get(position);
         holder.bookButton.setText(timeSlot.getTime());
-        holder.bookButton.setSelected(buttonStates.get(position));
+        boolean isSelected = buttonStates.get(position);
 
+        // Change the button's background color based on selection state
+        int color = isSelected
+                ? holder.itemView.getContext().getResources().getColor(R.color.colorAccent)
+                : holder.itemView.getContext().getResources().getColor(R.color.colorPrimary);
+        holder.bookButton.setBackgroundColor(color);
 
+        // Set click listener to toggle selection state
         holder.bookButton.setOnClickListener(v -> {
-            boolean isSelected = !buttonStates.get(position);
-            buttonStates.set(position, isSelected);
-            holder.bookButton.setSelected(isSelected);
-            listener.onTimeSlotSelected(timeSlot, isSelected);
+            boolean newState = !buttonStates.get(position);
+            buttonStates.set(position, newState);
+            listener.onTimeSlotSelected(timeSlot, newState);
+            notifyItemChanged(position); // Update the specific item
         });
-
     }
 
 

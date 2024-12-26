@@ -1,19 +1,268 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profileFragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ProfileFragment">
+    android:layout_height="wrap_content">
 
-    <!-- TODO: Update blank fragment layout -->
+    <!-- Background View -->
+
+
+    <!-- Green View -->
+    <View
+        android:id="@+id/bg"
+        android:layout_width="393dp"
+        android:layout_height="851dp"
+        android:layout_marginStart="0dp"
+        android:background="@drawable/bg_white_shape"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/green"
+        android:layout_width="397dp"
+        android:layout_height="194dp"
+        android:background="@drawable/green"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Username Text -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/profile_string"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:layout_gravity="center"
-        android:gravity="center"/>
+        android:id="@+id/username"
+        android:layout_width="163dp"
+        android:layout_height="42.27dp"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="40dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/hi__username_string"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</FrameLayout>
+    <!-- Profile View -->
+    <ImageView
+        android:id="@+id/profile"
+        android:layout_width="87.21dp"
+        android:layout_height="88.13dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/circular_border"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_profile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!-- Flying Mortarboard Image -->
+    <ImageView
+        android:id="@+id/flying_mortarboard"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="35dp"
+        android:contentDescription="flying_mortarboard"
+        android:src="@drawable/flying_mortarboard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Edit Image -->
+    <ImageView
+        android:id="@+id/edit"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="352dp"
+        android:layout_marginTop="104dp"
+        android:contentDescription="vector_ek1"
+        android:src="@drawable/edit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/collection"
+        android:layout_width="18dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="320dp"
+        android:layout_marginTop="104dp"
+        android:contentDescription="vector"
+        android:src="@drawable/collection"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Achievement Text -->
+
+    <!-- Achievement Horizontal ScrollView with dynamically added achievements -->
+
+    <TextView
+        android:id="@+id/achievement"
+        android:layout_width="203dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="452dp"
+        android:fontFamily="@font/inter"
+        android:gravity="center_vertical"
+        android:text="@string/achievement_string"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+<!--    <HorizontalScrollView-->
+<!--        android:id="@+id/horizontalScrollView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="0dp"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/achievement">-->
+
+<!--        <LinearLayout-->
+<!--            android:id="@+id/achievementContainer"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:paddingEnd="16dp">-->
+<!--            &lt;!&ndash; Dynamically added achievements will go here &ndash;&gt;-->
+<!--        </LinearLayout>-->
+<!--    </HorizontalScrollView>-->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/achievementRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievement"
+        android:scrollbars="horizontal"
+        android:orientation="horizontal" />
+
+    <!-- View All achievements -->
+
+    <TextView
+        android:id="@+id/viewAllAchievement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="76dp"
+        android:layout_marginTop="460dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/ViewAhcievement_string"
+        android:textColor="#00897B"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/achievement"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/view_learning_history"
+        android:layout_width="215dp"
+        android:layout_height="47dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="224dp"
+        android:fontFamily="@font/inter"
+        android:gravity="center_vertical"
+        android:text="@string/view_learning_history_string"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- View All achievements -->
+
+    <!-- Learning History Horizontal ScrollView with dynamically added learning items -->
+    <TextView
+        android:id="@+id/viewAllHistory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="232dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/ViewAhcievement_string"
+        android:textColor="#00897B"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/view_learning_history"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <HorizontalScrollView
+        android:id="@+id/learningHistoryScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_learning_history">
+
+        <LinearLayout
+            android:id="@+id/learningHistoryContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingEnd="16dp">
+            <!-- Dynamically added learning items will go here -->
+        </LinearLayout>
+    </HorizontalScrollView>
+
+
+    <TextView
+        android:id="@+id/noHistoryMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="76dp"
+        android:text="No history available"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_learning_history" />
+
+    <TextView
+        android:id="@+id/upload_education_qualification"
+        android:layout_width="233dp"
+        android:layout_height="31dp"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="144dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/upload_education_qualification_string"
+        android:textColor="@color/upload_education_qualification_color"
+        android:textSize="14sp"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/gmail"
+        android:layout_width="188dp"
+        android:layout_height="31dp"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="72dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/xxxxxxxx_gmail_com_string"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/notification"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="340dp"
+        android:layout_marginTop="40dp"
+        android:contentDescription="vector_ek4"
+        android:src="@drawable/notification"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/noAchievementsMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No achievements yet"
+        android:textSize="20dp"
+        app:layout_constraintBottom_toBottomOf="@+id/bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/achievement"
+        app:layout_constraintVertical_bias="0.162" />
+</androidx.constraintlayout.widget.ConstraintLayout>

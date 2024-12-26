@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/IVPost"
+        android:layout_width="146dp"
+        android:layout_height="142dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/TVCourseTitle"
+        android:layout_width="221dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="Course Title"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/IVPost"
+        app:layout_constraintTop_toTopOf="@+id/IVPost" />
+
+    <TextView
+        android:id="@+id/TVAuthorName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Author Name"
+        app:layout_constraintStart_toStartOf="@+id/TVCourseTitle"
+        app:layout_constraintTop_toBottomOf="@+id/TVCourseTitle" />
+
+    <TextView
+        android:id="@+id/TVDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date"
+        android:textSize="8sp"
+        app:layout_constraintEnd_toEndOf="@+id/TVCourseTitle"
+        app:layout_constraintTop_toBottomOf="@+id/TVAuthorName" />
+
+    <TextView
+        android:id="@+id/TVDateTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:text="Date:"
+        android:textSize="8sp"
+        app:layout_constraintEnd_toStartOf="@+id/TVDate"
+        app:layout_constraintTop_toTopOf="@+id/TVDate" />
+
+    <TextView
+        android:id="@+id/TVStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Pending"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/TVDate"
+        app:layout_constraintTop_toBottomOf="@+id/TVDate" />
+
+    <Button
+        android:id="@+id/BTNReject"
+        android:layout_width="100dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:text="Reject"
+        android:fontFamily="@font/inter"
+        android:textStyle="bold"
+        android:textColor="@color/bg_white_color"
+        android:background="@drawable/hzw_green_button_shape"
+        app:layout_constraintBottom_toBottomOf="@+id/IVPost"
+        app:layout_constraintStart_toStartOf="@+id/TVAuthorName"
+        app:layout_constraintTop_toBottomOf="@+id/TVStatus" />
+
+    <Button
+        android:id="@+id/BTNApprove"
+        android:layout_width="100dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="8dp"
+        android:text="Approve"
+        android:fontFamily="@font/inter"
+        android:textStyle="bold"
+        android:textColor="@color/bg_white_color"
+        android:background="@drawable/hzw_green_button_shape"
+        app:layout_constraintBottom_toBottomOf="@+id/IVPost"
+        app:layout_constraintEnd_toEndOf="@+id/TVStatus"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/BTNReject"
+        app:layout_constraintTop_toBottomOf="@+id/TVStatus"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/IVPost" />
+</androidx.constraintlayout.widget.ConstraintLayout>

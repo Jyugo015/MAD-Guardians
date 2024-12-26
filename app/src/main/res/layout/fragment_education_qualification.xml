@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragmentEduQualify"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <View
+        android:id="@+id/bg"
+        android:layout_width="393dp"
+        android:layout_height="851dp"
+        android:background="@drawable/bg_white_shape"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/upload"
+        android:layout_width="274dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/cert_upload_button"
+        android:fontFamily="@font/inter"
+        android:gravity="center"
+        android:text="@string/upload_string"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/displayPdf" />
+
+    <Button
+        android:id="@+id/chooseDomain"
+        android:layout_width="274dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="3dp"
+        android:background="@drawable/cert_upload_button"
+        android:fontFamily="@font/inter"
+        android:gravity="center"
+        android:text="@string/upload_string"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/domainRelated" />
+
+
+    <TextView
+        android:id="@+id/spm_certificate_"
+        android:layout_width="214.93dp"
+        android:layout_height="41.03dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/inter"
+        android:text="Upload Resume"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/domainRelated"
+        android:layout_width="325dp"
+        android:layout_height="37.68dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="160dp"
+        android:fontFamily="@font/inter"
+        android:text="Domain related"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/upload" />
+
+    <TextView
+        android:id="@+id/__stpm__matriculation__a_levels__foundation_program_certificates_"
+        android:layout_width="324dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="28dp"
+        android:fontFamily="@font/inter"
+        android:text="Please make sure your include your certification as an appendix for prove"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spm_certificate_" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/group_12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <TextView
+        android:id="@+id/diploma_or_degree"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:fontFamily="@font/inter"
+        android:text="(.pdf only)"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/__stpm__matriculation__a_levels__foundation_program_certificates_" />
+
+    <Button
+        android:id="@+id/save_change"
+        android:layout_width="296dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="648dp"
+        android:background="@drawable/save_profile_button"
+        android:fontFamily="@font/inter"
+        android:gravity="center"
+        android:text="@string/save_change_string"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.577"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <WebView
+        android:id="@+id/displayPdf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="46dp"
+        app:layout_constraintBottom_toTopOf="@+id/upload"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.095"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/diploma_or_degree"
+        app:layout_constraintVertical_bias="0.0" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

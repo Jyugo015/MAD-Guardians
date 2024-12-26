@@ -31,18 +31,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.content.SharedPreferences;
 
+import com.example.madguardians.database.Achievement;
+import com.example.madguardians.database.AchievementDao;
 import com.example.madguardians.database.AppDatabase;
+import com.example.madguardians.database.Badge;
+import com.example.madguardians.database.BadgeDao;
+import com.example.madguardians.database.Executor;
+import com.example.madguardians.database.FirestoreManager;
+import com.example.madguardians.database.Staff;
 import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
 import com.example.madguardians.ui.home.HomeFragment;
+import com.example.madguardians.database.StaffDao;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class loginpage_activity extends Activity {
 	private EditText emailEditText, passwordEditText;
 	private Button loginButton;
 	private TextView signUpTextView, forgotPasswordTextView;
 	private ImageView passwordToggle;
-
 	private UserDao userDao;
+	private StaffDao staffDao;
+	private BadgeDao badgeDao;
+	private AchievementDao achievementDao;
+	private AppDatabase db;
 
 
 	@Override
@@ -54,8 +67,10 @@ public class loginpage_activity extends Activity {
 //		configureloginButton();
 
 // Initialize database and DAO
-		AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+		db = AppDatabase.getDatabase(getApplicationContext());
 		userDao = db.userDao();
+		staffDao = db.staffDao();
+		badgeDao = db.badgeDao();
 
 		// Initialize views
 		emailEditText = findViewById(R.id.email);
@@ -108,7 +123,10 @@ public class loginpage_activity extends Activity {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				LocalDate today= LocalDate.now();
 				User user = userDao.getByEmail(email);
+				Staff staff = staffDao.getByEmail(email);
+
 				runOnUiThread(() -> {
 					if (user != null && user.getPassword().equals(password)) {
 						// Login successful
@@ -116,7 +134,36 @@ public class loginpage_activity extends Activity {
 
 						// Get userId
 						String userId = user.getUserId();
+						int strikeLoginDay = user.getStrikeLoginDays();
+						String lastLoginString = user.getLastLogin();
 
+						// Check if the lastLogin is a special marker or a date
+						if (lastLoginString.equals("SignUpDone")) {
+							strikeLoginDay = 1; // Reset strikeLoginDay for new signups
+						} else {
+							try {
+								// Attempt to parse the last login date
+								LocalDate lastLogin = LocalDate.parse(lastLoginString);
+								if (lastLogin.isEqual(today.minusDays(1))) {
+									strikeLoginDay++; // Increment if logged in yesterday
+								} else if (!lastLogin.isEqual(today)) {
+									strikeLoginDay = 1; // Reset if not logged in yesterday or today
+								}
+							} catch (DateTimeParseException e) {
+								strikeLoginDay = 1; // Reset if the last login date is invalid
+							}
+						}
+
+						user.setStrikeLoginDays(strikeLoginDay);
+						user.setLastLogin(today.toString());
+
+						Executor.executeTask(() -> {
+						// If username does not exist, proceed to insert the user
+						FirestoreManager firestoreManager = new FirestoreManager(AppDatabase.getDatabase(getApplicationContext()));
+						firestoreManager.onInsertUpdate("update","user", user, getApplicationContext());
+							firestoreManager.onLoginSyncUser(userId);
+						});
+						checkAndAssignAchievement(userId);
 						// Get SharedPreferences
 						SharedPreferences sharedPreferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
 
@@ -129,7 +176,24 @@ public class loginpage_activity extends Activity {
 						Intent intent = new Intent(loginpage_activity.this, NavVewBnv.class);
 						startActivity(intent);
 						finish();
-					} else {
+					} else if (staff != null && staff.getPassword().equals(password)) {
+						// Login successful for staff
+						Toast.makeText(loginpage_activity.this, "Login Successful as Staff", Toast.LENGTH_SHORT).show();
+
+
+
+
+						// Save staffId in SharedPreferences
+						SharedPreferences sharedPreferences = getSharedPreferences("staff_preferences", MODE_PRIVATE);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString("staff_id", staff.getStaffId());
+						editor.apply();
+						// Navigate to staff-specific activity
+						Intent intent = new Intent(loginpage_activity.this, NavVewBnvStaff.class);
+						startActivity(intent);
+						finish();
+					}
+					else {
 						// Login failed
 						Toast.makeText(loginpage_activity.this, "Invalid email or password", Toast.LENGTH_SHORT).show();
 					}
@@ -146,6 +210,37 @@ public class loginpage_activity extends Activity {
 			toggleIcon.setImageResource(R.drawable.icon_password_seen); // Use your hidden icon
 		}
 		editText.setSelection(editText.getText().length()); // Move cursor to end
+	}
+	public void checkAndAssignAchievement(String userId) {
+		Executor.executeTask(() -> {
+			if (achievementDao == null) {
+				achievementDao = AppDatabase.getDatabase(getApplicationContext()).achievementDao();
+			}
+			User user = userDao.getById(userId);
+			if (user == null) {
+				throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
+			}
+
+			Badge badge = badgeDao.getById("B0001");
+			if (badge == null) {
+				throw new IllegalArgumentException("Badge with ID B0001 does not exist.");
+			}
+			if (user != null && user.getStrikeLoginDays() >= 10) {
+				boolean hasAchievement = achievementDao.countUserAchievement(userId, "B0001") > 0;
+				if (!hasAchievement) {
+					Achievement achievement = new Achievement();
+					achievement.setBadgeId("B0001");
+					achievement.setUserId(userId);
+					FirestoreManager firestoreManager = new FirestoreManager(AppDatabase.getDatabase(getApplicationContext()));
+					firestoreManager.onInsertUpdate("insert","achievement", achievement, getApplicationContext());
+					System.out.println("Achievement B0001 added to user " + userId);
+				} else {
+					System.out.println("User " + userId + " already has achievement B0001");
+				}
+			} else {
+				System.out.println("User " + userId + " does not meet the criteria for achievement B0001");
+			}
+		});
 	}
 	private void configureSignUpButton() {
 		TextView TVsign_up = (TextView) findViewById(R.id.TVsign_up);

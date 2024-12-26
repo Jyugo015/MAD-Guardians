@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.madguardians.databinding.ActivityNavVewBnvStaffBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
@@ -96,7 +98,7 @@ public class NavVewBnv extends AppCompatActivity {
 //
 //    private void logout() {
 //        new AlertDialog.Builder(this)
-//                .setTitle("Logout")
+//                 .setTitle("Logout")
 //                .setMessage("Are you sure you want to log out?")
 //                .setPositiveButton("Yes", (dialog, which) -> {
 //                    Intent intent = new Intent(NavVewBnv.this, MainActivity.class);
@@ -114,19 +116,24 @@ protected void onCreate(Bundle savedInstanceState) {
 
     Toolbar toolbar =findViewById(R.id.TBMainAct);
     setSupportActionBar(toolbar);
+    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
     NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.NavHostFragment);
     NavController navController = navHostFragment.getNavController();
 
     BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_nav);
     NavigationUI.setupWithNavController(bottomNavigationView, navController);
-    AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).setOpenableLayout(findViewById(R.id.DLMain)).build();
+    AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+            R.id.nav_home,
+            R.id.nav_consult,
+            R.id.nav_profile
+    ).setOpenableLayout(findViewById(R.id.DLMain)).build();
     NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
     DrawerLayout drawerLayout = findViewById(R.id.DLMain);
-    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout,toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-    drawerLayout.addDrawerListener(toggle);
-    toggle.syncState();
+//    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout,toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//    drawerLayout.addDrawerListener(toggle);
+//    toggle.syncState();
 
     NavigationView sideView = findViewById(R.id.side_nav);
     NavigationUI.setupWithNavController(sideView, navController);
@@ -151,6 +158,14 @@ protected void onCreate(Bundle savedInstanceState) {
 
 
 }
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.NavHostFragment);
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_home, R.id.nav_consult, R.id.nav_profile
+        ).setOpenableLayout(findViewById(R.id.DLMain)).build();
+        return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp();
+    }
 
     private void logout() {
         new AlertDialog.Builder(this)

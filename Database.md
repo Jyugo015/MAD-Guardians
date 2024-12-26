@@ -758,7 +758,7 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri imageUri = result.getData().getData();
-                        mediaHandler.handleResult(imageUri, "image");
+                        imageHandler.handleResult(imageUri, "image");
                     }
                 }
         );
@@ -776,7 +776,7 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri videoUri = result.getData().getData();
-                        mediaHandler.handleResult(videoUri, "video");
+                        videoHandler.handleResult(videoUri, "video");
                     }
                 }
         );
@@ -792,13 +792,13 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri pdfUri = result.getData().getData();
-                        mediaHandler.handleResult(pdfUri, "pdf");
+                        pdfHandler.handleResult(pdfUri, "pdf");
                     }
                 }
         );
         pdfHandler = new MediaHandler(this, pdfPickerLauncher, this);
         // Trigger pdf selection
-        uploadPDF.setOnClickListener(v -> videoHandler.selectVideo());
+        uploadPDF.setOnClickListener(v -> videoHandler.selectPdf());
     }
 
     @Override
@@ -806,11 +806,11 @@ public class YourActivity extends AppCompatActivity implements MediaHandler.Medi
         // Handle the file path returned by the MediaHandler
         Toast.makeText(this, "Selected " + fileType + " path: " + filePath, Toast.LENGTH_LONG).show();
         if (fileType.equalsIgnoreCase("video")){
-            videoHandler.uploadVideoInBackground((String) filePath, "YOUR_DATABASE", player);
+            videoHandler.uploadVideoInBackground(filePath, "YOUR_DATABASE", player);
         } else if (fileType.equalsIgnoreCase("image")){
-            imageHandler.uploadImageInBackground((String) filePath, "YOUR_DATABASE", imageView);
+            imageHandler.uploadImageInBackground(filePath, "YOUR_DATABASE", imageView);
         } else if (fileType.equalsIgnoreCase("pdf")){
-            pdfHandler.uploadPdfInBackground((byte[]) filePath, "YOUR_DATABASE", webView)
+            pdfHandler.uploadPdfInBackground(filePath, "YOUR_DATABASE", webView)
         }
     }
 

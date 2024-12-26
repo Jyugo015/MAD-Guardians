@@ -19,11 +19,13 @@ import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.User;
+import com.example.madguardians.database.UserDao;
 
 public class signuppage_activity extends Activity {
 		private EditText nameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
 		private ImageView passwordToggle, confirmPasswordToggle;
 		private Button signupButton;
+		private UserDao userDao;
 
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,9 @@ public class signuppage_activity extends Activity {
 			super.onCreate(savedInstanceState);
 			setContentView(R.layout.signuppage);
 			configureLogInButton();
+
+			AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+			userDao = db.userDao();
 
 			// Initialize UI components
 			nameEditText = findViewById(R.id.name);
@@ -82,23 +87,22 @@ public class signuppage_activity extends Activity {
 				return;
 			}
 
+			Executor.executeTask(() -> {
+		     String userId = generateUserId();
+
 			// Save user to the database
-			User user = new User("0008", name, email, null, password, "url link of default profile pic", "SignUpDone", 0);
-			AppDatabase.getDatabase(this).userDao().insert(user);
+			User user = new User(userId, name, email, null, password, "url link of default profile pic", "SignUpDone", 0);
+//		AppDatabase.getDatabase(this).userDao().insert(user);
 
 			// Check if the username already exists in the database
-			Executor.executeTask(() -> {
-				// Query the database to check if username already exists
-				boolean usernameExists =
 
-						AppDatabase.getDatabase(getApplicationContext())
+				// Query the database to check if username already exists
+				boolean usernameExists = AppDatabase.getDatabase(getApplicationContext())
 						.userDao()
 						.usernameExists(user.getName());
 
 				// Query the database to check if email already exists
-				boolean emailExists =
-
-						AppDatabase.getDatabase(getApplicationContext())
+				boolean emailExists = AppDatabase.getDatabase(getApplicationContext())
 						.userDao()
 						.emailExists(user.getEmail());
 
@@ -126,6 +130,19 @@ public class signuppage_activity extends Activity {
 				}
 			});
 		}
+
+	public String generateUserId() {
+		// Directly return from the method without using asynchronous execution
+		String lastUserId = userDao.getLastUserId();  // Synchronously fetch the last user ID
+		if (lastUserId != null) {
+			int idNumber = Integer.parseInt(lastUserId.substring(1));
+			System.out.println("The last number:"+idNumber);
+			idNumber++;  // Increment the ID
+			return String.format("U%04d", idNumber);  // Return new user ID with leading zeros
+		} else {
+			return "U0001";  // Return the first user ID if none exist
+		}
+	}
 
 		private void configureLogInButton() {
 			TextView logInHere = (TextView) findViewById(R.id.log_in_here_ek1);
