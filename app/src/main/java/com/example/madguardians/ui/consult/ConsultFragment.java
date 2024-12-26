@@ -24,6 +24,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.Source;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConsultFragment extends Fragment {
 
@@ -42,6 +47,19 @@ public class ConsultFragment extends Fragment {
         View root = binding.getRoot();
         TextView chatResponse = binding.chatResponse.findViewById(R.id.chat_response);
         TextView directingResponse = binding.directingResponse.findViewById(R.id.directing_response);
+
+//        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+//        Map<String, Object> counselorData = new HashMap<>();
+//        counselorData.put("online", true);
+//        counselorData.put("skill", "Mental Health Specialist");
+//        counselorData.put("name", "Test Counselor 1");
+//        counselorData.put("experience", "30 years experience");
+//
+//        firestore.collection("counselors")
+//                .document("0010")
+//                .set(counselorData, SetOptions.merge()) // Ensures it updates or adds missing fields
+//                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Document updated successfully!"))
+//                .addOnFailureListener(e -> Log.e("Firestore", "Error updating document", e));
 
         binding.btnViewAppointmentHistory.setVisibility(View.GONE);
 
@@ -71,6 +89,7 @@ public class ConsultFragment extends Fragment {
                         Log.d("ConsultFragment", "Navigating to ChatFragment with counselor: " + counselorName);
                     } else {
                         directingResponse.setText("Sorry, no counselor is available now. Please make an appointment.");
+                        directingResponse.setVisibility(View.VISIBLE);
                     }
                 });
             }, 2000);
@@ -108,20 +127,48 @@ public class ConsultFragment extends Fragment {
 
     public void isCounselorOnline(Callback callback) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+//        firestore.collection("counselors")
+//                .get()
+//                .addOnSuccessListener(querySnapshot -> {
+//                    for (QueryDocumentSnapshot doc : querySnapshot) {
+//                        Log.d("Firestore Debug", "Document: " + doc.getId() + ", Data: " + doc.getData());
+//                    }
+//                });
+//
+//        firestore.collection("counselors")
+//                .document("0010")
+//                .get()
+//                .addOnSuccessListener(documentSnapshot -> {
+//                    if (documentSnapshot.exists()) {
+//                        Log.d("Firestore Document", "Document exists: " + documentSnapshot.getData());
+//                    } else {
+//                        Log.d("Firestore Document", "Document does not exist.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> Log.e("Firestore", "Error: ", e));
+
         firestore.collection("counselors")
                 .whereEqualTo("online", true)
-                .get()
+                .get(Source.SERVER)
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        Log.d("Firestore Query", "Documents fetched: " + task.getResult().size());
                         for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+                            Log.d("Firestore Document", "ID: " + documentSnapshot.getId() +
+                                    ", Name: " + documentSnapshot.getString("name") +
+                                    ", Online: " + documentSnapshot.getBoolean("online"));
                             counselorID = documentSnapshot.getId();
                             counselorName = documentSnapshot.getString("name");
                             callback.onResult(true);
                             return;
                         }
+                    } else {
+                        Log.d("Firestore Query", "Failed: ", task.getException());
                     }
                     callback.onResult(false);
                 });
+
     }
 
     public interface Callback {
@@ -130,7 +177,7 @@ public class ConsultFragment extends Fragment {
 
 
     private void checkChatroomExistence(Callback callback) {
-        String currentUserId = FirebaseUtil.currentUserId();
+        String currentUserId = FirebaseUtil.currentUserId(getContext());
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
         firestore.collection("chatrooms")

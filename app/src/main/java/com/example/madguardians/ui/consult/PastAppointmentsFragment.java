@@ -49,7 +49,7 @@ public class PastAppointmentsFragment extends Fragment {
         appointmentAdapter = new AppointmentScheduleAdapter(appointmentList, getContext());
         recyclerView.setAdapter(appointmentAdapter);
 
-        String userID = FirebaseUtil.currentUserId();
+        String userID = FirebaseUtil.currentUserId(getContext());
 
         FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -90,7 +90,7 @@ public class PastAppointmentsFragment extends Fragment {
             public void onError(Exception e) {
                 Log.e("Error", "Failed to check if user is counselor", e);
             }
-        });
+        },getActivity());
     }
 
     private void fetchAppointmentsSchedule(String date) {

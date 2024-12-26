@@ -84,23 +84,23 @@ public class signuppage_activity extends Activity {
 
 			// Save user to the database
 			User user = new User("0008", name, email, null, password, "url link of default profile pic", "SignUpDone", 0);
-//		AppDatabase.getDatabase(this).userDao().insert(user);
+			AppDatabase.getDatabase(this).userDao().insert(user);
 
 			// Check if the username already exists in the database
 			Executor.executeTask(() -> {
 				// Query the database to check if username already exists
-				boolean usernameExists = false;
+				boolean usernameExists =
 
-//						AppDatabase.getDatabase(getApplicationContext())
-//						.userDao()
-//						.usernameExists(user.getName());
+						AppDatabase.getDatabase(getApplicationContext())
+						.userDao()
+						.usernameExists(user.getName());
 
 				// Query the database to check if email already exists
-				boolean emailExists = false;
+				boolean emailExists =
 
-//						AppDatabase.getDatabase(getApplicationContext())
-//						.userDao()
-//						.emailExists(user.getEmail());
+						AppDatabase.getDatabase(getApplicationContext())
+						.userDao()
+						.emailExists(user.getEmail());
 
 				if (usernameExists) {
 					// If username exists, show a toast message to the user

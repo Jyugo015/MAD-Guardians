@@ -38,13 +38,18 @@ public class AppointmentScheduleAdapter extends RecyclerView.Adapter<Appointment
         public void onBindViewHolder(@NonNull AppointmentViewHolder holder, int position) {
             AppointmentModel appointment = appointments.get(position);
 
-            holder.userName.setText(appointment.getUserName());
-            holder.userEmail.setText(appointment.getUserEmail());
-            holder.date.setText(appointment.getDate());
-            holder.timeSlot.setText(appointment.getTimeSlot());
-            holder.counselorName.setText(appointment.getCounselorName());
+            String name = "Username: " + appointment.getUserName();
+            String em = "Email: "+ appointment.getUserEmail();
+            String date = "Date : "+ appointment.getDate();
+            String timeSlot = "Time: " + appointment.getTimeSlot();
+            String cName = "CounselorName: "+ appointment.getCounselorName();
 
-            holder.approveButton.setOnClickListener(v -> approveAppointment(appointment));
+            holder.userName.setText(name);
+            holder.userEmail.setText(em);
+            holder.date.setText(date);
+            holder.timeSlot.setText(timeSlot);
+            holder.counselorName.setText(cName);
+
             holder.rejectButton.setOnClickListener(v -> rejectAppointment(appointment));
 
         }
@@ -64,16 +69,11 @@ public class AppointmentScheduleAdapter extends RecyclerView.Adapter<Appointment
                 userEmail = itemView.findViewById(R.id.tv_email);
                 date = itemView.findViewById(R.id.tv_date);
                 timeSlot = itemView.findViewById(R.id.tv_timeslot);
-                approveButton = itemView.findViewById(R.id.btn_approve);
                 rejectButton = itemView.findViewById(R.id.btn_reject);
                 counselorName = itemView.findViewById(R.id.tv_counselorName);
             }
         }
 
-
-        private void approveAppointment(AppointmentModel appointment) {
-
-        }
 
 
         private void rejectAppointment(AppointmentModel appointment) {
@@ -81,7 +81,7 @@ public class AppointmentScheduleAdapter extends RecyclerView.Adapter<Appointment
             firestore.collection("appointments")
                     .document(appointment.getDate())
                     .collection(appointment.getCounselorName())
-                    .document(appointment.getId())
+                    .document(appointment.getTimeSlot())
                     .delete()
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(context, "Appointment canceled", Toast.LENGTH_SHORT).show();

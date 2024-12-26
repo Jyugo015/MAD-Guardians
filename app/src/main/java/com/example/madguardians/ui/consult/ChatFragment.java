@@ -64,7 +64,7 @@ public class ChatFragment extends Fragment {
             Log.d("ChatFragment", "Received counselor"+ counselorName);
         }
         if(counselorID != null){
-        chatroomId = FirebaseUtil.getChatroomId(FirebaseUtil.currentUserId(),counselorID);}
+        chatroomId = FirebaseUtil.getChatroomId(FirebaseUtil.currentUserId(getContext()),counselorID);}
 
         messageInput = view.findViewById(R.id.chat_message_input);
         sendMessageBtn = view.findViewById(R.id.message_send_btn);
@@ -115,12 +115,12 @@ public class ChatFragment extends Fragment {
     }
 
     private void sendMessageToUser(String message) {
-        chatroomModel.setLastMessageSenderId(FirebaseUtil.currentUserId());
+        chatroomModel.setLastMessageSenderId(FirebaseUtil.currentUserId(getContext()));
         chatroomModel.setLastMessageTimestamp(Timestamp.now());
         chatroomModel.setLastMessage(message);
         FirebaseUtil.getChatroomReference(chatroomId).set(chatroomModel);
 
-        ChatMessageModel chatMessageModel = new ChatMessageModel(message, FirebaseUtil.currentUserId(), Timestamp.now());
+        ChatMessageModel chatMessageModel = new ChatMessageModel(message, FirebaseUtil.currentUserId(getContext()), Timestamp.now());
         FirebaseUtil.getChatroomMessageReference(chatroomId).add(chatMessageModel).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 messageInput.setText("");
@@ -137,12 +137,14 @@ public class ChatFragment extends Fragment {
                     if (chatroomModel == null) {
                         chatroomModel = new ChatroomModel(
                                 chatroomId,
-                                Arrays.asList(FirebaseUtil.currentUserId(),counselorID),
+                                Arrays.asList(FirebaseUtil.currentUserId(getContext()),counselorID),
                                 Timestamp.now(),
                                 ""
                         );
                         FirebaseUtil.getChatroomReference(chatroomId).set(chatroomModel);
                     }
+                }else{
+                    Log.e("Chatroom","chatroom not found");
                 }
             }
         });

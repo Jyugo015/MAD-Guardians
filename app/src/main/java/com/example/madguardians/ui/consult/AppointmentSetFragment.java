@@ -40,7 +40,7 @@ public class AppointmentSetFragment extends Fragment {
     private List<TimeSlotModel> timeSlotList;
 
     private String selectedDate;
-    private String userName = "Test Counselor 1";
+    private String userName ;
     private Set<TimeSlotModel> selectedTimeSlots = new HashSet<>();
 
     @Override
@@ -68,20 +68,20 @@ public class AppointmentSetFragment extends Fragment {
             recyclerView.setAdapter(adapter);
         });
 
-        String userID = FirebaseUtil.currentUserId();
+        String userID = FirebaseUtil.currentUserId(getContext());
 
-//        FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                userName = task.getResult();
-//                if (userName != null) {
-//                    Log.d("Username","Username getted success");
-//                } else {
-//                    Log.d("Username","no such user name");
-//                }
-//            } else {
-//                userName = "Hello World";
-//            }
-//        });
+        FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                userName = task.getResult();
+                if (userName != null) {
+                    Log.d("Username","Username getted success");
+                } else {
+                    Log.d("Username","no such user name");
+                }
+            } else {
+                userName = "Hello World";
+            }
+        });
 
 
 

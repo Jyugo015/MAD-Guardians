@@ -47,7 +47,7 @@ public class CounselorAdapter extends RecyclerView.Adapter<CounselorAdapter.Coun
     @Override
     public void onBindViewHolder(@NonNull CounselorViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        String userID = FirebaseUtil.currentUserId();
+        String userID = FirebaseUtil.currentUserId(context);
 
         FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -145,7 +145,7 @@ public class CounselorAdapter extends RecyclerView.Adapter<CounselorAdapter.Coun
     }
 
     private void bookAppointment(String selectedTimeSlot, String counselorName) {
-        String userID = FirebaseUtil.currentUserId();
+        String userID = FirebaseUtil.currentUserId(context);
 
 //        FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
 //            if (task.isSuccessful()) {

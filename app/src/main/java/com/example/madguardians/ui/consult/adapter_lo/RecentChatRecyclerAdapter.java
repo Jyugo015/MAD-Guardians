@@ -1,5 +1,6 @@
 package com.example.madguardians.ui.consult.adapter_lo;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,15 +26,16 @@ import com.google.firebase.firestore.DocumentSnapshot;
 public class RecentChatRecyclerAdapter extends FirestoreRecyclerAdapter<ChatroomModel, RecentChatRecyclerAdapter.ChatroomModelViewHolder> {
 
     private final NavController navController;
+    Context context;
 
-    public RecentChatRecyclerAdapter(@NonNull FirestoreRecyclerOptions<ChatroomModel> options, NavController navController) {
+    public RecentChatRecyclerAdapter(@NonNull FirestoreRecyclerOptions<ChatroomModel> options, NavController navController, Context context) {
         super(options);
         this.navController = navController;
+        this.context = context;
     }
-
     @Override
     protected void onBindViewHolder(@NonNull ChatroomModelViewHolder holder, int position, @NonNull ChatroomModel model) {
-        FirebaseUtil.getOtherUserFromChatroom(model.getUserIds()).addOnCompleteListener(task -> {
+        FirebaseUtil.getOtherUserFromChatroom(model.getUserIds(),context).addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 DocumentSnapshot document = task.getResult();
 
@@ -61,7 +63,7 @@ public class RecentChatRecyclerAdapter extends FirestoreRecyclerAdapter<Chatroom
     }
 
     private void setUpChat(ChatroomModelViewHolder holder, ChatroomModel model, Object otherUserModel) {
-        boolean lastMessageSentByMe = model.getLastMessageSenderId().equals(FirebaseUtil.currentUserId());
+        boolean lastMessageSentByMe = model.getLastMessageSenderId().equals(FirebaseUtil.currentUserId(context));
 
         if (otherUserModel instanceof UserModel) {
             UserModel userModel = (UserModel) otherUserModel;

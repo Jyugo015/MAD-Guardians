@@ -1,5 +1,9 @@
 package com.example.madguardians.ui.consult.utils_lo;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaRouter;
 import android.util.Log;
 
@@ -17,20 +21,23 @@ import java.util.List;
 
 public class FirebaseUtil {
 
-    public static String currentUserId() {
-        return "0007";
-//                FirebaseAuth.getInstance().getUid();
+    public static String currentUserId(Context context) {
+
+        // Get SharedPreferences instance using the passed context
+        SharedPreferences sharedPreferences = context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE);
+
+        // Retrieve the user_id from SharedPreferences
+        String userId = sharedPreferences.getString("user_id", null); // null is the default value if the key doesn't exist
+
+        // Return the userId (or null if not found)
+        return userId;
     }
 
-    public static boolean isLoggedIn() {
-        return currentUserId() != null;
-    }
 
-    public static DocumentReference currentUserDetail() {
-        return FirebaseFirestore.getInstance().collection("user").document(currentUserId());
-    }
-    public static void isCounselor(SimpleCallback callback) {
-        String currentUserId = FirebaseUtil.currentUserId();
+
+
+    public static void isCounselor(SimpleCallback callback, Context context) {
+        String currentUserId = currentUserId(context);
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
         firestore.collection("counselors")
@@ -93,9 +100,9 @@ public class FirebaseUtil {
     }
 
 
-    public static Task<DocumentSnapshot> getOtherUserFromChatroom(List<String> userIds) {
+    public static Task<DocumentSnapshot> getOtherUserFromChatroom(List<String> userIds, Context context) {
 
-        String currentUserId = FirebaseUtil.currentUserId();
+        String currentUserId = FirebaseUtil.currentUserId(context);
         String otherUserId = userIds.get(0).equals(currentUserId) ? userIds.get(1) : userIds.get(0);
 
 

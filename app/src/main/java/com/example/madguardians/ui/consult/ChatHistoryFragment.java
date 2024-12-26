@@ -48,7 +48,7 @@ public class ChatHistoryFragment extends Fragment {
 
     void setupRecyclerView(NavController navController) {
         Query query = FirebaseUtil.allChatroomCollectionReference()
-                .whereArrayContains("userIds", FirebaseUtil.currentUserId())
+                .whereArrayContains("userIds", FirebaseUtil.currentUserId(getContext()))
                 .orderBy("lastMessageTimestamp", Query.Direction.DESCENDING);
 
         query.get().addOnCompleteListener(task -> {
@@ -66,7 +66,7 @@ public class ChatHistoryFragment extends Fragment {
         FirestoreRecyclerOptions<ChatroomModel> options = new FirestoreRecyclerOptions.Builder<ChatroomModel>()
                 .setQuery(query, ChatroomModel.class).build();
 
-        adapter = new RecentChatRecyclerAdapter(options, navController);
+        adapter = new RecentChatRecyclerAdapter(options, navController, getContext());
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
         adapter.startListening();
