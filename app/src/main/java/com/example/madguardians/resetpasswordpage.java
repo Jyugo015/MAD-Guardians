@@ -23,6 +23,8 @@ import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class resetpasswordpage extends AppCompatActivity {
 
@@ -57,14 +59,10 @@ public class resetpasswordpage extends AppCompatActivity {
             passwordToggle = findViewById(R.id.icon_passwoard);
             confirmPasswordToggle = findViewById(R.id.icon_passwoard2);
 
-            // Get SharedPreferences
-            sharedPreferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
-            // Get user ID from SharedPreferences
-            userId = sharedPreferences.getString("user_id", null);
             // Initialize database
-            appDatabase = AppDatabase.getDatabase(this);
+//            appDatabase = AppDatabase.getDatabase(this);
             // Initialize userDao
-            userDao = appDatabase.userDao();
+//            userDao = appDatabase.userDao();
             // Set password visibility toggles
             passwordToggle.setOnClickListener(v -> togglePasswordVisibility(password, passwordToggle));
             confirmPasswordToggle.setOnClickListener(v -> togglePasswordVisibility(confirmPassword, confirmPasswordToggle));
@@ -80,34 +78,43 @@ public class resetpasswordpage extends AppCompatActivity {
                 }
 
                 // Check if passwords match
-                if (newPassword.equals(confirmPasswordText)) {
-                    // Fetch the user by userId asynchronously
-                    Executor.executeTask(() -> {
-                        User user = userDao.getByEmail(email);
-                        if (user != null) {
-                            // Update the user's password
-                            user.setPassword(newPassword);
-
-                            // Update the user in Firestore
-                            FirestoreManager firestoreManager = new FirestoreManager(appDatabase);
-                            Executor.executeTask(() -> firestoreManager.onInsertUpdate("update","user", user, getApplicationContext()));
-
-                            // Redirect to login page on the main thread
-                            runOnUiThread(() -> {
-                                Intent intent = new Intent(resetpasswordpage.this, loginpage_activity.class);
-                                startActivity(intent);
-                                finish();  // Optionally, finish the current activity to prevent user from going back
-                            });
-                        } else {
-                            runOnUiThread(() -> {
-                                Toast.makeText(resetpasswordpage.this, "User not found", Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                    });
-                } else {
-                    // Passwords don't match
-                    Toast.makeText(resetpasswordpage.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                if (!newPassword.equals(confirmPasswordText)) {
+                    Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                db.collection("user")
+                        .whereEqualTo("email", email)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                                // Find user by email
+                                DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                                String userId = document.getId();
+
+                                // update new passwprd
+                                db.collection("user")
+                                        .document(userId)
+                                        .update("password", newPassword)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Toast.makeText(resetpasswordpage.this, "Password reset successfully", Toast.LENGTH_SHORT).show();
+
+                                            // Redirect to login page
+                                            Intent intent = new Intent(resetpasswordpage.this, loginpage_activity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(resetpasswordpage.this, "Failed to reset password: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        });
+                            } else {
+                                Toast.makeText(resetpasswordpage.this, "User not found", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(resetpasswordpage.this, "Failed to fetch user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
             });
             configureSignUpButton();
         }

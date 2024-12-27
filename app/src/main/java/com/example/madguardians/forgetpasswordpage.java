@@ -4,6 +4,7 @@ import static java.security.AccessController.getContext;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,17 +12,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.UserDao;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class forgetpasswordpage extends AppCompatActivity {
     private EditText emailEditText;
     private Button resetPasswordButton;
     UserDao userDao;
     AppDatabase appDatabase;
+    private String OTP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,29 +50,75 @@ public class forgetpasswordpage extends AppCompatActivity {
             }
 
             // Run the email existence check on a background thread
-            Executor.executeTask(() -> {
-                boolean emailExists = false;
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("user")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            // Email Exist
+                            generateOTP();
+                            MailgunAPI mailgunAPI = new MailgunAPI();
+                            mailgunAPI.sendOTPEmail(email, OTP);
 
-//                        userDao.emailExists(email);
-
-                // Run UI code on the main thread
-                runOnUiThread(() -> {
-                    if (!emailExists) {
-                        Toast.makeText(forgetpasswordpage.this, "Email not found", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // Proceed to the reset password page and pass the email
-                    Intent intent = new Intent(forgetpasswordpage.this, resetpasswordpage.class);
-                    intent.putExtra("email", email);  // Pass email to the next activity
-                    startActivity(intent);
-                });
-            });
+                    // Show OTP dialog
+                    showOTPDialog(email);
+                        } else {
+                            // Email Not Exist
+                            Toast.makeText(forgetpasswordpage.this, "Email not found", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(forgetpasswordpage.this, "Failed to check email: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
         });
 
         configureLogInButton();
     }
 
+    private void generateOTP() {
+        // Generate a random 6-digit OTP
+        OTP = String.valueOf((int) (Math.random() * 900000) + 100000);
+    }
+
+    private void showOTPDialog(String email) {
+        // Create a dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter OTP");
+
+        // Add an EditText to the dialog for OTP input
+        final EditText otpEditText = new EditText(this);
+        otpEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        otpEditText.setHint("Enter the OTP sent to your email");
+        builder.setView(otpEditText);
+
+        // Add "Verify" button
+        builder.setPositiveButton("Verify", (dialog, which) -> {
+            String enteredOTP = otpEditText.getText().toString().trim();
+
+            if (enteredOTP.equals(OTP)) {
+                // OTP is correct
+                Toast.makeText(forgetpasswordpage.this, "OTP Verified", Toast.LENGTH_SHORT).show();
+
+                // Proceed to the reset password page and pass the email
+                Intent intent = new Intent(forgetpasswordpage.this, resetpasswordpage.class);
+                intent.putExtra("email", email);  // Pass email to the next activity
+                startActivity(intent);
+            } else {
+                // OTP is incorrect
+                Toast.makeText(forgetpasswordpage.this, "Invalid OTP", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Add "Cancel" button
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        // Show the dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
     private void configureLogInButton() {
         TextView logInHere = (TextView) findViewById(R.id.log_in);
         logInHere.setOnClickListener(new View.OnClickListener() {

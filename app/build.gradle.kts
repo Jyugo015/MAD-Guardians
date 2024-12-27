@@ -77,4 +77,5 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.4.1")
     // for worker
     implementation("androidx.work:work-runtime:2.7.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 }
