@@ -86,7 +86,8 @@ public class FirestoreManager {
             public void run() {
                 // Call the potentially long-running operations here
                 try {
-                    clearTables();
+                    if (userId != null && !userId.isEmpty())
+                        clearTables();
                     syncUserPartial(userId);
                     syncUserFull();
                 } catch (Exception e) {
@@ -624,7 +625,7 @@ public class FirestoreManager {
         switch (tableName) {
             case "achievement":
                 sql = new String[]{
-                        "CREATE TABLE e (" +
+                        "CREATE TABLE tempe (" +
                                 "userId TEXT NOT NULL, " +
                                 "badgeId TEXT NOT NULL, " +
                                 "PRIMARY KEY(userId, badgeId), " +
@@ -1408,6 +1409,7 @@ public class FirestoreManager {
                     .get()
                     .addOnSuccessListener(querySnapshot -> {
                         List<?> resultList = querySnapshot.toObjects(getDomainClass(tableName));
+                        System.out.println("run" + tableName);
                         Executor.executeTask(() -> {
                             insertDataToDatabase(tableName, resultList);
                         });
@@ -1665,34 +1667,36 @@ public class FirestoreManager {
 
             // Step 1: Fetch posts by userId to get the list of IDs for the join
             fetchUserPosts(userId, postIds -> {
-                if (!((List<String>) postIds).isEmpty()) {
-                    // Step 2: Depending on the tableName, fetch the corresponding data (VerPost, MediaSet, etc.)
-                    switch (tableName) {
-                        case "verPost":
-                            // Fetch VerPosts by postIds
-                            getVerPostsByPostIds((List<String>) postIds, callback);
-                            break;
+                if (postIds instanceof List<?>){
+                    if (!((List<String>) postIds).isEmpty()) {
+                        // Step 2: Depending on the tableName, fetch the corresponding data (VerPost, MediaSet, etc.)
+                        switch (tableName) {
+                            case "verPost":
+                                // Fetch VerPosts by postIds
+                                getVerPostsByPostIds((List<String>) postIds, callback);
+                                break;
 
-                        case "mediaSet":
-                            // Extract MediaSet IDs from the posts and fetch MediaSets
-                            List<String> mediaSetIds = extractMediaSetIdsFromPosts((List<String>) postIds);
-                            fetchUserVerEducators(userId, mediaSetId -> {
-                                mediaSetIds.addAll((List<String>) mediaSetId);
-                            });
-                            if (!mediaSetIds.isEmpty()) {
-                                getMediaSetsByIds(mediaSetIds, callback);
-                            }
-                            break;
+                            case "mediaSet":
+                                // Extract MediaSet IDs from the posts and fetch MediaSets
+                                List<String> mediaSetIds = extractMediaSetIdsFromPosts((List<String>) postIds);
+                                fetchUserVerEducators(userId, mediaSetId -> {
+                                    mediaSetIds.addAll((List<String>) mediaSetId);
+                                });
+                                if (!mediaSetIds.isEmpty()) {
+                                    getMediaSetsByIds(mediaSetIds, callback);
+                                }
+                                break;
 
-                        // Add more cases for other tables as needed, e.g., "userHistory", "chatHistory", etc.
-                        default:
-                            Log.e("FirestoreSync", "Unsupported table: " + tableName);
-                            callback.onComplete(Tasks.forResult(Collections.emptyList()));
-                            break;
+                            // Add more cases for other tables as needed, e.g., "userHistory", "chatHistory", etc.
+                            default:
+                                Log.e("FirestoreSync", "Unsupported table: " + tableName);
+                                callback.onComplete(Tasks.forResult(Collections.emptyList()));
+                                break;
+                        }
+                    } else {
+                        // If no posts exist for the user, return an empty list
+                        callback.onComplete(Tasks.forResult(Collections.emptyList()));
                     }
-                } else {
-                    // If no posts exist for the user, return an empty list
-                    callback.onComplete(Tasks.forResult(Collections.emptyList()));
                 }
             });
         }

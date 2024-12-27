@@ -45,9 +45,19 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation(libs.firebase.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
+
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation ("com.firebaseui:firebase-ui-firestore:8.0.2")
+
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
 
     implementation ("androidx.room:room-runtime:2.6.1")
     annotationProcessor ("androidx.room:room-compiler:2.6.1")
@@ -67,4 +77,5 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.4.1")
     // for worker
     implementation("androidx.work:work-runtime:2.7.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 }
