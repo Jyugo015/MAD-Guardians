@@ -44,6 +44,9 @@ import com.example.madguardians.database.UserDao;
 import com.example.madguardians.database.UserHistory;
 import com.example.madguardians.database.UserHistoryDao;
 import com.example.madguardians.notification.notificationFragment;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,9 +76,9 @@ public class ProfileFragment extends Fragment {
         //Get userid
         userId = sharedPreferences.getString("user_id", null);
         // Initialize database
-        appDatabase = AppDatabase.getDatabase(getContext());
-        //Initialize userDao
-        userDao = appDatabase.userDao();
+//        appDatabase = AppDatabase.getDatabase(getContext());
+//        //Initialize userDao
+//        userDao = appDatabase.userDao();
 
 
         // Inflate the layout for this fragment
@@ -149,38 +152,38 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadUserData() {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                // Get user from the database (in background thread)
-                User user = userDao.getById(userId);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                // Update UI on the main thread
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (user != null) {
-                            // Update user name and email
-                            usernameTextView.setText(user.getName());
-                            emailTextView.setText(user.getEmail());
+        db.collection("user")
+                .document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        DocumentSnapshot document = task.getResult();
 
-                            // Check if user has a profile pic
-                            String profilePicUrl = user.getProfilePic();
-                            if ("url link of default profile pic".equals(profilePicUrl)) {
-                                // Use default profile pic if no custom profile picture
-                                profileImageView.setImageResource(R.drawable.ic_profile);
-                            } else {
-                                // Use Glide to load the profile pic if available
+                        if (document.exists()) {
+                            String name = document.getString("name");
+                            String email = document.getString("email");
+                            String profilePicUrl = document.getString("profilePic");
+
+                            if (name != null) usernameTextView.setText(name);
+                            if (email != null) emailTextView.setText(email);
+
+                            if (profilePicUrl != null && !"url link of default profile pic".equals(profilePicUrl)) {
                                 Glide.with(ProfileFragment.this)
                                         .load(profilePicUrl)
                                         .circleCrop()
                                         .into(profileImageView);
+                            } else {
+                                profileImageView.setImageResource(R.drawable.ic_profile);
                             }
+                        } else {
+                            Toast.makeText(getContext(), "User data not found", Toast.LENGTH_SHORT).show();
                         }
+                    } else {
+                        Toast.makeText(getContext(), "Failed to load user data", Toast.LENGTH_SHORT).show();
                     }
                 });
-            }
-        });
     }
 
     private void loadLearningHistory() {
@@ -250,27 +253,44 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadAchievements() {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                // Query the database for achievements (or other data you need)
-                achievementList = appDatabase.achievementDao().getAll();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        // Query Firestore untuk mendapatkan semua achievement pengguna
+        db.collection("achievement")
+                .whereEqualTo("userId", userId) // Filter berdasarkan userId
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Buat daftar untuk menyimpan data achievement
+                        List<Achievement> achievementList = new ArrayList<>();
 
-                // Update the RecyclerView on the main thread
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (achievementList.isEmpty()) {
-                            noAchievementsMessage.setVisibility(View.VISIBLE);
-                        } else {
-                            noAchievementsMessage.setVisibility(View.GONE);
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Achievement achievement = new Achievement();
+                            achievement.setUserId(document.getString("userId"));
+                            achievement.setBadgeId(document.getString("badgeId"));
+
+                            // Tambahkan achievement ke daftar
+                            achievementList.add(achievement);
                         }
-                        achievementAdapter = new AchievementAdapter(achievementList);
-                        achievementRecyclerView.setAdapter(achievementAdapter);
+
+                        // Perbarui RecyclerView di thread utama
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (achievementList.isEmpty()) {
+                                    noAchievementsMessage.setVisibility(View.VISIBLE);
+                                } else {
+                                    noAchievementsMessage.setVisibility(View.GONE);
+                                }
+
+                                // Atur adapter RecyclerView
+                                achievementAdapter = new AchievementAdapter(achievementList);
+                                achievementRecyclerView.setAdapter(achievementAdapter);
+                            });
+                        }
+                    } else {
+                        // Tampilkan pesan kesalahan jika query gagal
+                        Toast.makeText(getContext(), "Failed to load achievements", Toast.LENGTH_SHORT).show();
                     }
                 });
-            }
-        });
     }
 }
