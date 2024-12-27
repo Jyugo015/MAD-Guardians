@@ -255,13 +255,13 @@ public class ProfileFragment extends Fragment {
     private void loadAchievements() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Query Firestore untuk mendapatkan semua achievement pengguna
+        // Query Firestore
         db.collection("achievement")
                 .whereEqualTo("userId", userId) // Filter berdasarkan userId
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Buat daftar untuk menyimpan data achievement
+                        // Initialize achievementList
                         List<Achievement> achievementList = new ArrayList<>();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
@@ -269,11 +269,11 @@ public class ProfileFragment extends Fragment {
                             achievement.setUserId(document.getString("userId"));
                             achievement.setBadgeId(document.getString("badgeId"));
 
-                            // Tambahkan achievement ke daftar
+                            // Add all achievement to achievementList
                             achievementList.add(achievement);
                         }
 
-                        // Perbarui RecyclerView di thread utama
+                        // Run RecyclerView in main ui thread
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
                                 if (achievementList.isEmpty()) {
@@ -282,13 +282,13 @@ public class ProfileFragment extends Fragment {
                                     noAchievementsMessage.setVisibility(View.GONE);
                                 }
 
-                                // Atur adapter RecyclerView
+                                // set adapter RecyclerView
                                 achievementAdapter = new AchievementAdapter(achievementList);
                                 achievementRecyclerView.setAdapter(achievementAdapter);
                             });
                         }
                     } else {
-                        // Tampilkan pesan kesalahan jika query gagal
+                        // Pop toast if fail to load achievements
                         Toast.makeText(getContext(), "Failed to load achievements", Toast.LENGTH_SHORT).show();
                     }
                 });
