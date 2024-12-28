@@ -1,8 +1,5 @@
 <resources>
-    <string name="cloudinary_cloud_name">example</string>
-    <string name="cloudinary_api_key">example</string>
-    <string name="cloudinary_api_secret">example</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <!-- TODO: Remove or change this placeholder text -->
-
+    <string name="cloud_name">dmgpozfee</string>
+    <string name="api_key">116557637455163</string>
+    <string name="api_secret">3cSlVqcO61vVWM6ol3cZ2hP6TmE</string>
 </resources>
