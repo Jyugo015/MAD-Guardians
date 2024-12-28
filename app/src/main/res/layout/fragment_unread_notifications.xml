@@ -6,9 +6,18 @@
     android:gravity="center"
     android:orientation="vertical">
 
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <TextView
+        android:id="@+id/no_unread_notifications"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Unread Notifications"
+        android:text="No Unread Notifications"
+        android:layout_gravity="center"
+        android:visibility="invisible"
         android:textSize="18sp" />
 </LinearLayout>
