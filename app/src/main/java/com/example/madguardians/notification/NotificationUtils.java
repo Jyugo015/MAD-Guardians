@@ -12,7 +12,7 @@ public class NotificationUtils {
 
     public void createTestNotification(String userId,String message) {
         // Test Notification
-        String notificationId = "N" + System.currentTimeMillis(); // 动态生成唯一的 notificationId
+        String notificationId = "N" + System.currentTimeMillis();
         Notification notification = new Notification(
                 notificationId,
                 userId,
