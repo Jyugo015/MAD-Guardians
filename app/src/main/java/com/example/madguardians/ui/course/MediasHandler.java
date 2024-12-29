@@ -1,20 +1,14 @@
-package com.example.madguardians.database;
+package com.example.madguardians.ui.course;
 
-import static androidx.core.app.ActivityCompat.requestPermissions;
-
-import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.util.Base64;
 import android.util.Log;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -24,7 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.media3.common.MediaItem;
 import androidx.media3.exoplayer.ExoPlayer;
-import androidx.media3.ui.PlayerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
@@ -32,7 +27,8 @@ import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
 import com.bumptech.glide.Glide;
-import com.cloudinary.utils.ObjectUtils;
+import com.example.madguardians.database.CloudinaryUploadWorker;
+import com.example.madguardians.utilities.AdapterMedia;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,45 +36,56 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
-import java.util.logging.Handler;
+import java.util.ArrayList;
+import java.util.List;
 
-public class MediaHandler {
+public class MediasHandler {
 
-    public interface MediaHandleCallback {
-        void onMediaSelected(String filePath, String fileType);
-    }
+//    public interface MediaHandleCallback {
+//        void onMediaSelected(String filePath, String fileType);
+//    }
     private final Context context;
     private final ActivityResultLauncher<Intent> activityResultLauncher;
-    private final MediaHandleCallback callback;
+//    private final MediaHandleCallback callback;
     private WorkRequest uploadWorkRequest;
+    private AdapterMedia mediaAdapter;
+    private List<Uri> selectedMedias;
+    private String mediaType;
 
-    public MediaHandler(@NonNull Context context, @NonNull ActivityResultLauncher<Intent> activityResultLauncher, @NonNull MediaHandleCallback callback) {
+    public MediasHandler(@NonNull Context context, @NonNull ActivityResultLauncher<Intent> activityResultLauncher, String mediaType, @Nullable RecyclerView RVMedias) {
         this.context = context;
         this.activityResultLauncher = activityResultLauncher;
-        this.callback = callback;
+        this.mediaType = mediaType;
+//        this.callback = callback;
+
+        if (RVMedias != null) {
+            selectedMedias = new ArrayList<>();
+            mediaAdapter = new AdapterMedia(selectedMedias, mediaType, this::removeMedia);
+            RVMedias.setLayoutManager(new LinearLayoutManager(context));
+            RVMedias.setAdapter(mediaAdapter);
+        }
     }
 
     // Select Image
-    public void selectImage(){
+    public void selectImages(){
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         activityResultLauncher.launch(intent);
     }
 
-    public void selectVideo(){
+    public void selectVideos(){
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
         intent.setType("video/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         activityResultLauncher.launch(intent);
     }
 
-    public void selectPDF() {
+    public void selectPDFs() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("application/pdf");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         activityResultLauncher.launch(intent);
     }
 
@@ -95,10 +102,10 @@ public class MediaHandler {
         return null;
     }
 
-    public void handleResult(Uri uri, String type) {
+    public void handleResult(Uri uri) {
         if (uri != null) {
             long size = 0;
-            if (type.equalsIgnoreCase("image")) {
+            if (mediaType.equalsIgnoreCase("image") || mediaType.equalsIgnoreCase("pdf")) {
                 Log.d("TAG", "handleResult: here1");
                 String[] projection = {MediaStore.Images.Media.DATA, OpenableColumns.SIZE};
                 try (Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);) {
@@ -112,8 +119,11 @@ public class MediaHandler {
                             size = cursor.getLong(sizeIndex);
                             if (size < 10485760) {
                                 Log.d("TAG", "handleResult: here5");
-                                String filePath = getPathFromUri(uri);
-                                callback.onMediaSelected(filePath, "image");
+//                                String filePath = getPathFromUri(uri);
+                                selectedMedias.add(uri);
+                                Log.d("pick images / pdfs", "Selected Images / Pdfs: " + selectedMedias.toString());
+                                mediaAdapter.notifyDataSetChanged();
+//                                callback.onMediaSelected(filePath, "image");
                             } else
                                 Toast.makeText(context, "The file is too large (Maximum 10MB), please try another file", Toast.LENGTH_LONG).show();
                         } else
@@ -123,15 +133,18 @@ public class MediaHandler {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (type.equalsIgnoreCase("video")) {
+            } else if (mediaType.equalsIgnoreCase("video")) {
                 try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
                     if (cursor != null && cursor.moveToFirst()){
                         int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                         if (sizeIndex != -1){
                             size = cursor.getLong(sizeIndex);
                             if (size < 104857600) {
-                                String filePath = getPathFromUri(uri);
-                                callback.onMediaSelected(filePath, "video");
+                                selectedMedias.add(uri);
+                                Log.d("pick videos", "Selected Videos: " + selectedMedias.toString());
+                                mediaAdapter.notifyDataSetChanged();
+//                                String filePath = getPathFromUri(uri);
+//                                callback.onMediaSelected(filePath, "video");
                             } else
                                 Toast.makeText(context, "The file is too large (Maximum 100MB), please try another file", Toast.LENGTH_LONG).show();
                         }
@@ -139,25 +152,25 @@ public class MediaHandler {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (type.equalsIgnoreCase("pdf")) {
-                try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
-                    if (cursor != null && cursor.moveToFirst()){
-                        int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-                        if (sizeIndex != -1){
-                            size = cursor.getLong(sizeIndex);
-                            if (size < 10485760) {
-                                Log.d("TAG", "handleResult: pdfUri: " + uri);
-                                byte[] filePathBytes = getBytesFromUri(uri);
-                                String filePath = saveBytesToCacheFile(filePathBytes);
-                                Log.d("TAG", "handleResult: path: " + filePath);
-                                callback.onMediaSelected(filePath, "pdf");
-                            } else
-                                Toast.makeText(context, "The file is too large (Maximum 10MB), please try another file", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+//            } else if (mediaType.equalsIgnoreCase("pdf")) {
+//                try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
+//                    if (cursor != null && cursor.moveToFirst()){
+//                        int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+//                        if (sizeIndex != -1){
+//                            size = cursor.getLong(sizeIndex);
+//                            if (size < 10485760) {
+//                                Log.d("TAG", "handleResult: pdfUri: " + uri);
+//                                byte[] filePathBytes = getBytesFromUri(uri);
+////                                String filePath = saveBytesToCacheFile(filePathBytes);
+//                                Log.d("TAG", "handleResult: path: " + filePath);
+////                                callback.onMediaSelected(filePath, "pdf");
+//                            } else
+//                                Toast.makeText(context, "The file is too large (Maximum 10MB), please try another file", Toast.LENGTH_LONG).show();
+//                        }
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
             }
         } else {
             Log.d("Media Handler", "The filepath is null");
@@ -183,7 +196,8 @@ public class MediaHandler {
             throw new RuntimeException(e);
         }
     }
-    public void uploadImageInBackground(String filePath, String database, @Nullable ImageView imageView) {
+    public void uploadImageInBackground(Uri uri, String database, @Nullable ImageView imageView) {
+        String filePath = getPathFromUri(uri);
         Toast.makeText(context, "Uploading image", Toast.LENGTH_LONG).show();
         Data data = new Data.Builder()
                 .putString("filePath", filePath)
@@ -221,7 +235,8 @@ public class MediaHandler {
                 });
     }
 
-    public void uploadVideoInBackground(String filePath, String database, @Nullable ExoPlayer player) {
+    public void uploadVideoInBackground(Uri uri, String database, @Nullable ExoPlayer player) {
+        String filePath = getPathFromUri(uri);
         Toast.makeText(context, "Uploading video", Toast.LENGTH_LONG).show();
         Data data = new Data.Builder()
                 .putString("filePath", filePath)
@@ -261,10 +276,11 @@ public class MediaHandler {
                 });
     }
 
-    public void uploadPdfInBackground(String filePath, String database, @Nullable WebView webView) {
+    public void uploadPdfInBackground(Uri uri, String database, @Nullable WebView webView) {
+        byte[] filePathBytes = getBytesFromUri(uri);
+        String filePath = saveBytesToCacheFile(filePathBytes);
         Toast.makeText(context, "Uploading pdf", Toast.LENGTH_LONG).show();
         Data data = new Data.Builder()
-//                .putByteArray("filePath", filePath)
                 .putString("filePath", filePath)
                 .putString("fileType", "pdf")
                 .build();
@@ -329,18 +345,18 @@ public class MediaHandler {
     }
 
     // Display Image
-    private static void displayImage(Context context, String imageUrl, ImageView imageView) {
+    public static void displayImage(Context context, String imageUrl, ImageView imageView) {
         Log.d("Cloudinary URL", imageUrl);
         Glide.with(context).load(imageUrl).into(imageView);
     }
 
     // Display PDF
-    private static void displayPDF(String pdfUrl, WebView webView) {
+    public static void displayPDF(String pdfUrl, WebView webView) {
         Log.d("Cloudinary URL", pdfUrl);
         webView.loadUrl("https://docs.google.com/gview?embedded=true&url=" + pdfUrl);
     }
 
-    private static void playVideo(String videoUrl, ExoPlayer player) {
+    public static void playVideo(String videoUrl, ExoPlayer player) {
 //        mediaItem = MediaItem.fromUri(Uri.parse(toHTTPS("http://res.cloudinary.com/dmgpozfee/video/upload/v1731385187/cgtajcgfoloqc4calfov.mp4")));
         MediaItem mediaItem = MediaItem.fromUri(Uri.parse(videoUrl));
         player.setMediaItem(mediaItem);
@@ -348,6 +364,26 @@ public class MediaHandler {
         player.prepare();
         player.setVolume(1.0f);
         player.play();
+    }
+
+    private void removeMedia(Uri uri) {
+            selectedMedias.remove(uri);
+            mediaAdapter.notifyDataSetChanged();
+    }
+
+    public List<Uri> getSelectedMedias() {
+        return selectedMedias;
+    }
+
+    public void clearSelectedMedias() {
+        selectedMedias.clear();
+        mediaAdapter.notifyDataSetChanged();
+    }
+
+    public void loadSavedMedia(List<Uri> savedMedias) {
+        selectedMedias.clear();
+        selectedMedias.addAll(savedMedias);
+        mediaAdapter.notifyDataSetChanged();
     }
 }
 

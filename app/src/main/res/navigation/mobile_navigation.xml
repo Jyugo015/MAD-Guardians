@@ -37,6 +37,81 @@
         android:id="@+id/nav_profile"
         android:name="com.example.madguardians.ProfileFragment"
         android:label="@string/profile_string"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/nav_course_overview"
+        android:name="com.example.madguardians.ui.course.CourseOverviewFragment"
+        android:label="Courses"
+        tools:layout="@layout/fragment_course_overview"/>
+
+    <fragment
+        android:id="@+id/nav_post"
+        android:name="com.example.madguardians.ui.course.PostFragment"
+        android:label="Courses"
+        tools:layout="@layout/fragment_post"/>
+
+    <fragment
+        android:id="@+id/nav_pdf"
+        android:name="com.example.madguardians.ui.course.PdfFragment"
+        android:label="Courses"
+        tools:layout="@layout/fragment_pdf"/>
+
+    <fragment
+        android:id="@+id/nav_img"
+        android:name="com.example.madguardians.ui.course.ImageFragment"
+        android:label="Courses"
+        tools:layout="@layout/fragment_image"/>
+
+    <fragment
+        android:id="@+id/nav_vid"
+        android:name="com.example.madguardians.ui.course.VideoFragment"
+        android:label="Courses"
+        tools:layout="@layout/fragment_video"/>
+
+    <fragment
+        android:id="@+id/nav_domains"
+        android:name="com.example.madguardians.ui.course.UploadDomainsFragment"
+        android:label="Upload Courses"
+        tools:layout="@layout/fragment_upload_domains"/>
+
+    <fragment
+        android:id="@+id/nav_domain"
+        android:name="com.example.madguardians.ui.course.UploadDomainFragment"
+        android:label="Upload Courses"
+        tools:layout="@layout/fragment_upload_domain"/>
+
+    <fragment
+        android:id="@+id/nav_upload_course"
+        android:name="com.example.madguardians.ui.course.UploadCourseFragment"
+        android:label="Upload Courses"
+        tools:layout="@layout/fragment_upload_course"/>
+
+    <fragment
+        android:id="@+id/nav_upload_post"
+        android:name="com.example.madguardians.ui.course.UploadPostFragment"
+        android:label="Upload Courses"
+        tools:layout="@layout/fragment_upload_post"/>
+
+    <!--    <fragment-->
+<!--        android:id="@+id/editProfileFragment"-->
+<!--        android:name="com.example.madguardians.EditProfileFragment"-->
+<!--        android:label="fragment_edit_profile"-->
+<!--        tools:layout="@layout/fragment_edit_profile" />-->
+<!--    <fragment-->
+<!--        android:id="@+id/educationQualificationFragment"-->
+<!--        android:name="com.example.madguardians.EducationQualificationFragment"-->
+<!--        android:label="fragment_education_qualification"-->
+<!--        tools:layout="@layout/fragment_education_qualification" />-->
+<!--    <fragment-->
+<!--        android:id="@+id/notificationFragment"-->
+<!--        android:name="com.example.madguardians.notification.notificationFragment"-->
+<!--        android:label="fragment_notification"-->
+<!--        tools:layout="@layout/fragment_notification" />-->
+    <fragment
+        android:id="@+id/collectionFragment"
+        android:name="com.example.madguardians.collection.CollectionFragment"
+        android:label="CollectionFragment"
         tools:layout="@layout/fragment_profile" >
         <action
             android:id="@+id/action_nav_profile_to_educationQualificationFragment"
@@ -100,10 +175,10 @@
         android:id="@+id/educationQualificationFragment"
         android:name="com.example.madguardians.EducationQualificationFragment"
         android:label="Education Qualification" />
-    <fragment
-        android:id="@+id/collectionFragment"
-        android:name="com.example.madguardians.collection.CollectionFragment"
-        android:label="Collections" />
+<!--    <fragment-->
+<!--        android:id="@+id/collectionFragment"-->
+<!--        android:name="com.example.madguardians.collection.CollectionFragment"-->
+<!--        android:label="Collections" />-->
     <fragment
         android:id="@+id/editProfileFragment"
         android:name="com.example.madguardians.EditProfileFragment"
