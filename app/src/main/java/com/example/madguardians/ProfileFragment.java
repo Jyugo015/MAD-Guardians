@@ -3,19 +3,14 @@ package com.example.madguardians;
 import static android.content.Context.MODE_PRIVATE;
 import static com.google.common.reflect.Reflection.getPackageName;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,29 +22,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.madguardians.collection.AllCollectionFragment;
-import com.example.madguardians.collection.CollectionFragment;
 import com.example.madguardians.database.Achievement;
-import com.example.madguardians.database.AchievementDao;
 import com.example.madguardians.database.AppDatabase;
-import com.example.madguardians.database.Badge;
-import com.example.madguardians.database.BadgeDao;
 import com.example.madguardians.database.Course;
 import com.example.madguardians.database.CourseDao;
-import com.example.madguardians.database.MediaSetDao;
 import com.example.madguardians.database.Post;
 import com.example.madguardians.database.PostDao;
-import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
 import com.example.madguardians.database.UserHistory;
 import com.example.madguardians.database.UserHistoryDao;
-import com.example.madguardians.notification.notificationFragment;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 

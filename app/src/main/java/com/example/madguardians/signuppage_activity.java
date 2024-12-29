@@ -20,6 +20,7 @@ import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
+import com.example.madguardians.notification.NotificationUtils;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -70,8 +71,10 @@ public class signuppage_activity extends Activity {
 			editText.setSelection(editText.getText().length()); // Move cursor to end
 		}
 	private void saveUserToFirestore(String userId, String name, String email, String password) {
+		String message = "Thank you for signing up!";
 		User user = new User(userId, name, email, null, password, "url link of default profile pic", "SignUpDone", 0);
-
+		NotificationUtils notificationUtils = new NotificationUtils();
+		notificationUtils.createTestNotification(userId,message);
 		db.collection("user").document(userId)
 				.set(user)
 				.addOnSuccessListener(aVoid -> {

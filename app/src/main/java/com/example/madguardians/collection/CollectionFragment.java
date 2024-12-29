@@ -32,22 +32,6 @@ public class CollectionFragment extends Fragment {
         TabLayout tabLayout = view.findViewById(R.id.tabLayout);
         ViewPager2 viewPager = view.findViewById(R.id.viewPager);
 
-        CollectionPagerAdapter adapter = new CollectionPagerAdapter(requireActivity());
-        viewPager.setAdapter(adapter);
-
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            switch (position) {
-                case 0:
-                    tab.setText("All");
-                    break;
-                case 1:
-                    tab.setText("Course");
-                    break;
-                case 2:
-                    tab.setText("Volunteer");
-                    break;
-            }
-        }).attach();
     }
 
 }

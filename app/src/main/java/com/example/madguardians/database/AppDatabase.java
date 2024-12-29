@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 @Database(entities = {Achievement.class, Appointment.class, Badge.class, ChatHistory.class,
         Collection.class, Course.class, Comment.class, Counselor.class, CounselorAvailability.class,
         Domain.class, DomainInterested.class, Folder.class, Helpdesk.class, Issue.class,
-        MediaRead.class, Media.class, MediaSet.class, Notification.class, Post.class, Quiz.class,
+        MediaRead.class, Media.class, MediaSet.class, Post.class, Quiz.class,
         QuestionOption.class, QuizHistory.class, QuizOld.class, QuizQuestion.class,
         QuizResult.class, Staff.class, Timeslot.class, User.class, UserHistory.class,
         VerEducator.class, VerPost.class}, version = 2)
@@ -37,7 +37,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract MediaReadDao mediaReadDao();
     public abstract MediaSetDao mediaSetDao();
     public abstract MediaDao mediaDao();
-    public abstract NotificationDao notificationDao();
+//    public abstract NotificationDao notificationDao();
     public abstract PostDao postDao();
     public abstract QuestionOptionDao questionOptionDao();
     public abstract QuizDao quizDao();
@@ -389,19 +389,19 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("ALTER TABLE mediaSet_new RENAME TO mediaSet;");
 
             //notification
-            database.execSQL("DROP TABLE IF EXISTS notification_new;");
-            database.execSQL(
-                    "CREATE TABLE notification_new (" +
-                            "notificationId TEXT NOT NULL PRIMARY KEY, " +
-                            "userId TEXT NOT NULL, " +
-                            "message TEXT NOT NULL, " +
-                            "deliveredTime TEXT, " +
-                            "readTime TEXT, " +
-                            "FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE" +
-                            ");"
-            );
-            database.execSQL("DROP TABLE IF EXISTS notification;");
-            database.execSQL("ALTER TABLE notification_new RENAME TO notification;");
+//            database.execSQL("DROP TABLE IF EXISTS notification_new;");
+//            database.execSQL(
+//                    "CREATE TABLE notification_new (" +
+//                            "notificationId TEXT NOT NULL PRIMARY KEY, " +
+//                            "userId TEXT NOT NULL, " +
+//                            "message TEXT NOT NULL, " +
+//                            "deliveredTime TEXT, " +
+//                            "readTime TEXT, " +
+//                            "FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE" +
+//                            ");"
+//            );
+//            database.execSQL("DROP TABLE IF EXISTS notification;");
+//            database.execSQL("ALTER TABLE notification_new RENAME TO notification;");
 
             //post
             database.execSQL("DROP TABLE IF EXISTS post_new;");
