@@ -12,7 +12,7 @@
     <!-- Green View -->
     <View
         android:id="@+id/bg"
-        android:layout_width="393dp"
+        android:layout_width="match_parent"
         android:layout_height="851dp"
         android:layout_marginStart="0dp"
         android:background="@drawable/bg_white_shape"
@@ -21,7 +21,7 @@
 
     <View
         android:id="@+id/green"
-        android:layout_width="397dp"
+        android:layout_width="match_parent"
         android:layout_height="194dp"
         android:background="@drawable/green"
         app:layout_constraintStart_toStartOf="parent"
