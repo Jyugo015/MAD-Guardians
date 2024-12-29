@@ -69,4 +69,3 @@ public class AdapterMedia extends RecyclerView.Adapter<AdapterMedia.ViewHolder> 
         }
     }
 }
-

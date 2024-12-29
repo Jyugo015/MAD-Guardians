@@ -1,16 +1,18 @@
 package com.example.madguardians.ui.course;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.fragment.app.Fragment;
+
 import com.example.madguardians.R;
+import com.example.madguardians.firebase.Media;
 import com.example.madguardians.utilities.MediaHandler;
+import com.example.madguardians.utilities.UploadCallback;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -20,6 +22,7 @@ import com.example.madguardians.utilities.MediaHandler;
 public class ImageFragment extends Fragment {
 
     private Media image;
+    private View view;
     public ImageFragment() {
         // Required empty public constructor
     }
@@ -42,7 +45,18 @@ public class ImageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            image = Media.getMedia(getArguments().getString("mediaId"));
+            Media.getMedia(getArguments().getString("mediaId"), new UploadCallback<Media>() {
+                @Override
+                public void onSuccess(Media result) {
+                    image = result;
+                    ImageView imageView = view.findViewById(R.id.imageView);
+                    MediaHandler.displayImage(getContext(), image.getUrl(), imageView);
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("TAG", "onFailure: ", e);
+                }
+            });
         }
     }
 
@@ -50,9 +64,7 @@ public class ImageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_image, container, false);
-        ImageView imageView = view.findViewById(R.id.imageView);
-        MediaHandler.displayImage(getContext(), image.getUrl(), imageView);
+        view = inflater.inflate(R.layout.fragment_image, container, false);
         return view;
     }
 }

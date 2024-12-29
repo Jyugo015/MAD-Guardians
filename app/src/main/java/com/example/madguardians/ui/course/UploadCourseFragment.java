@@ -5,12 +5,6 @@ import static android.app.Activity.RESULT_OK;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,11 +14,17 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
 import com.example.madguardians.R;
 import com.example.madguardians.utilities.MediaHandler;
-import com.example.madguardians.utilities.PostViewModel;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,6 +35,7 @@ import java.util.List;
 public class UploadCourseFragment extends Fragment implements MediaHandler.MediaHandleCallback {
 
     private String domainId;
+    private String folderId;
     private ImageView IVCoverImage;
     private MediaHandler coverImageHandler;
     private Uri coverImageUri;
@@ -56,6 +57,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             domainId = getArguments().getString("domainId");
+            folderId = getArguments().getString("folderId");
         }
     }
 
@@ -123,6 +125,10 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             Toast.makeText(getContext(), "Please upload at least one post", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        boolean isPost1Uploaded = false;
+        boolean isPost2Uploaded = false;
+        boolean isPost3Uploaded = false;
         // check if all post have title and descriptions
         for (PostViewModel p:posts) {
             if (p.getTitle().isEmpty() || p.getDescription().isEmpty()) {
@@ -133,6 +139,14 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
                 Toast.makeText(getContext(), "Please upload at least one media for post " + p.getLevel(), Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (p.getLevel() == 1) isPost1Uploaded = true;
+            else if (p.getLevel() == 2) isPost2Uploaded = true;
+            else if (p.getLevel() == 3) isPost3Uploaded = true;
+        }
+
+        if (!isPost1Uploaded || (!isPost2Uploaded && !isPost3Uploaded)) {
+            Toast.makeText(getContext(), "Please upload according to level", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         // uploading
@@ -143,9 +157,11 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             Log.d("post confirmed", "post videosUri: " + p.getVideosUri().toString());
             Log.d("post confirmed", "post pdfUris: " + p.getPdfsUri().toString());
             // create a entity for database
+
             // verpost
 
         }
+
         clearHistory();
         Toast.makeText(getContext(), "Uploading", Toast.LENGTH_SHORT).show();
         Navigation.findNavController(getView()).navigate(R.id.nav_home);
@@ -160,6 +176,12 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
         selectedImages.clear();
         IVCoverImage.setImageURI(null);
     }
+
+    private static String generateDate() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        return dateFormat.format(new Date());
+    }
+
     @Override
     public void onMediaSelected(String filePath, String fileType) {
 

@@ -1,14 +1,6 @@
 package com.example.madguardians.ui.course;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +10,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
 import com.example.madguardians.R;
+import com.example.madguardians.firebase.Media;
+import com.example.madguardians.firebase.Post;
+import com.example.madguardians.utilities.FirebaseController;
+import com.example.madguardians.utilities.UploadCallback;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,8 +32,10 @@ import java.util.ArrayList;
 public class PostFragment extends Fragment {
 
     private Post post;
+    private View view;
     private static int NUMBER_OF_SEGMENT;
     private int lastViewId;
+
     public PostFragment() {
         // Required empty public constructor
     }
@@ -45,58 +49,96 @@ public class PostFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            post = Post.getPost(getArguments().getString("postId"));
+            Post.getPost(getArguments().getString("postId"), new UploadCallback<Post>(){
+                @Override
+                public void onSuccess(Post result) {
+                    post = result;
+                    setView();
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("TAG", "onFailure: ", e);
+                }
+            });
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_post, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.fragment_post, container, false);
+        setView();
+        NUMBER_OF_SEGMENT = 0;
+        lastViewId = 0;
+        return view;
+    }
+
+    private void setView() {
         TextView TVTitle = view.findViewById(R.id.TVTitle);
         TextView TVDescription = view.findViewById(R.id.TVDescription);
         if (post != null) {
             TVTitle.setText(post.getTitle());
             TVDescription.setText(post.getDescription());
-        } else {
-            Log.d("Post fragment", "onCreateView: Post is null");
-        }
-        NUMBER_OF_SEGMENT = 0;
-        lastViewId = 0;
-
-        //find if this post is viewed
-        // if yes, change the status as "Completed"
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        ConstraintLayout CLLevel = view.findViewById(R.id.CLLevel);
-
-        if (post != null) {
-            androidx.constraintlayout.widget.ConstraintLayout CLContainer = view.findViewById(R.id.CLContainer);
+            ConstraintLayout CLContainer = view.findViewById(R.id.CLContainer);
             ArrayList<Media> imgMedias = new ArrayList<>();
             ArrayList<Media> vidMedias = new ArrayList<>();
             ArrayList<Media> pdfMedias = new ArrayList<>();
             if (post.getImageSetId() != null) {
-                imgMedias = Media.getMedias(post.getImageSetId());
+                Media.getMedias(post.getImageSetId(), new UploadCallback<List<Media>>() {
+                    @Override
+                    public void onSuccess(List<Media> result) {
+                        imgMedias.clear();
+                        imgMedias.addAll(result);
+                        for (Media imgMedia : imgMedias) {
+                            displayMediaSegment(CLContainer, imgMedia, FirebaseController.IMAGE);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("TAG", "onFailureImage: ", e);
+                    }
+                });
             }
             if (post.getFileSetId() != null) {
-                pdfMedias = Media.getMedias(post.getFileSetId());
+                Media.getMedias(post.getFileSetId(), new UploadCallback<List<Media>>() {
+                    @Override
+                    public void onSuccess(List<Media> result) {
+                        pdfMedias.clear();
+                        pdfMedias.addAll(result);
+                        for (Media pdfMedia : pdfMedias) {
+                            displayMediaSegment(CLContainer, pdfMedia, FirebaseController.PDF);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("TAG", "onFailurePDF: ", e);
+                    }
+                });
             }
             if (post.getVideoSetId() != null) {
-                vidMedias = Media.getMedias(post.getVideoSetId());
+                Media.getMedias(post.getVideoSetId(), new UploadCallback<List<Media>>() {
+                    @Override
+                    public void onSuccess(List<Media> result) {
+                        vidMedias.clear();
+                        vidMedias.addAll(result);
+                        for (Media vidMedia : vidMedias) {
+                            displayMediaSegment(CLContainer, vidMedia, FirebaseController.VIDEO);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("TAG", "onFailureVideo: ", e);
+                    }
+                });
             }
-            for (Media imgMedia : imgMedias) {
-                displayMediaSegment(CLContainer, imgMedia, "image");
-            }for (Media vidMedia : vidMedias) {
-                displayMediaSegment(CLContainer, vidMedia, "video");
-            }for (Media pdfMedia : pdfMedias) {
-                displayMediaSegment(CLContainer, pdfMedia, "pdf");
-            }
+        } else {
+            Log.d("Post fragment", "onCreateView: Post is null");
         }
+
+        //find if this post is viewed
+        // if yes, change the status as "Completed"
     }
 
     private void displayMediaSegment(ConstraintLayout clContainer, Media imgMedia, String typeMedia) {

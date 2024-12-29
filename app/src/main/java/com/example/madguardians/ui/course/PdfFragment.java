@@ -1,17 +1,19 @@
 package com.example.madguardians.ui.course;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.fragment.app.Fragment;
+
 import com.example.madguardians.R;
+import com.example.madguardians.firebase.Media;
 import com.example.madguardians.utilities.MediaHandler;
+import com.example.madguardians.utilities.UploadCallback;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,6 +23,7 @@ import com.example.madguardians.utilities.MediaHandler;
 public class PdfFragment extends Fragment {
 
     private Media pdf;
+    private View view;
     public PdfFragment() {
         // Required empty public constructor
     }
@@ -43,7 +46,21 @@ public class PdfFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            pdf = Media.getMedia(getArguments().getString("mediaId"));
+            Media.getMedia(getArguments().getString("mediaId"), new UploadCallback<Media>() {
+                @Override
+                public void onSuccess(Media result) {
+                    pdf = result;
+                    WebView webView = view.findViewById(R.id.webView);
+                    webView.getSettings().setJavaScriptEnabled(true);
+                    webView.getSettings().setSupportZoom(true);
+                    webView.setWebViewClient(new WebViewClient());
+                    MediaHandler.displayPDF(pdf.getUrl(), webView);
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("TAG", "onFailure: ", e);
+                }
+            });
         }
     }
 
@@ -51,12 +68,7 @@ public class PdfFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_pdf, container, false);
-        WebView webView = view.findViewById(R.id.webView);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setSupportZoom(true);
-        webView.setWebViewClient(new WebViewClient());
-        MediaHandler.displayPDF(pdf.getUrl(), webView);
+        view = inflater.inflate(R.layout.fragment_pdf, container, false);
         return view;
     }
 }

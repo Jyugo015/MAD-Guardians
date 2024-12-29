@@ -14,19 +14,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
-import com.example.madguardians.ui.course.CourseElement;
-import com.example.madguardians.ui.course.Domain;
-import com.example.madguardians.ui.course.Post;
+import com.example.madguardians.firebase.Course;
+import com.example.madguardians.firebase.Domain;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseViewHolder> {
 
-    private List<CourseElement> courseList;
-    private List<CourseElement> originalCourseList;
+    private List<Course> courseList;
+    private List<Course> originalCourseList;
     private OnItemClickListener listener;
-    public AdapterCourse(List<CourseElement> courseList, OnItemClickListener listener) {
+    public AdapterCourse(List<Course> courseList, OnItemClickListener listener) {
         this.courseList = courseList;
         this.originalCourseList = courseList;
         this.listener = listener;
@@ -40,8 +39,8 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AdapterCourse.CourseViewHolder holder, int position) {
-        CourseElement course = courseList.get(position);
+    public void onBindViewHolder(@NonNull CourseViewHolder holder, int position) {
+        Course course = courseList.get(position);
 
         // Set the data
         holder.title.setText(course.getTitle());
@@ -58,7 +57,7 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
         holder.button_collection.setOnClickListener(v -> listener.onCollectionClick(course));
     }
 
-    private void showImage(CourseViewHolder holder, CourseElement course) {
+    private void showImage(CourseViewHolder holder, Course course) {
         Glide.with(holder.itemView.getContext()).load(course.getCoverImage()).placeholder(R.drawable.placeholder_image).error(R.drawable.error_image).into(holder.image_cover);
     }
 
@@ -73,10 +72,20 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
             courseList = originalCourseList;
         } else {
             courseList = originalCourseList.stream()
-                    .filter(course -> domains.contains(Domain.getDomainById(Post.getPost(course.getPost1()).getDomainId())))
-                    .collect(Collectors.toList());
+                .filter(course ->{
+                        String domainId = course.getDomainId();
+                        Log.d("TAG", "domainId: " + domainId);
+                        return domains.stream().anyMatch(domain -> domain.getDomainId().equals(course.getDomainId()));
+                }).collect(Collectors.toList());
         }
         Log.d("TAG", "filterCourseByDomain: " + courseList.toString());
+        notifyDataSetChanged();
+    }
+
+
+    public void updateCourseList(List<Course> courses) {
+        courseList.clear();
+        courseList.addAll(courses);
         notifyDataSetChanged();
     }
 
@@ -101,7 +110,7 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
     }
 
     public interface OnItemClickListener {
-        void onStartClick(CourseElement course);
-        void onCollectionClick(CourseElement course);
+        void onStartClick(Course course);
+        void onCollectionClick(Course course);
     }
 }

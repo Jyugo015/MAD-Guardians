@@ -2,6 +2,15 @@ package com.example.madguardians.ui.home;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,23 +19,11 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.TextView;
-
 import com.example.madguardians.R;
-import com.example.madguardians.ui.course.CourseElement;
-import com.example.madguardians.ui.course.Domain;
-import com.example.madguardians.ui.course.Media;
-import com.example.madguardians.ui.course.Post;
+import com.example.madguardians.firebase.Course;
+import com.example.madguardians.firebase.Domain;
 import com.example.madguardians.utilities.AdapterCourse;
+import com.example.madguardians.utilities.UploadCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +46,9 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
     private RecyclerView RVCourse;
     private AdapterCourse courseAdapter;
     private Spinner SPDomain;
-    private List<CourseElement> courseList;
-    List<Domain> domains;
-    List<Domain> selectedDomain;
+    private List<Course> courseList = new ArrayList<>();
+    List<Domain> domains = new ArrayList<>();
+    List<Domain> selectedDomain = new ArrayList<>();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -78,13 +75,27 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        courseAdapter = new AdapterCourse(courseList, HomeFragment.this);
 
-//        AppDatabase db = Room.databaseBuilder(getContext(), AppDatabase.class, "course-database").build();
-//        courseDao = db.courseDao();
-        CourseElement.initializeCourseList();
-        Post.intializePosts();
-        Media.initialiseMedia();
-        courseAdapter = new AdapterCourse(CourseElement.getCourseList(), this);
+        Log.d("TAG", "onCreate: start1");
+//        Course.initializeCourseList();
+//        Domain.initialiseDomains();
+//        Post.intializePosts();
+//        Media.initialiseMedia();
+//        Folder.initialiseFolders();
+        Log.d("TAG", "onCreate: start2");
+        Course.getCourses(new UploadCallback<List<Course>>() {
+            @Override
+            public void onSuccess(List<Course> courseList) {
+                courseAdapter.updateCourseList(courseList);
+                Log.d("TAG", "onSuccess: size = " + courseList.size());
+                Log.d("TAG", "onSuccess: start3" + courseList.toString());
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("TAG", "onFailure: " + e.getMessage());
+            }
+        });
     }
 
     @Override
@@ -103,16 +114,20 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
             Navigation.findNavController(view).navigate(R.id.nav_domains);
         });
 
-        List<Domain> domains = Domain.getDomains();
-        selectedDomain = new ArrayList<>();
-        CustomSpinnerAdapter adapter = new CustomSpinnerAdapter(getContext(), domains);
-        SPDomain.setAdapter(adapter);
+        Domain.getDomains(new UploadCallback<List<Domain>>() {
+            @Override
+            public void onSuccess(List<Domain> result) {
+                domains.clear();
+                domains.addAll(result);
+                CustomSpinnerAdapter adapter = new CustomSpinnerAdapter(getContext(), domains);
+                SPDomain.setAdapter(adapter);
+            }
+            @Override
+            public void onFailure(Exception e) {
 
-//        List<String> domainNames = new ArrayList<>();
-//        for (Domain domain : domains) {
-//            domainNames.add(domain.getDomainName());
-//        }
-        List<Domain> selectedDomain = new ArrayList<>();
+            }
+        });
+
 
         return view;
     }
@@ -124,7 +139,7 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
 
 
     @Override
-    public void onStartClick(CourseElement course) {
+    public void onStartClick(Course course) {
         Log.w("Home Fragment", "onStartClick" );
         Bundle bundle = new Bundle();
         bundle.putString("courseId", course.getCourseId());
@@ -132,7 +147,7 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
     }
 
     @Override
-    public void onCollectionClick(CourseElement course) {
+    public void onCollectionClick(Course course) {
 
     }
 

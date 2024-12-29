@@ -1,27 +1,22 @@
 package com.example.madguardians.ui.course;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
 import com.example.madguardians.R;
-import com.example.madguardians.database.AppDatabase;
-import com.example.madguardians.database.Course;
-import com.example.madguardians.database.CourseDao;
-import com.example.madguardians.database.PostDao;
-import com.example.madguardians.database.UserDao;
+import com.example.madguardians.firebase.Course;
+import com.example.madguardians.firebase.Domain;
+import com.example.madguardians.utilities.UploadCallback;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -31,11 +26,9 @@ import com.example.madguardians.database.UserDao;
 public class CourseOverviewFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
-    private CourseElement course;
+    private Course course;
+    private List<Course> courses;
     private View view;
-    private AppDatabase db;
-    private CourseDao courseDao;
-    private PostDao postDao;
 
     public CourseOverviewFragment() {
         // Required empty public constructor
@@ -58,11 +51,19 @@ public class CourseOverviewFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = AppDatabase.getDatabase(getContext());
-        courseDao = db.courseDao();
-        postDao = db.postDao();
         if (getArguments() != null) {
-            course = CourseElement.getCourse(getArguments().getString("courseId"));
+            String courseId = getArguments().getString("courseId");
+            Course.getCourse(courseId, new UploadCallback<Course>() {
+                @Override
+                public void onSuccess(Course result) {
+                    course = result;
+                    setView();
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("CourseOverviewFragment", "onFailure: failed to get course");
+                }
+            });
         }
     }
 
@@ -71,8 +72,13 @@ public class CourseOverviewFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view =  inflater.inflate(R.layout.fragment_course_overview, container, false);
+        setView();
+        return view;
+    }
 
-        if (course != null) {
+    private void setView() {
+        this.course = course;
+        if (view != null && course != null) {
             TextView TVTitle = view.findViewById(R.id.TVTitle);
             TextView TVDomain = view.findViewById(R.id.TVDomain);
             TextView TVDate = view.findViewById(R.id.TVDate);
@@ -82,15 +88,76 @@ public class CourseOverviewFragment extends Fragment {
             TextView TVDescription = view.findViewById(R.id.TVDescription);
 
             TVTitle.setText(course.getTitle());
-//                TVDomain.setText(course.getDomain());
+            Domain.getDomain(course.getDomainId(), new UploadCallback<Domain>() {
+                @Override
+                public void onSuccess(Domain result) {
+                    TVDomain.setText("Domain: " + (String) result.getDomainName());
+                }
+                @Override
+                public void onFailure(Exception e) {
+
+                }
+            });
             TVDate.setText("Date: " + course.getDate());
             TVAuthor.setText(course.getAuthor());
+
+            androidx.constraintlayout.widget.ConstraintLayout LYLevel1 = view.findViewById(R.id.LYPost1);
+            androidx.constraintlayout.widget.ConstraintLayout LYLevel2 = view.findViewById(R.id.LYPost2);
+            androidx.constraintlayout.widget.ConstraintLayout LYLevel3 = view.findViewById(R.id.LYPost3);
+
+            if (course.getPost1() == null) {
+                LYLevel1.setVisibility(View.GONE);
+            } else {
+                Log.d("CourseOverviewFragment", "Post1: " + course.getPost1());
+                LYLevel1.setOnClickListener(v -> {
+                    Log.w("CourseOverviewFragment", "Level 1 clicked");
+                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(course.getPost1()));
+                });
+            }
+
+            if (course.getPost2() == null) {
+                LYLevel2.setVisibility(View.GONE);
+            } else{
+                Log.d("CourseOverviewFragment", "Post2: " + course.getPost2());
+                LYLevel2.setOnClickListener(v -> {
+                    Log.w("CourseOverviewFragment", "Level 2 clicked");
+                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(course.getPost2()));
+                });
+            }
+
+            if (course.getPost3() == null) {
+                LYLevel3.setVisibility(View.GONE);
+            } else {
+                Log.d("CourseOverviewFragment", "Post3: " + course.getPost3());
+                LYLevel3.setOnClickListener(v -> {
+                    Log.w("CourseOverviewFragment", "Level 3 clicked");
+                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(course.getPost3()));
+                });
+            }
+
+            ToggleButton TBCollection = view.findViewById(R.id.TBCollection);
+            setIsChecked(course, isCollected(course));
+            TBCollection.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) setIsChecked(course, true);
+                else setIsChecked(course, false);
+            });
+
+            view.clearFocus();
         }
-        return view;
+    }
+
+    private Bundle getPassingBundle (String post) {
+        Bundle bundle = new Bundle();
+        bundle.putString("courseId", course.getCourseId());
+//        bundle.putString("domainId", course.getDomainId());
+//        bundle.putString("date", course.getDate());
+//        bundle.putString("folderId", course.getFolderId());
+        bundle.putString("postId", post);
+        return bundle;
     }
 
     /////////////////////////////////////////////////////////////////////
-    private void setIsChecked(CourseElement course, boolean isChecked) {
+    private void setIsChecked(Course course, boolean isChecked) {
         TextView TVCollection = view.findViewById(R.id.TVCollection);
         ToggleButton TBCollection = view.findViewById(R.id.TBCollection);
         TBCollection.setChecked(isChecked);
@@ -99,62 +166,8 @@ public class CourseOverviewFragment extends Fragment {
         // change database
     }
 
-    private boolean isCollected(CourseElement course) {
+    private boolean isCollected(Course course) {
         return true;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        androidx.constraintlayout.widget.ConstraintLayout LYLevel1 = view.findViewById(R.id.LYPost1);
-        androidx.constraintlayout.widget.ConstraintLayout LYLevel2 = view.findViewById(R.id.LYPost2);
-        androidx.constraintlayout.widget.ConstraintLayout LYLevel3 = view.findViewById(R.id.LYPost3);
-
-        Log.d("CourseOverviewFragment", "Post1: " + course.getPost1());
-        Log.d("CourseOverviewFragment", "Post2: " + course.getPost2());
-        Log.d("CourseOverviewFragment", "Post3: " + course.getPost3());
-
-        if (course.getPost1() == null) {
-            LYLevel1.setVisibility(View.GONE);
-        } else {
-            LYLevel1.setOnClickListener(v -> {
-                Log.w("CourseOverviewFragment", "Level 1 clicked");
-                Bundle bundle = new Bundle();
-                bundle.putString("postId", course.getPost1());
-                Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
-            });
-        }
-
-        if (course.getPost2() == null) {
-            LYLevel2.setVisibility(View.GONE);
-        } else{
-            LYLevel2.setOnClickListener(v -> {
-                Log.w("CourseOverviewFragment", "Level 2 clicked");
-                Bundle bundle = new Bundle();
-                bundle.putString("postId", course.getPost2());
-                Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
-            });
-        }
-
-        if (course.getPost3() == null) {
-            LYLevel3.setVisibility(View.GONE);
-        } else {
-            LYLevel3.setOnClickListener(v -> {
-                Log.w("CourseOverviewFragment", "Level 3 clicked");
-                Bundle bundle = new Bundle();
-                bundle.putString("postId", course.getPost3());
-                Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
-            });
-        }
-
-        ToggleButton TBCollection = view.findViewById(R.id.TBCollection);
-        setIsChecked(course, isCollected(course));
-        TBCollection.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) setIsChecked(course, true);
-            else setIsChecked(course, false);
-        });
-
-        view.clearFocus();
     }
 }
 
