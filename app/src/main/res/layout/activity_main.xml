@@ -9,7 +9,7 @@
 
     <View
         android:id="@+id/bg_white"
-        android:layout_width="393dp"
+        android:layout_width="match_parent"
         android:layout_height="851dp"
         android:layout_marginStart="0dp"
         android:layout_marginTop="0dp"
@@ -19,26 +19,27 @@
 
     <ImageView
         android:id="@+id/loginpagebg"
-        android:layout_width="365dp"
+        android:layout_width="match_parent"
         android:layout_height="346dp"
-        android:layout_marginStart="14dp"
         android:layout_marginTop="232dp"
         android:contentDescription="loginpagebg"
         android:src="@drawable/loginpagebg"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 
     <ImageView
         android:id="@+id/loginpagecharacter"
         android:layout_width="296dp"
         android:layout_height="252dp"
-        android:layout_marginStart="48dp"
         android:layout_marginTop="296dp"
         android:contentDescription="loginpagecharacter"
         android:src="@drawable/loginpagecharacter"
+        app:layout_constraintEnd_toEndOf="@+id/bg_white"
+        app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 
     <Button
         android:id="@+id/signup"
