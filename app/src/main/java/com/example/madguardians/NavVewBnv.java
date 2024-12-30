@@ -5,11 +5,16 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 
+import com.bumptech.glide.Glide;
 import com.example.madguardians.databinding.ActivityNavVewBnvStaffBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
@@ -25,6 +30,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.madguardians.databinding.ActivityNavVewBnvBinding;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class NavVewBnv extends AppCompatActivity {
 
@@ -109,10 +116,13 @@ public class NavVewBnv extends AppCompatActivity {
 //                .setNegativeButton("No", null)
 //                .show();
 //    }
+SharedPreferences sharedPreferences;
+String userId;
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_nav_vew_bnv);
+
 
     Toolbar toolbar =findViewById(R.id.TBMainAct);
     setSupportActionBar(toolbar);
@@ -139,22 +149,64 @@ protected void onCreate(Bundle savedInstanceState) {
     NavigationUI.setupWithNavController(sideView, navController);
 
     sideView.setNavigationItemSelectedListener(item -> {
-            int id = item.getItemId();
-            boolean handled = false;
-            if (id == R.id.nav_logout) {
-                logout();
-                handled = true;
-            } else {
-                handled = NavigationUI.onNavDestinationSelected(item, navController) || super.onOptionsItemSelected(item);
-            }
+        int id = item.getItemId();
+        boolean handled = false;
+        if (id == R.id.nav_logout) {
+            logout();
+            handled = true;
+        } else {
+            handled = NavigationUI.onNavDestinationSelected(item, navController) || super.onOptionsItemSelected(item);
+        }
 
-            if (handled) {
-                drawerLayout.closeDrawer(GravityCompat.START);
-            }
+        if (handled) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }
 
-            return handled;
-        });
+        return handled;
+    });
 
+    View headerView = sideView.getHeaderView(0);
+    ImageView IVprofileImage = headerView.findViewById(R.id.profile_image);
+    TextView TVusername = headerView.findViewById(R.id.username);
+    TextView TVemail = headerView.findViewById(R.id.email);
+
+    // Get SharedPreferences
+    sharedPreferences = getSharedPreferences("user_preferences", MODE_PRIVATE);
+    //Get userid
+    userId = sharedPreferences.getString("user_id", null);
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    db.collection("user")
+            .document(userId)
+            .get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    DocumentSnapshot document = task.getResult();
+
+                    if (document.exists()) {
+                        String name = document.getString("name");
+                        String email = document.getString("email");
+                        String profilePicUrl = document.getString("profilePic");
+
+                        if (name != null) TVusername.setText(name);
+                        if (email != null) TVemail.setText(email);
+
+                        if (profilePicUrl != null && !"url link of default profile pic".equals(profilePicUrl)) {
+                            Glide.with(NavVewBnv.this)
+                                    .load(profilePicUrl)
+                                    .circleCrop()
+                                    .into(IVprofileImage);
+                        } else {
+                            IVprofileImage.setImageResource(R.drawable.profile_pic);
+                        }
+                    } else {
+                        Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(this, "Failed to load user data", Toast.LENGTH_SHORT).show();
+                }
+            });
 
 
 }

@@ -36,9 +36,9 @@ public class CloudinaryUploadWorker extends Worker {
         super(context, params);
         this.context = context;
         Map<String, String> config = new HashMap<>();
-        config.put("cloud_name", context.getString(R.string.cloudinary_cloud_name));
-        config.put("api_key", context.getString(R.string.cloudinary_api_key));
-        config.put("api_secret", context.getString(R.string.cloudinary_api_secret));
+        config.put("cloud_name", context.getString(R.string.cloud_name));
+        config.put("api_key", context.getString(R.string.api_key));
+        config.put("api_secret", context.getString(R.string.api_secret));
 
         cloudinary = new Cloudinary(config);
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
