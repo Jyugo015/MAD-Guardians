@@ -36,7 +36,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract IssueDao issueDao();
     public abstract MediaReadDao mediaReadDao();
     public abstract MediaSetDao mediaSetDao();
-    public abstract MediaDao mediaDao();
+//    public abstract MediaDao mediaDao();
 //    public abstract NotificationDao notificationDao();
     public abstract PostDao postDao();
     public abstract QuestionOptionDao questionOptionDao();
