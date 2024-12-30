@@ -63,7 +63,7 @@ public class FirestoreManager {
 //        database.notificationDao().deleteAll();
         database.verPostDao().deleteAll();
         database.mediaSetDao().deleteAll();
-        database.mediaDao().deleteAll();
+//        database.mediaDao().deleteAll();
         database.questionOptionDao().deleteAll();
         database.quizQuestionDao().deleteAll();
         database.quizOldDao().deleteAll();
@@ -483,9 +483,9 @@ public class FirestoreManager {
             case "issue":
                 database.issueDao().delete((Issue)data);
                 break;
-            case "media":
-                database.mediaDao().delete((Media)data);
-                break;
+//            case "media":
+//                database.mediaDao().delete((Media)data);
+//                break;
             case "mediaRead":
                 database.mediaReadDao().delete((MediaRead)data);
                 break;
@@ -1532,9 +1532,9 @@ public class FirestoreManager {
                 case "issue":
                     database.issueDao().insert((Issue) currentObject);
                     break;
-                case "media":
-                    database.mediaDao().insert((Media) currentObject);
-                    break;
+//                case "media":
+//                    database.mediaDao().insert((Media) currentObject);
+//                    break;
                 case "mediaRead":
                     database.mediaReadDao().insert((MediaRead) currentObject);
                     break;
@@ -1628,9 +1628,9 @@ public class FirestoreManager {
                 case "issue":
                     database.issueDao().insertAll((List<Issue>) data);
                     break;
-                case "media":
-                    database.mediaDao().insertAll((List<Media>) data);
-                    break;
+//                case "media":
+//                    database.mediaDao().insertAll((List<Media>) data);
+//                    break;
                 case "mediaRead":
                     database.mediaReadDao().insertAll((List<MediaRead>) data);
                     break;
@@ -2122,13 +2122,13 @@ public class FirestoreManager {
                 database.verPostDao()::delete
         );
         //media
-        addFirestoreListener(
-                "media",
-                Media.class,
-                database.mediaDao()::insert,
-                database.mediaDao()::update,
-                database.mediaDao()::delete
-        );
+//        addFirestoreListener(
+//                "media",
+//                Media.class,
+//                database.mediaDao()::insert,
+//                database.mediaDao()::update,
+//                database.mediaDao()::delete
+//        );
         //mediaSet
         addFirestoreListener(
                 "mediaSet",
