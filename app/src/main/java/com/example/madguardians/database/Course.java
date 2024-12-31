@@ -5,6 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 @Entity(tableName = "course",
         foreignKeys = {
@@ -13,21 +21,18 @@ import androidx.room.PrimaryKey;
                         parentColumns = "postId",
                         childColumns = "post1",
                         onDelete = ForeignKey.SET_NULL
-                        //shown as "empty post" upon deletion
                 ),
                 @ForeignKey(
                         entity = Post.class,
                         parentColumns = "postId",
                         childColumns = "post2",
                         onDelete = ForeignKey.SET_NULL
-                        //shown as "empty post" upon deletion
                 ),
                 @ForeignKey(
                         entity = Post.class,
                         parentColumns = "postId",
                         childColumns = "post3",
                         onDelete = ForeignKey.SET_NULL
-                        //shown as "empty post" upon deletion
                 ),
                 @ForeignKey(
                         entity = Folder.class,
@@ -37,6 +42,7 @@ import androidx.room.PrimaryKey;
                 )
         }
 )
+@TypeConverters(TimestampConverter.class)
 public class Course {
     @PrimaryKey
     @NonNull
@@ -55,16 +61,14 @@ public class Course {
     private String post3;
     @Nullable
     private String folderId;
-    @NonNull
-    private String date;
+    @Nullable
+    private String date;  // Store as String
 
-    public Course() {
-    }
+    public Course() {}
 
-    // Constructor
     public Course(@NonNull String courseId, @NonNull String title, @NonNull String description,
                   @NonNull String coverImage, @Nullable String post1, @Nullable String post2,
-                  @Nullable String post3, @Nullable String folderId, @NonNull String date) {
+                  @Nullable String post3, @Nullable String folderId, @Nullable String date) {
         this.courseId = courseId;
         this.title = title;
         this.description = description;
@@ -157,7 +161,7 @@ public class Course {
     }
 
     // Getter and Setter for date
-    @NonNull
+    @Nullable
     public String getDate() {
         return date;
     }
