@@ -75,6 +75,7 @@ public class PostFragment extends Fragment {
     private void setView() {
         TextView TVTitle = view.findViewById(R.id.TVTitle);
         TextView TVDescription = view.findViewById(R.id.TVDescription);
+        Button BTNComment = view.findViewById(R.id.BTNComment);
         if (post != null) {
             TVTitle.setText(post.getTitle());
             TVDescription.setText(post.getDescription());
@@ -136,6 +137,10 @@ public class PostFragment extends Fragment {
         } else {
             Log.d("Post fragment", "onCreateView: Post is null");
         }
+
+        BTNComment.setOnClickListener(v -> {
+            connectToComment(post.getPostId());
+        });
     }
 
     private void displayMediaSegment(ConstraintLayout clContainer, MediaFB media, String typeMedia) {
@@ -146,7 +151,6 @@ public class PostFragment extends Fragment {
         TextView TVDesc = mediaSegment.findViewById(R.id.TVDesc);
         Button BTNStart = mediaSegment.findViewById(R.id.BTNStart);
         Button BTNReport = mediaSegment.findViewById(R.id.BTNReport);
-        Button BTNComment = mediaSegment.findViewById(R.id.BTNComment);
 
 
         // set text in the button
@@ -204,9 +208,6 @@ public class PostFragment extends Fragment {
         BTNReport.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Connecting to report", Toast.LENGTH_SHORT).show();
         });
-        BTNComment.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Connecting to commment", Toast.LENGTH_SHORT).show();
-        });
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -218,4 +219,10 @@ public class PostFragment extends Fragment {
 
     private void setIsRead(String mediaId) {
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    // jiaqi
+    private void connectToComment(String postId) {
+    }
+
 }
