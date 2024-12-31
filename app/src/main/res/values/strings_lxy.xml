@@ -1,0 +1,39 @@
+<resources>
+
+    <string name="home_fragment">Home</string>
+    <string name="volunteer_fragment">Volunteer</string>
+    <string name="consult_fragment">Consult</string>
+    <string name="profile_fragment">Profile</string>
+    <string name="logout_fragment">Logout</string>
+    <string name="back">Back</string>
+    <string name="title">Title</string>
+    <string name="author">Author</string>
+    <string name="date">Date</string>
+    <string name="description">Description</string>
+    <string name="domain">Domain</string>
+    <string name="comment">0 comment</string>
+    <string name="view">0 view</string>
+    <string name="collection">Add to favourite</string>
+    <string name="level1">Level 1</string>
+    <string name="level2">Level 2</string>
+    <string name="level3">Level 3</string>
+    <string name="image_desc">Click me to see the image</string>
+    <string name="video_desc">Click me to watch the video</string>
+    <string name="pdf_desc">Click me to learn more information</string>
+    <string name="start">Start learning</string>
+    <string name="upload_course">Upload Course</string>
+    <string name="course_title">Course Title</string>
+    <string name="course_description">Course Description</string>
+    <string name="upload_post">Upload Post</string>
+    <string name="upload_quiz">Upload Quiz</string>
+    <string name="post_title">Post Title</string>
+    <string name="post_description">Post Description</string>
+    <string name="choose_image">Choose Image</string>
+    <string name="upload_images">Upload Images</string>
+    <string name="upload_videos">Upload Videos</string>
+    <string name="upload_pdfs">Upload PDFs</string>
+    <string name="discard">Discard</string>
+    <string name="image">Image</string>
+    <string name="video">Video</string>
+    <string name="pdf">PDF</string>
+</resources>

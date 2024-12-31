@@ -5,6 +5,7 @@ import android.content.Context;
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.Notification;
+import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,7 +24,7 @@ public class NotificationManager {
     public void sendNotification(String userId, String message) {
         try {
             String notificationId = UUID.randomUUID().toString();
-            String deliveredTime = getCurrentTimestamp();
+            Timestamp deliveredTime = getCurrentTimestamp();
 
             Notification notification = new Notification(
                     notificationId,
@@ -38,7 +39,8 @@ public class NotificationManager {
         }
     }
 
-    private String getCurrentTimestamp() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+    private Timestamp getCurrentTimestamp() {
+        return Timestamp.now();
+//        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
     }
 }
