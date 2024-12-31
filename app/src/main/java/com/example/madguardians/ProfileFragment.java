@@ -134,6 +134,12 @@ public class ProfileFragment extends Fragment {
 
             navController.navigate(R.id.action_nav_profile_to_notificationFragment);
         });
+
+        TextView viewAllAchievement = rootView.findViewById(R.id.viewAllAchievement);
+        viewAllAchievement.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
+            navController.navigate(R.id.action_nav_profile_to_viewAllAchievementsFragment);
+        });
         return rootView;
     }
 
