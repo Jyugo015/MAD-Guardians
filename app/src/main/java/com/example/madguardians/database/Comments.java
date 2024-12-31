@@ -10,38 +10,7 @@ import androidx.room.PrimaryKey;
 import com.google.firebase.Timestamp;
 import java.io.Serializable;
 
-@Entity(tableName = "comment",
-        foreignKeys = {
-            @ForeignKey(
-                    entity = User.class,
-                    parentColumns = "userId",
-                    childColumns = "userId",
-                    onDelete = ForeignKey.SET_NULL
-                    //shown as "user no longer exists" upon deletion
-            ),
-            @ForeignKey(
-                    entity = Post.class,
-                    parentColumns = "postId",
-                    childColumns = "postId",
-                    onDelete = ForeignKey.CASCADE
-            ),
-            @ForeignKey(
-                    entity = Comment.class,
-                    parentColumns = "commentId",
-                    childColumns = "rootComment",
-                    onDelete = ForeignKey.CASCADE
-            ),
-            @ForeignKey(
-                    entity = User.class,
-                    parentColumns = "userId",
-                    childColumns = "replyUserId",
-                    onDelete = ForeignKey.SET_NULL
-                    //shown as "user no longer exists" upon deletion
-            )
-        }
-)
-public class Comment implements Serializable{
-    @PrimaryKey
+public class Comments implements Serializable{
     @NonNull
     private String commentId;
     @Nullable
@@ -59,13 +28,13 @@ public class Comment implements Serializable{
     private boolean isRead;
     @NonNull
     private String authorId;
-//    @NonNull
-//    private Timestamp timestamp;
+    @NonNull
+    private Timestamp timestamp;
 
     // Constructor
-    public Comment(@NonNull String commentId, @Nullable String userId, @NonNull String postId,
+    public Comments(@NonNull String commentId, @Nullable String userId, @NonNull String postId,
                    @NonNull String comment, @Nullable String rootComment, @Nullable String replyUserId,
-                   boolean isRead, String authorId) {
+                   boolean isRead, String authorId, @NonNull Timestamp timestamp) {
         this.commentId = commentId;
         this.userId = userId;
         this.postId = postId;
@@ -74,9 +43,9 @@ public class Comment implements Serializable{
         this.replyUserId = replyUserId;
         this.isRead = isRead;
         this.authorId = authorId;
-//        this.timestamp = timestamp;
+        this.timestamp = timestamp;
     }
-    public Comment() {
+    public Comments() {
     }
 
     // Getter and Setter for commentId
@@ -159,12 +128,12 @@ public class Comment implements Serializable{
     }
 
     // Getter and Setter for timestamp
-//    @NonNull
-//    public String getTimestamp() {
-//        return timestamp;
-//    }
-//
-//    public void setTimestamp(@NonNull String timestamp) {
-//        this.timestamp = timestamp;
-//    }
+    @NonNull
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(@NonNull Timestamp timestamp) {
+        this.timestamp = timestamp;
+    }
 }
