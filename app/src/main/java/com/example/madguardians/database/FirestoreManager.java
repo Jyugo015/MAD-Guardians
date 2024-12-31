@@ -63,7 +63,7 @@ public class FirestoreManager {
 //        database.notificationDao().deleteAll();
         database.verPostDao().deleteAll();
         database.mediaSetDao().deleteAll();
-        database.mediaDao().deleteAll();
+//        database.mediaDao().deleteAll();
         database.questionOptionDao().deleteAll();
         database.quizQuestionDao().deleteAll();
         database.quizOldDao().deleteAll();
@@ -483,9 +483,9 @@ public class FirestoreManager {
             case "issue":
                 database.issueDao().delete((Issue)data);
                 break;
-            case "media":
-                database.mediaDao().delete((Media)data);
-                break;
+//            case "media":
+//                database.mediaDao().delete((Media)data);
+//                break;
             case "mediaRead":
                 database.mediaReadDao().delete((MediaRead)data);
                 break;
@@ -1190,7 +1190,7 @@ public class FirestoreManager {
                 Comment comment = (Comment)currentChange;
                 return new Object[]{comment.getCommentId(), comment.getUserId(), comment.getPostId(),
                     comment.getComment(), comment.getRootComment(), comment.getReplyUserId(),
-                    comment.isRead(), comment.getTimestamp()};
+                    comment.isRead()};
             case "counselor":
                 Counselor counselor = (Counselor)currentChange;
                 return new Object[]{counselor.getCounselorId(), counselor.getName(), counselor.getOffice(),
@@ -1532,9 +1532,9 @@ public class FirestoreManager {
                 case "issue":
                     database.issueDao().insert((Issue) currentObject);
                     break;
-                case "media":
-                    database.mediaDao().insert((Media) currentObject);
-                    break;
+//                case "media":
+//                    database.mediaDao().insert((Media) currentObject);
+//                    break;
                 case "mediaRead":
                     database.mediaReadDao().insert((MediaRead) currentObject);
                     break;
@@ -1628,9 +1628,9 @@ public class FirestoreManager {
                 case "issue":
                     database.issueDao().insertAll((List<Issue>) data);
                     break;
-                case "media":
-                    database.mediaDao().insertAll((List<Media>) data);
-                    break;
+//                case "media":
+//                    database.mediaDao().insertAll((List<Media>) data);
+//                    break;
                 case "mediaRead":
                     database.mediaReadDao().insertAll((List<MediaRead>) data);
                     break;
@@ -1868,309 +1868,309 @@ public class FirestoreManager {
             return liveData;
         }
 
-    public <T> void addFirestoreListener(
-            String collectionName,
-            Class<T> modelClass,
-            Consumer<T> onAdded,
-            Consumer<T> onModified,
-            Consumer<T> onRemoved) {
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection(collectionName)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        Log.e("Firestore", "Error listening to changes in " + collectionName, error);
-                        return;
-                    }
-
-                    if (value != null) {
-                        for (DocumentChange documentChange : value.getDocumentChanges()) {
-                            switch (documentChange.getType()) {
-                                case ADDED:
-                                    T addedItem = documentChange.getDocument().toObject(modelClass);
-                                    Executor.executeTask(() -> onAdded.accept(addedItem));
-                                    break;
-
-                                case MODIFIED:
-                                    T modifiedItem = documentChange.getDocument().toObject(modelClass);
-                                    Executor.executeTask(() -> onModified.accept(modifiedItem));
-                                    break;
-
-                                case REMOVED:
-                                    T removedItem = documentChange.getDocument().toObject(modelClass);
-                                    Executor.executeTask(() ->onRemoved.accept(removedItem));
-                                    break;
-                            }
-                        }
-                    }
-                });
-    }
-
-    public void initializeFirestoreListenersUser() {
-        //post
-        addFirestoreListener(
-                "post",
-                Post.class,
-                database.postDao()::insert, // Handle add and update operations
-                database.postDao()::update,
-                database.postDao()::delete
-//                postId -> database.postDao.deleteById(postId) // Use custom deleteById method
-        );
-        //domain
-        addFirestoreListener(
-                "domain",
-                Domain.class,
-                database.domainDao()::insert,
-                database.domainDao()::update,
-                database.domainDao()::delete
-        );
-        //questionOption
-        addFirestoreListener(
-                "questionOption",
-                QuestionOption.class,
-                database.questionOptionDao()::insert,
-                database.questionOptionDao()::update,
-                database.questionOptionDao()::delete
-        );
-        //quizQuestion
-        addFirestoreListener(
-                "quizQuestion",
-                QuizQuestion.class,
-                database.quizQuestionDao()::insert,
-                database.quizQuestionDao()::update,
-                database.quizQuestionDao()::delete
-        );
-        //quizOld
-        addFirestoreListener(
-                "quizOld",
-                QuizOld.class,
-                database.quizOldDao()::insert,
-                database.quizOldDao()::update,
-                database.quizOldDao()::delete
-        );
-        //course
-        addFirestoreListener(
-                "course",
-                Course.class,
-                database.courseDao()::insert,
-                database.courseDao()::update,
-                database.courseDao()::delete
-        );
-        //comment
-        addFirestoreListener(
-                "comment",
-                Comment.class,
-                database.commentDao()::insert,
-                database.commentDao()::update,
-                database.commentDao()::delete
-        );
-        //issue
-        addFirestoreListener(
-                "issue",
-                Issue.class,
-                database.issueDao()::insert,
-                database.issueDao()::update,
-                database.issueDao()::delete
-        );
-        //timeslot
-        addFirestoreListener(
-                "timeslot",
-                Timeslot.class,
-                database.timeslotDao()::insert,
-                database.timeslotDao()::update,
-                database.timeslotDao()::delete
-        );
-        //counselorAvailability
-        addFirestoreListener(
-                "counselorAvailability",
-                CounselorAvailability.class,
-                database.counselorAvailabilityDao()::insert,
-                database.counselorAvailabilityDao()::update,
-                database.counselorAvailabilityDao()::delete
-        );
-        //badge
-        addFirestoreListener(
-                "badge",
-                Badge.class,
-                database.badgeDao()::insert,
-                database.badgeDao()::update,
-                database.badgeDao()::delete
-        );
-        //quiz
-        addFirestoreListener(
-                "quiz",
-                Quiz.class,
-                database.quizDao()::insert,
-                database.quizDao()::update,
-                database.quizDao()::delete
-        );
-    }
-
-    public void initializeFirestoreListenersStaff() {
-        initializeFirestoreListenersUser();
-        //user
-        addFirestoreListener(
-                "user",
-                User.class,
-                database.userDao()::insert,
-                database.userDao()::update,
-                database.userDao()::delete
-        );
-        //domainInterested
-        addFirestoreListener(
-                "domainInterested",
-                DomainInterested.class,
-                database.domainInterestedDao()::insert,
-                database.domainInterestedDao()::update,
-                database.domainInterestedDao()::delete
-        );
-        //verEducator
-        addFirestoreListener(
-                "verEducator",
-                VerEducator.class,
-                database.verEducatorDao()::insert,
-                database.verEducatorDao()::update,
-                database.verEducatorDao()::delete
-        );
-        //quizHistory
-        addFirestoreListener(
-                "quizHistory",
-                QuizHistory.class,
-                database.quizHistoryDao()::insert,
-                database.quizHistoryDao()::update,
-                database.quizHistoryDao()::delete
-        );
-        //quizResult
-        addFirestoreListener(
-                "quizResult",
-                QuizResult.class,
-                database.quizResultDao()::insert,
-                database.quizResultDao()::update,
-                database.quizResultDao()::delete
-        );
-        //collection
-        addFirestoreListener(
-                "collection",
-                Collection.class,
-                database.collectionDao()::insert,
-                database.collectionDao()::update,
-                database.collectionDao()::delete
-        );
-        //folder
-        addFirestoreListener(
-                "folder",
-                Folder.class,
-                database.folderDao()::insert,
-                database.folderDao()::update,
-                database.folderDao()::delete
-        );
-        //userHistory
-        addFirestoreListener(
-                "userHistory",
-                UserHistory.class,
-                database.userHistoryDao()::insert,
-                database.userHistoryDao()::update,
-                database.userHistoryDao()::delete
-        );
-        //mediaRead
-        addFirestoreListener(
-                "mediaRead",
-                MediaRead.class,
-                database.mediaReadDao()::insert,
-                database.mediaReadDao()::update,
-                database.mediaReadDao()::delete
-        );
-        //appointment
-        addFirestoreListener(
-                "appointment",
-                Appointment.class,
-                database.appointmentDao()::insert,
-                database.appointmentDao()::update,
-                database.appointmentDao()::delete
-        );
-        //achievement
-        addFirestoreListener(
-                "achievement",
-                Achievement.class,
-                database.achievementDao()::insert,
-                database.achievementDao()::update,
-                database.achievementDao()::delete
-        );
-        //chatHistory
-        addFirestoreListener(
-                "chatHistory",
-                ChatHistory.class,
-                database.chatHistoryDao()::insert,
-                database.chatHistoryDao()::update,
-                database.chatHistoryDao()::delete
-        );
-        //notification
+//    public <T> void addFirestoreListener(
+//            String collectionName,
+//            Class<T> modelClass,
+//            Consumer<T> onAdded,
+//            Consumer<T> onModified,
+//            Consumer<T> onRemoved) {
+//
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection(collectionName)
+//                .addSnapshotListener((value, error) -> {
+//                    if (error != null) {
+//                        Log.e("Firestore", "Error listening to changes in " + collectionName, error);
+//                        return;
+//                    }
+//
+//                    if (value != null) {
+//                        for (DocumentChange documentChange : value.getDocumentChanges()) {
+//                            switch (documentChange.getType()) {
+//                                case ADDED:
+//                                    T addedItem = documentChange.getDocument().toObject(modelClass);
+//                                    Executor.executeTask(() -> onAdded.accept(addedItem));
+//                                    break;
+//
+//                                case MODIFIED:
+//                                    T modifiedItem = documentChange.getDocument().toObject(modelClass);
+//                                    Executor.executeTask(() -> onModified.accept(modifiedItem));
+//                                    break;
+//
+//                                case REMOVED:
+//                                    T removedItem = documentChange.getDocument().toObject(modelClass);
+//                                    Executor.executeTask(() ->onRemoved.accept(removedItem));
+//                                    break;
+//                            }
+//                        }
+//                    }
+//                });
+//    }
+//
+//    public void initializeFirestoreListenersUser() {
+//        //post
 //        addFirestoreListener(
-//                "notification",
-//                Notification.class,
-//                database.notificationDao()::insert,
-//                database.notificationDao()::update,
-//                database.notificationDao()::delete
+//                "post",
+//                Post.class,
+//                database.postDao()::insert, // Handle add and update operations
+//                database.postDao()::update,
+//                database.postDao()::delete
+////                postId -> database.postDao.deleteById(postId) // Use custom deleteById method
 //        );
-        //verPost
-        addFirestoreListener(
-                "verPost",
-                VerPost.class,
-                database.verPostDao()::insert,
-                database.verPostDao()::update,
-                database.verPostDao()::delete
-        );
-        //media
-        addFirestoreListener(
-                "media",
-                Media.class,
-                database.mediaDao()::insert,
-                database.mediaDao()::update,
-                database.mediaDao()::delete
-        );
-        //mediaSet
-        addFirestoreListener(
-                "mediaSet",
-                MediaSet.class,
-                database.mediaSetDao()::insert,
-                database.mediaSetDao()::update,
-                database.mediaSetDao()::delete
-        );
-        //helpdesk
-        addFirestoreListener(
-                "helpdesk",
-                Helpdesk.class,
-                database.helpdeskDao()::insert,
-                database.helpdeskDao()::update,
-                database.helpdeskDao()::delete
-        );
-        //counselor
-        addFirestoreListener(
-                "counselor",
-                Counselor.class,
-                database.counselorDao()::insert,
-                database.counselorDao()::update,
-                database.counselorDao()::delete
-        );
-        //staff
-        addFirestoreListener(
-                "staff",
-                Staff.class,
-                database.staffDao()::insert,
-                database.staffDao()::update,
-                database.staffDao()::delete
-        );
-    }
-
-    public void initializeFirestoreListenersCounselor() {
-        //timeslot
-        addFirestoreListener(
-                "timeslot",
-                Timeslot.class,
-                database.timeslotDao()::insert,
-                database.timeslotDao()::update,
-                database.timeslotDao()::delete
-        );
-    }
+//        //domain
+//        addFirestoreListener(
+//                "domain",
+//                Domain.class,
+//                database.domainDao()::insert,
+//                database.domainDao()::update,
+//                database.domainDao()::delete
+//        );
+//        //questionOption
+//        addFirestoreListener(
+//                "questionOption",
+//                QuestionOption.class,
+//                database.questionOptionDao()::insert,
+//                database.questionOptionDao()::update,
+//                database.questionOptionDao()::delete
+//        );
+//        //quizQuestion
+//        addFirestoreListener(
+//                "quizQuestion",
+//                QuizQuestion.class,
+//                database.quizQuestionDao()::insert,
+//                database.quizQuestionDao()::update,
+//                database.quizQuestionDao()::delete
+//        );
+//        //quizOld
+//        addFirestoreListener(
+//                "quizOld",
+//                QuizOld.class,
+//                database.quizOldDao()::insert,
+//                database.quizOldDao()::update,
+//                database.quizOldDao()::delete
+//        );
+//        //course
+//        addFirestoreListener(
+//                "course",
+//                Course.class,
+//                database.courseDao()::insert,
+//                database.courseDao()::update,
+//                database.courseDao()::delete
+//        );
+//        //comment
+//        addFirestoreListener(
+//                "comment",
+//                Comment.class,
+//                database.commentDao()::insert,
+//                database.commentDao()::update,
+//                database.commentDao()::delete
+//        );
+//        //issue
+//        addFirestoreListener(
+//                "issue",
+//                Issue.class,
+//                database.issueDao()::insert,
+//                database.issueDao()::update,
+//                database.issueDao()::delete
+//        );
+//        //timeslot
+//        addFirestoreListener(
+//                "timeslot",
+//                Timeslot.class,
+//                database.timeslotDao()::insert,
+//                database.timeslotDao()::update,
+//                database.timeslotDao()::delete
+//        );
+//        //counselorAvailability
+//        addFirestoreListener(
+//                "counselorAvailability",
+//                CounselorAvailability.class,
+//                database.counselorAvailabilityDao()::insert,
+//                database.counselorAvailabilityDao()::update,
+//                database.counselorAvailabilityDao()::delete
+//        );
+//        //badge
+//        addFirestoreListener(
+//                "badge",
+//                Badge.class,
+//                database.badgeDao()::insert,
+//                database.badgeDao()::update,
+//                database.badgeDao()::delete
+//        );
+//        //quiz
+//        addFirestoreListener(
+//                "quiz",
+//                Quiz.class,
+//                database.quizDao()::insert,
+//                database.quizDao()::update,
+//                database.quizDao()::delete
+//        );
+//    }
+//
+//    public void initializeFirestoreListenersStaff() {
+//        initializeFirestoreListenersUser();
+//        //user
+//        addFirestoreListener(
+//                "user",
+//                User.class,
+//                database.userDao()::insert,
+//                database.userDao()::update,
+//                database.userDao()::delete
+//        );
+//        //domainInterested
+//        addFirestoreListener(
+//                "domainInterested",
+//                DomainInterested.class,
+//                database.domainInterestedDao()::insert,
+//                database.domainInterestedDao()::update,
+//                database.domainInterestedDao()::delete
+//        );
+//        //verEducator
+//        addFirestoreListener(
+//                "verEducator",
+//                VerEducator.class,
+//                database.verEducatorDao()::insert,
+//                database.verEducatorDao()::update,
+//                database.verEducatorDao()::delete
+//        );
+//        //quizHistory
+//        addFirestoreListener(
+//                "quizHistory",
+//                QuizHistory.class,
+//                database.quizHistoryDao()::insert,
+//                database.quizHistoryDao()::update,
+//                database.quizHistoryDao()::delete
+//        );
+//        //quizResult
+//        addFirestoreListener(
+//                "quizResult",
+//                QuizResult.class,
+//                database.quizResultDao()::insert,
+//                database.quizResultDao()::update,
+//                database.quizResultDao()::delete
+//        );
+//        //collection
+//        addFirestoreListener(
+//                "collection",
+//                Collection.class,
+//                database.collectionDao()::insert,
+//                database.collectionDao()::update,
+//                database.collectionDao()::delete
+//        );
+//        //folder
+//        addFirestoreListener(
+//                "folder",
+//                Folder.class,
+//                database.folderDao()::insert,
+//                database.folderDao()::update,
+//                database.folderDao()::delete
+//        );
+//        //userHistory
+//        addFirestoreListener(
+//                "userHistory",
+//                UserHistory.class,
+//                database.userHistoryDao()::insert,
+//                database.userHistoryDao()::update,
+//                database.userHistoryDao()::delete
+//        );
+//        //mediaRead
+//        addFirestoreListener(
+//                "mediaRead",
+//                MediaRead.class,
+//                database.mediaReadDao()::insert,
+//                database.mediaReadDao()::update,
+//                database.mediaReadDao()::delete
+//        );
+//        //appointment
+//        addFirestoreListener(
+//                "appointment",
+//                Appointment.class,
+//                database.appointmentDao()::insert,
+//                database.appointmentDao()::update,
+//                database.appointmentDao()::delete
+//        );
+//        //achievement
+//        addFirestoreListener(
+//                "achievement",
+//                Achievement.class,
+//                database.achievementDao()::insert,
+//                database.achievementDao()::update,
+//                database.achievementDao()::delete
+//        );
+//        //chatHistory
+//        addFirestoreListener(
+//                "chatHistory",
+//                ChatHistory.class,
+//                database.chatHistoryDao()::insert,
+//                database.chatHistoryDao()::update,
+//                database.chatHistoryDao()::delete
+//        );
+//        //notification
+////        addFirestoreListener(
+////                "notification",
+////                Notification.class,
+////                database.notificationDao()::insert,
+////                database.notificationDao()::update,
+////                database.notificationDao()::delete
+////        );
+//        //verPost
+//        addFirestoreListener(
+//                "verPost",
+//                VerPost.class,
+//                database.verPostDao()::insert,
+//                database.verPostDao()::update,
+//                database.verPostDao()::delete
+//        );
+//        //media
+//        addFirestoreListener(
+//                "media",
+//                Media.class,
+//                database.mediaDao()::insert,
+//                database.mediaDao()::update,
+//                database.mediaDao()::delete
+//        );
+//        //mediaSet
+//        addFirestoreListener(
+//                "mediaSet",
+//                MediaSet.class,
+//                database.mediaSetDao()::insert,
+//                database.mediaSetDao()::update,
+//                database.mediaSetDao()::delete
+//        );
+//        //helpdesk
+//        addFirestoreListener(
+//                "helpdesk",
+//                Helpdesk.class,
+//                database.helpdeskDao()::insert,
+//                database.helpdeskDao()::update,
+//                database.helpdeskDao()::delete
+//        );
+//        //counselor
+//        addFirestoreListener(
+//                "counselor",
+//                Counselor.class,
+//                database.counselorDao()::insert,
+//                database.counselorDao()::update,
+//                database.counselorDao()::delete
+//        );
+//        //staff
+//        addFirestoreListener(
+//                "staff",
+//                Staff.class,
+//                database.staffDao()::insert,
+//                database.staffDao()::update,
+//                database.staffDao()::delete
+//        );
+//    }
+//
+//    public void initializeFirestoreListenersCounselor() {
+//        //timeslot
+//        addFirestoreListener(
+//                "timeslot",
+//                Timeslot.class,
+//                database.timeslotDao()::insert,
+//                database.timeslotDao()::update,
+//                database.timeslotDao()::delete
+//        );
+//    }
 }

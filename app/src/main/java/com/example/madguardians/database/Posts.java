@@ -5,55 +5,12 @@ import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
+
+import com.google.firebase.Timestamp;
+
 import java.io.Serializable;
 
-@Entity(tableName = "post",
-        foreignKeys = {
-                @ForeignKey(
-                        entity = User.class,
-                        parentColumns = "userId",
-                        childColumns = "userId",
-                        onDelete = ForeignKey.CASCADE
-                ),
-                @ForeignKey(
-                        entity = MediaSet.class,
-                        parentColumns = "mediaSetId",
-                        childColumns = "imageSetId",
-                        onDelete = ForeignKey.SET_NULL
-                ),
-                @ForeignKey(
-                        entity = MediaSet.class,
-                        parentColumns = "mediaSetId",
-                        childColumns = "videoSetId",
-                        onDelete = ForeignKey.SET_NULL
-                ),
-                @ForeignKey(
-                        entity = MediaSet.class,
-                        parentColumns = "mediaSetId",
-                        childColumns = "fileSetId",
-                        onDelete = ForeignKey.SET_NULL
-                ),
-                @ForeignKey(
-                        entity = Quiz.class,
-                        parentColumns = "quizId",
-                        childColumns = "quizId",
-                        onDelete = ForeignKey.SET_NULL
-                ),
-                @ForeignKey(
-                        entity = Domain.class,
-                        parentColumns = "domainId",
-                        childColumns = "domainId",
-                        onDelete = ForeignKey.RESTRICT
-                ),
-                @ForeignKey(
-                        entity = Folder.class,
-                        parentColumns = "folderId",
-                        childColumns = "folderId",
-                        onDelete = ForeignKey.SET_NULL
-                )
-        }
-)
-public class Post implements Serializable{
+public class Posts implements Serializable {
     @PrimaryKey
     @NonNull
     private String postId;
@@ -75,16 +32,16 @@ public class Post implements Serializable{
     private String domainId;
     @Nullable
     private String folderId;
-    @Nullable
-    private String date;
+    @NonNull
+    private Timestamp timestamp;
 
-    public Post() {
+    public Posts() {
     }
 
     // Constructor
-    public Post(String postId, @NonNull String userId, @NonNull String title, @NonNull String description,
+    public Posts(String postId, @NonNull String userId, @NonNull String title, @NonNull String description,
                 @Nullable String imageSetId, @Nullable String videoSetId, @Nullable String fileSetId,
-                @Nullable String quizId, @NonNull String domainId, @Nullable String folderId, @Nullable String date) {
+                @Nullable String quizId, @NonNull String domainId, @Nullable String folderId, @NonNull Timestamp timestamp) {
         this.postId = postId;
         this.userId = userId;
         this.title = title;
@@ -95,7 +52,7 @@ public class Post implements Serializable{
         this.quizId = quizId;
         this.domainId = domainId;
         this.folderId = folderId;
-        this.date = date;
+        this.timestamp = timestamp;
     }
 
     // Getters
@@ -139,8 +96,8 @@ public class Post implements Serializable{
         return folderId;
     }
 
-    public String getDate() {
-        return date;
+    public Timestamp getTimestamp() {
+        return timestamp;
     }
 
     // Setters
@@ -184,7 +141,7 @@ public class Post implements Serializable{
         this.folderId = folderId;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
     }
 }
