@@ -49,14 +49,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="@drawable/ic_report"
         />
-
-    <Button
-        android:layout_width="25dp"
-        android:layout_height="20dp"
-        android:layout_margin="@dimen/medium_margin"
-        android:id="@+id/BTNComment"
-        app:layout_constraintEnd_toStartOf="@+id/BTNReport"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@drawable/ic_comment"
-        />
 </androidx.constraintlayout.widget.ConstraintLayout>

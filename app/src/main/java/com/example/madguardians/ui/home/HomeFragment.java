@@ -131,7 +131,6 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
             }
         });
 
-
         return view;
     }
 
