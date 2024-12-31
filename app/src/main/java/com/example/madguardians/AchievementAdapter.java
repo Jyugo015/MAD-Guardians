@@ -1,5 +1,4 @@
 package com.example.madguardians;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,7 @@ import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Badge;
 import com.example.madguardians.database.BadgeDao;
 import com.example.madguardians.database.Executor;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -33,25 +33,34 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
 
     @Override
     public void onBindViewHolder(AchievementViewHolder holder, int position) {
-        BadgeDao badgeDao = AppDatabase.getDatabase(holder.itemView.getContext()).badgeDao();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        //Find badge by badgeId
         Achievement achievement = achievementList.get(position);
-        Executor.executeTask(() -> {
-            Badge badge = badgeDao.getById(achievement.getBadgeId());
+        db.collection("badge").document(achievement.getBadgeId())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Badge badge = documentSnapshot.toObject(Badge.class);
 
-            // Use 'post' to run the UI update code on the main thread
-            holder.itemView.post(() -> {
-                holder.achievementTitle.setText(badge != null ? badge.getBadgeName() : "Unknown Badge");
+                        // Update UI
+                        holder.achievementTitle.setText(badge != null ? badge.getBadgeName() : "Unknown Badge");
 
-                if (badge != null && badge.getBadgeImage() != null && !badge.getBadgeImage().isEmpty()) {
-                    String imageUrl = badge.getBadgeImage();
-                    Glide.with(holder.itemView.getContext())
-                            .load(imageUrl)
-                            .into(holder.achievementIcon);
-                } else {
-                    holder.achievementIcon.setImageResource(R.drawable.ic_achievement_icon);
-                }
-            });
-        });
+                        if (badge != null && badge.getBadgeImage() != null && !badge.getBadgeImage().isEmpty()) {
+                            Glide.with(holder.itemView.getContext())
+                                    .load(badge.getBadgeImage())
+                                    .into(holder.achievementIcon);
+                        } else {
+                            holder.achievementIcon.setImageResource(R.drawable.ic_achievement_icon); // 使用默认图标
+                        }
+                    } else {
+                        holder.achievementTitle.setText("Unknown Badge");
+                        holder.achievementIcon.setImageResource(R.drawable.ic_achievement_icon); // 使用默认图标
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    holder.achievementTitle.setText("Error loading badge");
+                    holder.achievementIcon.setImageResource(R.drawable.ic_achievement_icon); // 使用默认图标
+                });
     }
 
     @Override

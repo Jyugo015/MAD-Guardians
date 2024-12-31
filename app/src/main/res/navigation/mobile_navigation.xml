@@ -37,7 +37,23 @@
         android:id="@+id/nav_profile"
         android:name="com.example.madguardians.ProfileFragment"
         android:label="@string/profile_string"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_nav_profile_to_educationQualificationFragment"
+            app:destination="@id/educationQualificationFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_collectionFragment"
+            app:destination="@id/collectionFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_notificationFragment"
+            app:destination="@id/notificationFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_viewAllAchievementsFragment"
+            app:destination="@id/viewAllAchievementsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_course_overview"
@@ -108,24 +124,6 @@
 <!--        android:name="com.example.madguardians.notification.notificationFragment"-->
 <!--        android:label="fragment_notification"-->
 <!--        tools:layout="@layout/fragment_notification" />-->
-    <fragment
-        android:id="@+id/collectionFragment"
-        android:name="com.example.madguardians.collection.CollectionFragment"
-        android:label="CollectionFragment"
-        tools:layout="@layout/fragment_profile" >
-        <action
-            android:id="@+id/action_nav_profile_to_educationQualificationFragment"
-            app:destination="@id/educationQualificationFragment" />
-        <action
-            android:id="@+id/action_nav_profile_to_collectionFragment"
-            app:destination="@id/collectionFragment" />
-        <action
-            android:id="@+id/action_nav_profile_to_editProfileFragment"
-            app:destination="@id/editProfileFragment" />
-        <action
-            android:id="@+id/action_nav_profile_to_notificationFragment"
-            app:destination="@id/notificationFragment" />
-    </fragment>
 
     <fragment
         android:id="@+id/chatFragment"
@@ -175,10 +173,10 @@
         android:id="@+id/educationQualificationFragment"
         android:name="com.example.madguardians.EducationQualificationFragment"
         android:label="Education Qualification" />
-<!--    <fragment-->
-<!--        android:id="@+id/collectionFragment"-->
-<!--        android:name="com.example.madguardians.collection.CollectionFragment"-->
-<!--        android:label="Collections" />-->
+    <fragment
+        android:id="@+id/collectionFragment"
+        android:name="com.example.madguardians.collection.CollectionFragment"
+        android:label="Collections" />
     <fragment
         android:id="@+id/editProfileFragment"
         android:name="com.example.madguardians.EditProfileFragment"
@@ -188,4 +186,9 @@
         android:id="@+id/notificationFragment"
         android:name="com.example.madguardians.notification.notificationFragment"
         android:label="Notifications" />
+    <fragment
+        android:id="@+id/viewAllAchievementsFragment"
+        android:name="com.example.madguardians.ViewAllAchievementsFragment"
+        android:label="View All Achievements"
+        tools:layout="@layout/fragment_view_all_achievements" />
 </navigation>
