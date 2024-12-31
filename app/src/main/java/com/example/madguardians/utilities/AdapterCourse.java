@@ -14,20 +14,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
-import com.example.madguardians.firebase.Course;
-import com.example.madguardians.firebase.Domain;
+import com.example.madguardians.firebase.CourseFB;
+import com.example.madguardians.firebase.DomainFB;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseViewHolder> {
 
-    private List<Course> courseList;
-    private List<Course> originalCourseList;
+    private List<CourseFB> courseFBList;
+    private List<CourseFB> originalCourseFBList;
     private OnItemClickListener listener;
-    public AdapterCourse(List<Course> courseList, OnItemClickListener listener) {
-        this.courseList = courseList;
-        this.originalCourseList = courseList;
+    public AdapterCourse(List<CourseFB> courseFBList, OnItemClickListener listener) {
+        this.courseFBList = courseFBList;
+        this.originalCourseFBList = courseFBList;
         this.listener = listener;
     }
 
@@ -40,52 +40,72 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
 
     @Override
     public void onBindViewHolder(@NonNull CourseViewHolder holder, int position) {
-        Course course = courseList.get(position);
+        CourseFB courseFB = courseFBList.get(position);
 
         // Set the data
-        holder.title.setText(course.getTitle());
-        holder.author.setText(course.getAuthor());
-        holder.date.setText(course.getDate());
+        holder.title.setText(courseFB.getTitle());
+        holder.author.setText(courseFB.getAuthor());
+        holder.date.setText(courseFB.getDate());
 //        holder.views.setText(course.getViews());
 //        holder.comments.setText(course.getComments());
-        showImage(holder, course);
+        showImage(holder, courseFB);
         // check if it is verified
+        if (isVerified(courseFB)) {
+            holder.verifyStatus.setImageResource(R.drawable.ic_verified);
+        } else {
+            holder.verifyStatus.setImageResource(R.drawable.ic_verifying);
+        }
         // check if it id collected
+        if (isCollected(courseFB)) {
+            holder.button_collection.setChecked(true);
+        }
 
         // Handle button clicks
-        holder.button_start.setOnClickListener(v -> listener.onStartClick(course));
-        holder.button_collection.setOnClickListener(v -> listener.onCollectionClick(course));
+        holder.button_start.setOnClickListener(v -> listener.onStartClick(courseFB));
+        holder.button_collection.setOnClickListener(v -> listener.onCollectionClick(courseFB));
     }
 
-    private void showImage(CourseViewHolder holder, Course course) {
-        Glide.with(holder.itemView.getContext()).load(course.getCoverImage()).placeholder(R.drawable.placeholder_image).error(R.drawable.error_image).into(holder.image_cover);
+    ////////////////////////////////////////////////////////////////////////////////////
+    // zw
+    private boolean isVerified(CourseFB courseFB) {
+        return true;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
+    // yewoon
+
+    private boolean isCollected(CourseFB courseFB) {
+        return true;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////
+
+    private void showImage(CourseViewHolder holder, CourseFB courseFB) {
+        Glide.with(holder.itemView.getContext()).load(courseFB.getCoverImage()).placeholder(R.drawable.placeholder_image).error(R.drawable.error_image).into(holder.image_cover);
+    }
 
     @Override
     public int getItemCount() {
-        return courseList.size();
+        return courseFBList.size();
     }
 
-    public void filterCourseByDomain(List<Domain> domains) {
+    public void filterCourseByDomain(List<DomainFB> domains) {
         if (domains == null || domains.isEmpty()) {
-            courseList = originalCourseList;
+            courseFBList = originalCourseFBList;
         } else {
-            courseList = originalCourseList.stream()
+            courseFBList = originalCourseFBList.stream()
                 .filter(course ->{
                         String domainId = course.getDomainId();
                         Log.d("TAG", "domainId: " + domainId);
                         return domains.stream().anyMatch(domain -> domain.getDomainId().equals(course.getDomainId()));
                 }).collect(Collectors.toList());
         }
-        Log.d("TAG", "filterCourseByDomain: " + courseList.toString());
+        Log.d("TAG", "filterCourseByDomain: " + courseFBList.toString());
         notifyDataSetChanged();
     }
 
-
-    public void updateCourseList(List<Course> courses) {
-        courseList.clear();
-        courseList.addAll(courses);
+    public void updateCourseList(List<CourseFB> cours) {
+        courseFBList.clear();
+        courseFBList.addAll(cours);
         notifyDataSetChanged();
     }
 
@@ -110,7 +130,7 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
     }
 
     public interface OnItemClickListener {
-        void onStartClick(Course course);
-        void onCollectionClick(Course course);
+        void onStartClick(CourseFB courseFB);
+        void onCollectionClick(CourseFB courseFB);
     }
 }

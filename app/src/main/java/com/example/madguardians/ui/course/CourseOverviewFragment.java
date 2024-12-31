@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.example.madguardians.R;
-import com.example.madguardians.firebase.Course;
-import com.example.madguardians.firebase.Domain;
+import com.example.madguardians.firebase.CourseFB;
+import com.example.madguardians.firebase.DomainFB;
 import com.example.madguardians.utilities.UploadCallback;
 
 import java.util.List;
@@ -26,8 +26,8 @@ import java.util.List;
 public class CourseOverviewFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
-    private Course course;
-    private List<Course> courses;
+    private CourseFB courseFB;
+    private List<CourseFB> cours;
     private View view;
 
     public CourseOverviewFragment() {
@@ -53,10 +53,10 @@ public class CourseOverviewFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             String courseId = getArguments().getString("courseId");
-            Course.getCourse(courseId, new UploadCallback<Course>() {
+            CourseFB.getCourse(courseId, new UploadCallback<CourseFB>() {
                 @Override
-                public void onSuccess(Course result) {
-                    course = result;
+                public void onSuccess(CourseFB result) {
+                    courseFB = result;
                     setView();
                 }
                 @Override
@@ -77,8 +77,8 @@ public class CourseOverviewFragment extends Fragment {
     }
 
     private void setView() {
-        this.course = course;
-        if (view != null && course != null) {
+        this.courseFB = courseFB;
+        if (view != null && courseFB != null) {
             TextView TVTitle = view.findViewById(R.id.TVTitle);
             TextView TVDomain = view.findViewById(R.id.TVDomain);
             TextView TVDate = view.findViewById(R.id.TVDate);
@@ -87,59 +87,57 @@ public class CourseOverviewFragment extends Fragment {
             TextView TVAuthor = view.findViewById(R.id.TVAuthor);
             TextView TVDescription = view.findViewById(R.id.TVDescription);
 
-            TVTitle.setText(course.getTitle());
-            Domain.getDomain(course.getDomainId(), new UploadCallback<Domain>() {
+            TVTitle.setText(courseFB.getTitle());
+            DomainFB.getDomain(courseFB.getDomainId(), new UploadCallback<DomainFB>() {
                 @Override
-                public void onSuccess(Domain result) {
+                public void onSuccess(DomainFB result) {
                     TVDomain.setText("Domain: " + (String) result.getDomainName());
                 }
                 @Override
-                public void onFailure(Exception e) {
-
-                }
+                public void onFailure(Exception e) {}
             });
-            TVDate.setText("Date: " + course.getDate());
-            TVAuthor.setText(course.getAuthor());
+            TVDate.setText("Date: " + courseFB.getDate());
+            TVAuthor.setText(courseFB.getAuthor());
 
             androidx.constraintlayout.widget.ConstraintLayout LYLevel1 = view.findViewById(R.id.LYPost1);
             androidx.constraintlayout.widget.ConstraintLayout LYLevel2 = view.findViewById(R.id.LYPost2);
             androidx.constraintlayout.widget.ConstraintLayout LYLevel3 = view.findViewById(R.id.LYPost3);
 
-            if (course.getPost1() == null) {
+            if (courseFB.getPost1() == null) {
                 LYLevel1.setVisibility(View.GONE);
             } else {
-                Log.d("CourseOverviewFragment", "Post1: " + course.getPost1());
+                Log.d("CourseOverviewFragment", "Post1: " + courseFB.getPost1());
                 LYLevel1.setOnClickListener(v -> {
                     Log.w("CourseOverviewFragment", "Level 1 clicked");
-                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(course.getPost1()));
+                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(courseFB.getPost1()));
                 });
             }
 
-            if (course.getPost2() == null) {
+            if (courseFB.getPost2() == null) {
                 LYLevel2.setVisibility(View.GONE);
             } else{
-                Log.d("CourseOverviewFragment", "Post2: " + course.getPost2());
+                Log.d("CourseOverviewFragment", "Post2: " + courseFB.getPost2());
                 LYLevel2.setOnClickListener(v -> {
                     Log.w("CourseOverviewFragment", "Level 2 clicked");
-                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(course.getPost2()));
+                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(courseFB.getPost2()));
                 });
             }
 
-            if (course.getPost3() == null) {
+            if (courseFB.getPost3() == null) {
                 LYLevel3.setVisibility(View.GONE);
             } else {
-                Log.d("CourseOverviewFragment", "Post3: " + course.getPost3());
+                Log.d("CourseOverviewFragment", "Post3: " + courseFB.getPost3());
                 LYLevel3.setOnClickListener(v -> {
                     Log.w("CourseOverviewFragment", "Level 3 clicked");
-                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(course.getPost3()));
+                    Navigation.findNavController(view).navigate(R.id.nav_post, getPassingBundle(courseFB.getPost3()));
                 });
             }
 
             ToggleButton TBCollection = view.findViewById(R.id.TBCollection);
-            setIsChecked(course, isCollected(course));
+            setIsChecked(courseFB, isCollected(courseFB));
             TBCollection.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) setIsChecked(course, true);
-                else setIsChecked(course, false);
+                if (isChecked) setIsChecked(courseFB, true);
+                else setIsChecked(courseFB, false);
             });
 
             view.clearFocus();
@@ -148,7 +146,7 @@ public class CourseOverviewFragment extends Fragment {
 
     private Bundle getPassingBundle (String post) {
         Bundle bundle = new Bundle();
-        bundle.putString("courseId", course.getCourseId());
+        bundle.putString("courseId", courseFB.getCourseId());
 //        bundle.putString("domainId", course.getDomainId());
 //        bundle.putString("date", course.getDate());
 //        bundle.putString("folderId", course.getFolderId());
@@ -157,7 +155,7 @@ public class CourseOverviewFragment extends Fragment {
     }
 
     /////////////////////////////////////////////////////////////////////
-    private void setIsChecked(Course course, boolean isChecked) {
+    private void setIsChecked(CourseFB courseFB, boolean isChecked) {
         TextView TVCollection = view.findViewById(R.id.TVCollection);
         ToggleButton TBCollection = view.findViewById(R.id.TBCollection);
         TBCollection.setChecked(isChecked);
@@ -166,7 +164,7 @@ public class CourseOverviewFragment extends Fragment {
         // change database
     }
 
-    private boolean isCollected(Course course) {
+    private boolean isCollected(CourseFB courseFB) {
         return true;
     }
 }
