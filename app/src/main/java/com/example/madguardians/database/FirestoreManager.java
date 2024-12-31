@@ -55,7 +55,7 @@ public class FirestoreManager {
         database.quizResultDao().deleteAll();
         database.collectionDao().deleteAll();
         database.folderDao().deleteAll();
-        database.userHistoryDao().deleteAll();
+//        database.userHistoryDao().deleteAll();
         database.mediaReadDao().deleteAll();
         database.appointmentDao().deleteAll();
         database.achievementDao().deleteAll();
@@ -525,9 +525,9 @@ public class FirestoreManager {
             case "user":
                 database.userDao().delete((User)data);
                 break;
-            case "userHistory":
-                database.userHistoryDao().delete((UserHistory)data);
-                break;
+//            case "userHistory":
+//                database.userHistoryDao().delete((UserHistory)data);
+//                break;
             case "verEducator":
                 database.verEducatorDao().delete((VerEducator)data);
                 break;
@@ -1273,10 +1273,10 @@ public class FirestoreManager {
                 User user = (User)currentChange;
                 return new Object[]{user.getUserId(), user.getName(), user.getEmail(), user.getPhoneNo(),
                     user.getPassword(), user.getProfilePic(), user.getLastLogin(), user.getStrikeLoginDays()};
-            case "userHistory":
-                UserHistory userHis = (UserHistory)currentChange;
-                return new Object[]{userHis.getPostId(), userHis.getUserId(), userHis.getProgress(),
-                    userHis.getTime()};
+//            case "userHistory":
+//                UserHistory userHis = (UserHistory)currentChange;
+//                return new Object[]{userHis.getPostId(), userHis.getUserId(), userHis.getProgress(),
+//                    userHis.getTime()};
             case "verEducator":
                 VerEducator verEdu = (VerEducator)currentChange;
                 return new Object[]{verEdu.getUserId(), verEdu.getImageSetId(), verEdu.getFileSetId(),
@@ -1571,9 +1571,9 @@ public class FirestoreManager {
                 case "timeslot":
                     database.timeslotDao().insert((Timeslot) currentObject);
                     break;
-                case "userHistory":
-                    database.userHistoryDao().insert((UserHistory) currentObject);
-                    break;
+//                case "userHistory":
+//                    database.userHistoryDao().insert((UserHistory) currentObject);
+//                    break;
                 case "verEducator":
                     database.verEducatorDao().insert((VerEducator) currentObject);
                     break;
@@ -1670,9 +1670,9 @@ public class FirestoreManager {
                 case "user":
                     database.userDao().insertAll((List<User>) data);
                     break;
-                case "userHistory":
-                    database.userHistoryDao().insertAll((List<UserHistory>) data);
-                    break;
+//                case "userHistory":
+//                    database.userHistoryDao().insertAll((List<UserHistory>) data);
+//                    break;
                 case "verEducator":
                     database.verEducatorDao().insertAll((List<VerEducator>) data);
                     break;
