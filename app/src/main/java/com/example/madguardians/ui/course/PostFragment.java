@@ -16,8 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.example.madguardians.R;
-import com.example.madguardians.firebase.Media;
-import com.example.madguardians.firebase.Post;
+import com.example.madguardians.firebase.MediaFB;
+import com.example.madguardians.firebase.PostFB;
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
 
@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class PostFragment extends Fragment {
 
-    private Post post;
+    private PostFB post;
     private View view;
     private static int NUMBER_OF_SEGMENT;
     private int lastViewId;
@@ -49,9 +49,9 @@ public class PostFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            Post.getPost(getArguments().getString("postId"), new UploadCallback<Post>(){
+            PostFB.getPost(getArguments().getString("postId"), new UploadCallback<PostFB>(){
                 @Override
-                public void onSuccess(Post result) {
+                public void onSuccess(PostFB result) {
                     post = result;
                     setView();
                 }
@@ -79,16 +79,16 @@ public class PostFragment extends Fragment {
             TVTitle.setText(post.getTitle());
             TVDescription.setText(post.getDescription());
             ConstraintLayout CLContainer = view.findViewById(R.id.CLContainer);
-            ArrayList<Media> imgMedias = new ArrayList<>();
-            ArrayList<Media> vidMedias = new ArrayList<>();
-            ArrayList<Media> pdfMedias = new ArrayList<>();
+            ArrayList<MediaFB> imgMedias = new ArrayList<>();
+            ArrayList<MediaFB> vidMedias = new ArrayList<>();
+            ArrayList<MediaFB> pdfMedias = new ArrayList<>();
             if (post.getImageSetId() != null) {
-                Media.getMedias(post.getImageSetId(), new UploadCallback<List<Media>>() {
+                MediaFB.getMedias(post.getImageSetId(), new UploadCallback<List<MediaFB>>() {
                     @Override
-                    public void onSuccess(List<Media> result) {
+                    public void onSuccess(List<MediaFB> result) {
                         imgMedias.clear();
                         imgMedias.addAll(result);
-                        for (Media imgMedia : imgMedias) {
+                        for (MediaFB imgMedia : imgMedias) {
                             displayMediaSegment(CLContainer, imgMedia, FirebaseController.IMAGE);
                         }
                     }
@@ -100,12 +100,12 @@ public class PostFragment extends Fragment {
                 });
             }
             if (post.getFileSetId() != null) {
-                Media.getMedias(post.getFileSetId(), new UploadCallback<List<Media>>() {
+                MediaFB.getMedias(post.getFileSetId(), new UploadCallback<List<MediaFB>>() {
                     @Override
-                    public void onSuccess(List<Media> result) {
+                    public void onSuccess(List<MediaFB> result) {
                         pdfMedias.clear();
                         pdfMedias.addAll(result);
-                        for (Media pdfMedia : pdfMedias) {
+                        for (MediaFB pdfMedia : pdfMedias) {
                             displayMediaSegment(CLContainer, pdfMedia, FirebaseController.PDF);
                         }
                     }
@@ -117,12 +117,12 @@ public class PostFragment extends Fragment {
                 });
             }
             if (post.getVideoSetId() != null) {
-                Media.getMedias(post.getVideoSetId(), new UploadCallback<List<Media>>() {
+                MediaFB.getMedias(post.getVideoSetId(), new UploadCallback<List<MediaFB>>() {
                     @Override
-                    public void onSuccess(List<Media> result) {
+                    public void onSuccess(List<MediaFB> result) {
                         vidMedias.clear();
                         vidMedias.addAll(result);
-                        for (Media vidMedia : vidMedias) {
+                        for (MediaFB vidMedia : vidMedias) {
                             displayMediaSegment(CLContainer, vidMedia, FirebaseController.VIDEO);
                         }
                     }
@@ -141,7 +141,7 @@ public class PostFragment extends Fragment {
         // if yes, change the status as "Completed"
     }
 
-    private void displayMediaSegment(ConstraintLayout clContainer, Media imgMedia, String typeMedia) {
+    private void displayMediaSegment(ConstraintLayout clContainer, MediaFB imgMedia, String typeMedia) {
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         View mediaSegment = layoutInflater.inflate(R.layout.segment_media_option, clContainer, false);
         mediaSegment.setId(View.generateViewId());
@@ -213,7 +213,7 @@ public class PostFragment extends Fragment {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
-    private boolean isRead(Media pdfMedia) {
+    private boolean isRead(MediaFB pdfMedia) {
         return true;
     }
 

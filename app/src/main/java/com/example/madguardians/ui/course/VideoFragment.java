@@ -11,7 +11,7 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 
 import com.example.madguardians.R;
-import com.example.madguardians.firebase.Media;
+import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.UploadCallback;
 
@@ -22,7 +22,7 @@ import com.example.madguardians.utilities.UploadCallback;
  */
 public class VideoFragment extends Fragment {
 
-    private Media video;
+    private MediaFB video;
     private View view;
     private ExoPlayer player;
     public VideoFragment() {
@@ -47,9 +47,9 @@ public class VideoFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            Media.getMedia(getArguments().getString("mediaId"), new UploadCallback<Media>() {
+            MediaFB.getMedia(getArguments().getString("mediaId"), new UploadCallback<MediaFB>() {
                 @Override
-                public void onSuccess(Media result) {
+                public void onSuccess(MediaFB result) {
                     video = result;
                     PlayerView playerView = view.findViewById(R.id.playerView);
                     player = new ExoPlayer.Builder(getContext()).build();

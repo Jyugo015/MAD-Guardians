@@ -1,5 +1,6 @@
 package com.example.madguardians.utilities;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,9 @@ import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
 import com.bumptech.glide.Glide;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.example.madguardians.R;
 import com.example.madguardians.database.CloudinaryUploadWorker;
 
 import java.io.ByteArrayOutputStream;
@@ -33,6 +37,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MediaHandler {
 
@@ -43,11 +49,17 @@ public class MediaHandler {
     private final ActivityResultLauncher<Intent> activityResultLauncher;
     private final MediaHandleCallback callback;
     private WorkRequest uploadWorkRequest;
+    private Cloudinary cloudinary;
 
     public MediaHandler(@NonNull Context context, @NonNull ActivityResultLauncher<Intent> activityResultLauncher, @NonNull MediaHandleCallback callback) {
         this.context = context;
         this.activityResultLauncher = activityResultLauncher;
         this.callback = callback;
+        Map<String, String> cloudinaryConfig = new HashMap<>();
+        cloudinaryConfig.put("cloud_name", context.getString(R.string.cloud_name));
+        cloudinaryConfig.put("api_key", context.getString(R.string.api_key));
+        cloudinaryConfig.put("api_secret", context.getString(R.string.api_secret));
+        cloudinary = new Cloudinary(cloudinaryConfig);
     }
 
     // Select Image
@@ -207,6 +219,23 @@ public class MediaHandler {
                         Toast.makeText(context, "Video Upload Failed", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+    public void uploadImageInBackground(Uri uri, UploadCallback<String> urlCallback){
+        String filePath = getPathFromUri(uri);
+        Toast.makeText(context, "Uploading image", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            try {
+                Map response = cloudinary.uploader().upload(filePath, ObjectUtils.emptyMap());
+                String imageUrl = (String) response.get("secure_url");
+                // Save the url for later need
+                ((Activity) context).runOnUiThread(() -> {
+                    Log.d("Cloudinary URL", imageUrl);
+                    urlCallback.onSuccess(imageUrl);
+                });
+            } catch (IOException e) {
+                urlCallback.onFailure(e);
+            }
+        }).start();
     }
 
     public void uploadVideoInBackground(String filePath, String database, @Nullable ExoPlayer player) {

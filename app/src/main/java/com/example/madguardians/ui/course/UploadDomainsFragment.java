@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.example.madguardians.R;
-import com.example.madguardians.firebase.Domain;
-import com.example.madguardians.firebase.Folder;
+import com.example.madguardians.firebase.DomainFB;
+import com.example.madguardians.firebase.FolderFB;
 import com.example.madguardians.utilities.UploadCallback;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class UploadDomainsFragment extends Fragment {
     private LayoutInflater inflater;
     private ViewGroup container;
     private String userId;
-    private ArrayList<Folder> folderVerified = new ArrayList<>();
+    private ArrayList<FolderFB> folderVerified = new ArrayList<>();
     public UploadDomainsFragment() {
         // Required empty public constructor
     }
@@ -47,9 +47,9 @@ public class UploadDomainsFragment extends Fragment {
         }
         //////////////////////////////////////////////////////////////////////////////////
         userId = "U00001";
-        Folder.getFolders(userId, new UploadCallback<List<Folder>>() {
+        FolderFB.getFolders(userId, new UploadCallback<List<FolderFB>>() {
             @Override
-            public void onSuccess(List<Folder> result) {
+            public void onSuccess(List<FolderFB> result) {
                 folderVerified.clear();
                 folderVerified.addAll(result);
                 setView();
@@ -74,14 +74,14 @@ public class UploadDomainsFragment extends Fragment {
 
     private void setView() {
         if (!folderVerified.isEmpty()) {
-            for (Folder folder : folderVerified) {
+            for (FolderFB folder : folderVerified) {
                 String domainId = folder.getDomainId();
                 View folderView = inflater.inflate(R.layout.segment_folder, container, false);
                 GridLayout GLFolders = view.findViewById(R.id.GLFolders);
                 TextView TVDomain = folderView.findViewById(R.id.TVDomain);
-                Domain.getDomain(domainId, new UploadCallback<Domain>() {
+                DomainFB.getDomain(domainId, new UploadCallback<DomainFB>() {
                     @Override
-                    public void onSuccess(Domain domain) {TVDomain.setText(domain.getDomainName());}
+                    public void onSuccess(DomainFB domain) {TVDomain.setText(domain.getDomainName());}
                     @Override
                     public void onFailure(Exception e) {Log.e("TAG", "onFailure: ", e);}
                 });

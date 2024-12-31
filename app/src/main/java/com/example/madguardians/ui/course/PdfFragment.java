@@ -11,7 +11,7 @@ import android.webkit.WebViewClient;
 import androidx.fragment.app.Fragment;
 
 import com.example.madguardians.R;
-import com.example.madguardians.firebase.Media;
+import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.UploadCallback;
 
@@ -22,7 +22,7 @@ import com.example.madguardians.utilities.UploadCallback;
  */
 public class PdfFragment extends Fragment {
 
-    private Media pdf;
+    private MediaFB pdf;
     private View view;
     public PdfFragment() {
         // Required empty public constructor
@@ -46,9 +46,9 @@ public class PdfFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            Media.getMedia(getArguments().getString("mediaId"), new UploadCallback<Media>() {
+            MediaFB.getMedia(getArguments().getString("mediaId"), new UploadCallback<MediaFB>() {
                 @Override
-                public void onSuccess(Media result) {
+                public void onSuccess(MediaFB result) {
                     pdf = result;
                     WebView webView = view.findViewById(R.id.webView);
                     webView.getSettings().setJavaScriptEnabled(true);

@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class Domain {
+public class DomainFB {
     private static final String TABLE_NAME = FirebaseController.DOMAIN;
     private String domainId;
 
@@ -19,7 +19,7 @@ public class Domain {
 
     private static Queue<HashMap<String, Object>> insertDomainQueue = new LinkedList<>();
 
-    private Domain(String domainId, String domainName) {
+    private DomainFB(String domainId, String domainName) {
         this.domainId = domainId;
         this.domainName = domainName;
     }
@@ -61,7 +61,7 @@ public class Domain {
         }
     }
 
-    public static void getDomain(String domainId, UploadCallback<Domain> callback) {
+    public static void getDomain(String domainId, UploadCallback<DomainFB> callback) {
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), domainId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> result) {
@@ -77,8 +77,8 @@ public class Domain {
         });
     }
 
-    private static Domain mapHashMapToDomain(HashMap<String, Object> data) {
-        return new Domain((String) data.get("domainId"), (String) data.get("domainName"));
+    private static DomainFB mapHashMapToDomain(HashMap<String, Object> data) {
+        return new DomainFB((String) data.get("domainId"), (String) data.get("domainName"));
     }
 
     public static void initialiseDomains() {
@@ -102,11 +102,11 @@ public class Domain {
         return data;
     }
 
-    public static void getDomainsByIds(ArrayList<String> domainIds, UploadCallback<ArrayList<Domain>> callback){
+    public static void getDomainsByIds(ArrayList<String> domainIds, UploadCallback<ArrayList<DomainFB>> callback){
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), domainIds, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> results) {
-                ArrayList<Domain> domainList = new ArrayList<>();
+                ArrayList<DomainFB> domainList = new ArrayList<>();
                 for (HashMap<String, Object> result : results) {
                     domainList.add(mapHashMapToDomain(result));
                 }
@@ -120,11 +120,11 @@ public class Domain {
         });
     }
 
-    public static void getDomains(UploadCallback<List<Domain>> callback) {
+    public static void getDomains(UploadCallback<List<DomainFB>> callback) {
         FirebaseController.getAllCollection(TABLE_NAME, null, new UploadCallback<List<HashMap<String, Object>>>() {
             @Override
             public void onSuccess(List<HashMap<String, Object>> domainHashMapList) {
-                ArrayList<Domain> list = new ArrayList<>();
+                ArrayList<DomainFB> list = new ArrayList<>();
                 for (HashMap<String, Object> domainHashMap : domainHashMapList) {
                     list.add(mapHashMapToDomain(domainHashMap));
                 }
