@@ -186,23 +186,15 @@
         app:layout_constraintStart_toEndOf="@+id/view_learning_history"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <HorizontalScrollView
-        android:id="@+id/learningHistoryScrollView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/view_learning_history">
 
-        <LinearLayout
-            android:id="@+id/learningHistoryContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingEnd="16dp">
-            <!-- Dynamically added learning items will go here -->
-        </LinearLayout>
-    </HorizontalScrollView>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/learningHistoryRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_learning_history"
+        android:scrollbars="horizontal"
+        android:orientation="horizontal"/>
 
 
     <TextView
