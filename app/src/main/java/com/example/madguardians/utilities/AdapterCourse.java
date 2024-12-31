@@ -50,17 +50,38 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
 //        holder.comments.setText(course.getComments());
         showImage(holder, courseFB);
         // check if it is verified
+        if (isVerified(courseFB)) {
+            holder.verifyStatus.setImageResource(R.drawable.ic_verified);
+        } else {
+            holder.verifyStatus.setImageResource(R.drawable.ic_verifying);
+        }
         // check if it id collected
+        if (isCollected(courseFB)) {
+            holder.button_collection.setChecked(true);
+        }
 
         // Handle button clicks
         holder.button_start.setOnClickListener(v -> listener.onStartClick(courseFB));
         holder.button_collection.setOnClickListener(v -> listener.onCollectionClick(courseFB));
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
+    // zw
+    private boolean isVerified(CourseFB courseFB) {
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // yewoon
+
+    private boolean isCollected(CourseFB courseFB) {
+        return true;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////
+
     private void showImage(CourseViewHolder holder, CourseFB courseFB) {
         Glide.with(holder.itemView.getContext()).load(courseFB.getCoverImage()).placeholder(R.drawable.placeholder_image).error(R.drawable.error_image).into(holder.image_cover);
     }
-
 
     @Override
     public int getItemCount() {

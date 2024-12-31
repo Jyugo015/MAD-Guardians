@@ -136,12 +136,9 @@ public class PostFragment extends Fragment {
         } else {
             Log.d("Post fragment", "onCreateView: Post is null");
         }
-
-        //find if this post is viewed
-        // if yes, change the status as "Completed"
     }
 
-    private void displayMediaSegment(ConstraintLayout clContainer, MediaFB imgMedia, String typeMedia) {
+    private void displayMediaSegment(ConstraintLayout clContainer, MediaFB media, String typeMedia) {
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         View mediaSegment = layoutInflater.inflate(R.layout.segment_media_option, clContainer, false);
         mediaSegment.setId(View.generateViewId());
@@ -153,7 +150,7 @@ public class PostFragment extends Fragment {
 
 
         // set text in the button
-        if (isRead(imgMedia))
+        if (isRead(media))
             BTNStart.setText("Completed");
         else
             BTNStart.setText("Start!");
@@ -173,8 +170,8 @@ public class PostFragment extends Fragment {
 
         BTNStart.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
-            bundle.putString("mediaId", imgMedia.getMediaId());
-            setIsRead(imgMedia.getMediaId());
+            bundle.putString("mediaId", media.getMediaId());
+            setIsRead(media.getMediaId());
 
             if (typeMedia.equalsIgnoreCase("image"))
                 Navigation.findNavController(v).navigate(R.id.nav_img, bundle);
@@ -213,7 +210,9 @@ public class PostFragment extends Fragment {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
+    // yewoon
     private boolean isRead(MediaFB pdfMedia) {
+
         return true;
     }
 

@@ -234,10 +234,11 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
         Log.d(TAG, "uploadCourse: postId3 " + postId3);
         HashMap<String, Object> courseHashMap = CourseFB.createCourseData(courseViewModel.getTitle(), userId, courseViewModel.getDescription(), coverImageUrl, postId1, postId2, postId3, courseViewModel.getDomainId(), courseViewModel.getFolderId(), generateDate());
         Log.d(TAG, "uploadPostIfAvailable: uploading course");
-        CourseFB.insertCourse(courseHashMap, new UploadCallback<Void>(){
+        CourseFB.insertCourse(courseHashMap, new UploadCallback<String>(){
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(String courseId) {
                 Log.d(TAG, "uploadPostIfAvailable: uploaded courses successfully");
+                sendForVerification(courseId);
                 clearHistory();
             }
             @Override
@@ -246,6 +247,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             }
         });
     }
+
 
     @Override
     public void onStop() {
@@ -265,10 +267,13 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
         CourseViewModel.clear(courseViewModel);
         IVCoverImage.setImageURI(null);
     }
-
-
     @Override
     public void onMediaSelected(String filePath, String fileType) {
 
+    }
+
+    //////////////////////////////////////////////////////////////////
+    // zw
+    private void sendForVerification(String courseId) {
     }
 }

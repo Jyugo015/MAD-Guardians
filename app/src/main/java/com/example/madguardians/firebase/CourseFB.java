@@ -48,14 +48,14 @@ public class CourseFB {
         this.folderId = folderId;
         this.date = date;
     }
-    public static void insertCourse(HashMap<String, Object> data, UploadCallback<Void> callback) {
+    public static void insertCourse(HashMap<String, Object> data, UploadCallback<String> callback) {
         insertCourseQueue.add(data);
         // start for the first, after that the method will call by itself, making sure no repetitive calling
         if (insertCourseQueue.size() == 1) {
             processQueue(callback);
         }
     }
-    private static void processQueue(UploadCallback<Void> callback) {
+    private static void processQueue(UploadCallback<String> callback) {
         if (!insertCourseQueue.isEmpty()) {
             HashMap<String, Object> dataHashMap = insertCourseQueue.peek();
             FirebaseController.generateDocumentId(TABLE_NAME, new UploadCallback<String>() {
@@ -66,6 +66,7 @@ public class CourseFB {
                         public void onSuccess(HashMap<String, Object> result) {
                             Log.d("initializeDomainList", "onSuccess");
                             insertCourseQueue.poll();
+                            callback.onSuccess(id);
                             processQueue(callback);
                         }
                         @Override
@@ -171,9 +172,9 @@ public class CourseFB {
         courseHashMapList.add(createCourseData("PHP", "Benz Harris", "This is PHP", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00005", generateDate()));
         Log.d(TAG, "initializeCourseList: here2");
         for (HashMap<String, Object> dataHashMap:courseHashMapList) {
-            insertCourse(dataHashMap, new UploadCallback<Void>() {
+            insertCourse(dataHashMap, new UploadCallback<String>() {
                 @Override
-                public void onSuccess(Void result) {
+                public void onSuccess(String result) {
                     Log.d(TAG, "onSuccess: " + "course");
                 }
                 @Override
@@ -227,8 +228,8 @@ public class CourseFB {
     }
 
     public static HashMap<String, Object> createCourseData(String title, String author,
-                                                            String description, String coverImage, String post1,
-                                                            String post2, String post3, String domainId, String folderId, String date) {
+                                                           String description, String coverImage, String post1,
+                                                           String post2, String post3, String domainId, String folderId, String date) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("title", title);
         data.put("author", author);

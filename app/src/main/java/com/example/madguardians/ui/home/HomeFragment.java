@@ -22,6 +22,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.madguardians.R;
 import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.firebase.DomainFB;
+import com.example.madguardians.firebase.FolderFB;
+import com.example.madguardians.firebase.MediaFB;
+import com.example.madguardians.firebase.PostFB;
 import com.example.madguardians.utilities.AdapterCourse;
 import com.example.madguardians.utilities.UploadCallback;
 
@@ -84,6 +87,11 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
 //        MediaFB.initialiseMedia();
 //        FolderFB.initialiseFolders();
         Log.d("TAG", "onCreate: start2");
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         CourseFB.getCourses(new UploadCallback<List<CourseFB>>() {
             @Override
             public void onSuccess(List<CourseFB> courseFBList) {
@@ -96,11 +104,6 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
                 Log.e("TAG", "onFailure: " + e.getMessage());
             }
         });
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         RVCourse = view.findViewById(R.id.RVCourse);
