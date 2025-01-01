@@ -34,8 +34,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ProfileFragment extends Fragment {
     private RecyclerView achievementRecyclerView, learningHistoryRecyclerView;
@@ -184,8 +186,23 @@ public class ProfileFragment extends Fragment {
     private void loadLearningHistory() {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         List<UserHistory> learningHistoryList = new ArrayList<>();
-        LearningHistoryAdapter adapter = new LearningHistoryAdapter(learningHistoryList);
+        Set<String> uniqueCourseIds = new HashSet<>();
+        // Initialize RecyclerView
+        LearningHistoryAdapter adapter = new LearningHistoryAdapter(learningHistoryList, history -> {
+            if (history.getCourseId() != null) {
+                Toast.makeText(getContext(), "Clicked on Course ID: " + history.getCourseId(), Toast.LENGTH_SHORT).show();
+
+                // Navigate to Course Overview
+                Bundle bundle = new Bundle();
+                bundle.putString("courseId", history.getCourseId());
+                Navigation.findNavController(requireView()).navigate(R.id.nav_course_overview, bundle);
+            } else {
+                Toast.makeText(getContext(), "Course ID not available", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         learningHistoryRecyclerView.setAdapter(adapter);
+
 
         firestore.collection("userHistory")
                 .whereEqualTo("userId", userId)
@@ -194,9 +211,16 @@ public class ProfileFragment extends Fragment {
                     if (task.isSuccessful() && task.getResult() != null) {
                         for (DocumentSnapshot doc : task.getResult()) {
                             UserHistory history = doc.toObject(UserHistory.class);
-                            learningHistoryList.add(history);
+                            if (history != null && history.getCourseId() != null) {
+                                // check courseId repeat or not
+                                if (!uniqueCourseIds.contains(history.getCourseId())) {
+                                    uniqueCourseIds.add(history.getCourseId()); // add to course list
+                                    learningHistoryList.add(history); // add to list
+                                }
+                            }
                         }
 
+                        adapter.notifyDataSetChanged();
                         // hide/show noHistoryMessage
                         if (learningHistoryList.isEmpty()) {
                             noHistoryMessage.setVisibility(View.VISIBLE); // show text
@@ -205,7 +229,6 @@ public class ProfileFragment extends Fragment {
                             noHistoryMessage.setVisibility(View.GONE); // hide text
                             learningHistoryRecyclerView.setVisibility(View.VISIBLE); // show RecyclerView
                         }
-                        adapter.notifyDataSetChanged();
                     } else {
                         // If fail loading
                         noHistoryMessage.setVisibility(View.VISIBLE);
