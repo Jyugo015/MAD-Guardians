@@ -18,14 +18,14 @@
 
     <TextView
         android:id="@+id/TVUsername"
-        android:layout_width="163dp"
-        android:layout_height="42.27dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="144dp"
         android:layout_marginTop="40dp"
         android:fontFamily="@font/inter"
-        android:text="Hi"
+        android:text="......"
         android:textColor="@color/black"
-        android:textSize="22sp"
+        android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,19 +67,6 @@
     <!--        app:layout_constraintStart_toStartOf="parent"-->
     <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
-    <TextView
-        android:id="@+id/TVEmail"
-        android:layout_width="188dp"
-        android:layout_height="31dp"
-        android:layout_marginStart="144dp"
-        android:layout_marginTop="80dp"
-        android:fontFamily="@font/inter"
-        android:text="email"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <!--    <TextView-->
     <!--        android:id="@+id/TVAge"-->
     <!--        android:layout_width="188dp"-->
@@ -94,11 +81,24 @@
     <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <TextView
+        android:id="@+id/TVEmail"
+        android:layout_width="188dp"
+        android:layout_height="31dp"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="80dp"
+        android:fontFamily="@font/inter"
+        android:text="......"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
         android:id="@+id/TVUserId"
         android:layout_width="188dp"
         android:layout_height="31dp"
         android:fontFamily="@font/inter"
-        android:text="userId"
+        android:text="......"
         android:textColor="@color/black"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="@+id/TVEmail"

@@ -34,11 +34,31 @@ public class HandlePostFragment extends Fragment {
         tabLayout = view.findViewById(R.id.tabLayout_HandlePost);
         viewPager = view.findViewById(R.id.viewPager_HandlePost);
 
+        // Retrieve the staffId from arguments
+        String staffId = getArguments() != null ? getArguments().getString("staffId") : null;
+        System.out.println("handle "+staffId);
+
+        // Create Tab1PostFragment and pass the staffId as arguments
+        Tab1PostFragment tab1 = new Tab1PostFragment();
+        Bundle tab1Args = new Bundle();
+        tab1Args.putString("staffId", staffId);
+        tab1.setArguments(tab1Args);
+
+        Tab2PostFragment tab2 = new Tab2PostFragment();
+        Bundle tab2Args = new Bundle();
+        tab2Args.putString("staffId", staffId);
+        tab2.setArguments(tab2Args);
+
+        Tab3PostFragment tab3 = new Tab3PostFragment();
+        Bundle tab3Args = new Bundle();
+        tab3Args.putString("staffId", staffId);
+        tab3.setArguments(tab3Args);
+
         // Set up the adapter for ViewPager2
         ViewPageAdapter adapter = new ViewPageAdapter(requireActivity());
-        adapter.addFragment(new Tab1PostFragment(), "All");
-        adapter.addFragment(new Tab2PostFragment(), "Pending");
-        adapter.addFragment(new Tab3PostFragment(), "Completed");
+        adapter.addFragment(tab1, "All");
+        adapter.addFragment(tab2, "Pending");
+        adapter.addFragment(tab3, "Completed");
         viewPager.setAdapter(adapter);
 
         // Use TabLayoutMediator to link TabLayout and ViewPager2

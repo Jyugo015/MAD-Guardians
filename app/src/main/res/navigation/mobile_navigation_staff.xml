@@ -45,7 +45,12 @@
         android:id="@+id/handlePostFragment"
         android:name="com.example.madguardians.ui.staff.HandlePostFragment"
         android:label="Handle Post"
-        tools:layout="@layout/staff_fragment_handle_post_hzw" />
+        tools:layout="@layout/staff_fragment_handle_post_hzw">
+        <argument
+            android:name="staffId"
+            app:argType="string" />
+    </fragment>
+
     <fragment
         android:id="@+id/handleReportedPostFragment"
         android:name="com.example.madguardians.ui.staff.HandleReportedPostFragment"
