@@ -3,56 +3,45 @@ package com.example.madguardians;
 import static android.content.Context.MODE_PRIVATE;
 import static com.google.common.reflect.Reflection.getPackageName;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.widget.Toolbar;
+
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.madguardians.collection.AllCollectionFragment;
-import com.example.madguardians.collection.CollectionFragment;
 import com.example.madguardians.database.Achievement;
-import com.example.madguardians.database.AchievementDao;
 import com.example.madguardians.database.AppDatabase;
-import com.example.madguardians.database.Badge;
-import com.example.madguardians.database.BadgeDao;
 import com.example.madguardians.database.Course;
-import com.example.madguardians.database.CourseDao;
-import com.example.madguardians.database.MediaSetDao;
-import com.example.madguardians.database.Post;
-import com.example.madguardians.database.PostDao;
-import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
 import com.example.madguardians.database.UserHistory;
-import com.example.madguardians.database.UserHistoryDao;
-import com.example.madguardians.notification.notificationFragment;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Executors;
+import java.util.Map;
+import java.util.Set;
 
 public class ProfileFragment extends Fragment {
-    private RecyclerView achievementRecyclerView;
-    private AchievementAdapter achievementAdapter;
+    private RecyclerView achievementRecyclerView, learningHistoryRecyclerView;
+    private AchievementAdapter achievementAdapter, learningHistoryAdapter;
     private List<Achievement> achievementList = new ArrayList<>();
     private AppDatabase appDatabase;
     private UserDao userDao;
@@ -73,9 +62,9 @@ public class ProfileFragment extends Fragment {
         //Get userid
         userId = sharedPreferences.getString("user_id", null);
         // Initialize database
-        appDatabase = AppDatabase.getDatabase(getContext());
-        //Initialize userDao
-        userDao = appDatabase.userDao();
+//        appDatabase = AppDatabase.getDatabase(getContext());
+//        //Initialize userDao
+//        userDao = appDatabase.userDao();
 
 
         // Inflate the layout for this fragment
@@ -85,12 +74,17 @@ public class ProfileFragment extends Fragment {
         achievementRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         achievementRecyclerView.setLayoutManager(layoutManager);
+        learningHistoryRecyclerView = rootView.findViewById(R.id.learningHistoryRecyclerView);
+        learningHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager learningHistoryLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        learningHistoryRecyclerView.setLayoutManager(learningHistoryLayoutManager);
+
         // Initialize views
         usernameTextView = rootView.findViewById(R.id.username);
         emailTextView = rootView.findViewById(R.id.gmail);
         profileImageView = rootView.findViewById(R.id.profile);
 //        achievementContainer = rootView.findViewById(R.id.achievementContainer);
-        learningHistoryContainer = rootView.findViewById(R.id.learningHistoryContainer);
+//        learningHistoryContainer = rootView.findViewById(R.id.learningHistoryContainer);
         viewAllAchievement = rootView.findViewById(R.id.viewAllAchievement);
         viewHistoryTextView = rootView.findViewById(R.id.view_learning_history);
         noAchievementsMessage = rootView.findViewById(R.id.noAchievementsMessage);
@@ -145,132 +139,143 @@ public class ProfileFragment extends Fragment {
 
             navController.navigate(R.id.action_nav_profile_to_notificationFragment);
         });
+
+        TextView viewAllAchievement = rootView.findViewById(R.id.viewAllAchievement);
+        viewAllAchievement.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
+            navController.navigate(R.id.action_nav_profile_to_viewAllAchievementsFragment);
+        });
         return rootView;
     }
 
     private void loadUserData() {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                // Get user from the database (in background thread)
-                User user = userDao.getById(userId);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                // Update UI on the main thread
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (user != null) {
-                            // Update user name and email
-                            usernameTextView.setText(user.getName());
-                            emailTextView.setText(user.getEmail());
+        db.collection("user")
+                .document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        DocumentSnapshot document = task.getResult();
 
-                            // Check if user has a profile pic
-                            String profilePicUrl = user.getProfilePic();
-                            if ("url link of default profile pic".equals(profilePicUrl)) {
-                                // Use default profile pic if no custom profile picture
-                                profileImageView.setImageResource(R.drawable.ic_profile);
-                            } else {
-                                // Use Glide to load the profile pic if available
+                        if (document.exists()) {
+                            String name = document.getString("name");
+                            String email = document.getString("email");
+                            String profilePicUrl = document.getString("profilePic");
+
+                            if (name != null) usernameTextView.setText(name);
+                            if (email != null) emailTextView.setText(email);
+
+                            if (profilePicUrl != null && !"url link of default profile pic".equals(profilePicUrl)) {
                                 Glide.with(ProfileFragment.this)
                                         .load(profilePicUrl)
                                         .circleCrop()
                                         .into(profileImageView);
+                            } else {
+                                profileImageView.setImageResource(R.drawable.ic_profile);
                             }
+                        } else {
+                            Toast.makeText(getContext(), "User data not found", Toast.LENGTH_SHORT).show();
                         }
+                    } else {
+                        Toast.makeText(getContext(), "Failed to load user data", Toast.LENGTH_SHORT).show();
                     }
                 });
-            }
-        });
     }
 
     private void loadLearningHistory() {
-        // Database access on a background thread
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                // Get UserHistory Data
-                UserHistoryDao userHistoryDao = AppDatabase.getDatabase(getContext()).userHistoryDao();
-                PostDao userPostDao = AppDatabase.getDatabase(getContext()).postDao();
-                CourseDao courseDao = AppDatabase.getDatabase(getContext()).courseDao();
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        List<UserHistory> learningHistoryList = new ArrayList<>();
+        Set<String> uniqueCourseIds = new HashSet<>();
+        // Initialize RecyclerView
+        LearningHistoryAdapter adapter = new LearningHistoryAdapter(learningHistoryList, history -> {
+            if (history.getCourseId() != null) {
+                Toast.makeText(getContext(), "Clicked on Course ID: " + history.getCourseId(), Toast.LENGTH_SHORT).show();
 
-                // Fetch user history from the database
-                List<UserHistory> learningHistoryList = userHistoryDao.getByUserId(userId);
+                // Navigate to Course Overview
+                Bundle bundle = new Bundle();
+                bundle.putString("courseId", history.getCourseId());
+                Navigation.findNavController(requireView()).navigate(R.id.nav_course_overview, bundle);
+            } else {
+                Toast.makeText(getContext(), "Course ID not available", Toast.LENGTH_SHORT).show();
+            }
+        });
 
-                // Update UI on the main thread
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Clear the container
-                        learningHistoryContainer.removeAllViews();
+        learningHistoryRecyclerView.setAdapter(adapter);
 
-                        // Check if there are learning history items
-                        if (learningHistoryList.isEmpty()) {
-                            noHistoryMessage.setVisibility(View.VISIBLE);
-                        } else {
-                            noHistoryMessage.setVisibility(View.GONE);
-                        }
 
-                        // Loop through the user history and populate the UI
-                        for (UserHistory history : learningHistoryList) {
-                            // Fetch the associated post (make sure it's non-blocking)
-                            Post post = userPostDao.getById(history.getPostId()).getValue();
-                            Course course = courseDao.getById(post.getPostId());
-
-                            if (post != null) {
-                                // Inflate the custom item layout for each post
-                                View learningHistoryItemView = LayoutInflater.from(getContext()).inflate(R.layout.learning_history, null);
-
-                                // Set post title
-                                TextView historyTitle = learningHistoryItemView.findViewById(R.id.PostTitle);
-                                historyTitle.setText(post.getTitle());
-
-                                // Get image URL and load the image
-                                ImageView historyImage = learningHistoryItemView.findViewById(R.id.PostImage);
-                                if (course.getCoverImage()!= null && !course.getCoverImage().isEmpty()) {
-                                    Glide.with(getContext())
-                                            .load(course.getCoverImage()) // Assuming this is a valid URL or local path
-                                            .into(historyImage);
-                                } else {
-                                    historyImage.setImageResource(R.drawable.bg_white_shape); // Default image if no image is found
+        firestore.collection("userHistory")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        for (DocumentSnapshot doc : task.getResult()) {
+                            UserHistory history = doc.toObject(UserHistory.class);
+                            if (history != null && history.getCourseId() != null) {
+                                // check courseId repeat or not
+                                if (!uniqueCourseIds.contains(history.getCourseId())) {
+                                    uniqueCourseIds.add(history.getCourseId()); // add to course list
+                                    learningHistoryList.add(history); // add to list
                                 }
-
-                                // Set onClickListener for the history item
-                                learningHistoryItemView.setOnClickListener(v -> {
-                                    Toast.makeText(getContext(), "Clicked on " + post.getTitle(), Toast.LENGTH_SHORT).show();
-                                });
-
-                                // Add the item view to the container
-                                learningHistoryContainer.addView(learningHistoryItemView);
                             }
                         }
-                    }
-                });
-            }
-        });
-    }
 
-    private void loadAchievements() {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                // Query the database for achievements (or other data you need)
-                achievementList = appDatabase.achievementDao().getAll();
-
-
-                // Update the RecyclerView on the main thread
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (achievementList.isEmpty()) {
-                            noAchievementsMessage.setVisibility(View.VISIBLE);
+                        adapter.notifyDataSetChanged();
+                        // hide/show noHistoryMessage
+                        if (learningHistoryList.isEmpty()) {
+                            noHistoryMessage.setVisibility(View.VISIBLE); // show text
+                            learningHistoryRecyclerView.setVisibility(View.GONE); // hide RecyclerView
                         } else {
-                            noAchievementsMessage.setVisibility(View.GONE);
+                            noHistoryMessage.setVisibility(View.GONE); // hide text
+                            learningHistoryRecyclerView.setVisibility(View.VISIBLE); // show RecyclerView
                         }
-                        achievementAdapter = new AchievementAdapter(achievementList);
-                        achievementRecyclerView.setAdapter(achievementAdapter);
+                    } else {
+                        // If fail loading
+                        noHistoryMessage.setVisibility(View.VISIBLE);
+                        learningHistoryRecyclerView.setVisibility(View.GONE);
+                        Toast.makeText(getContext(), "Failed to load learning history", Toast.LENGTH_SHORT).show();
                     }
                 });
-            }
-        });
+    }
+    private void loadAchievements() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Query Firestore
+        db.collection("achievement")
+                .whereEqualTo("userId", userId) // Filter berdasarkan userId
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Initialize achievementList
+                        List<Achievement> achievementList = new ArrayList<>();
+
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Achievement achievement = new Achievement();
+                            achievement.setUserId(document.getString("userId"));
+                            achievement.setBadgeId(document.getString("badgeId"));
+
+                            // Add all achievement to achievementList
+                            achievementList.add(achievement);
+                        }
+
+                        // Run RecyclerView in main ui thread
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (achievementList.isEmpty()) {
+                                    noAchievementsMessage.setVisibility(View.VISIBLE);
+                                } else {
+                                    noAchievementsMessage.setVisibility(View.GONE);
+                                }
+
+                                // set adapter RecyclerView
+                                achievementAdapter = new AchievementAdapter(achievementList);
+                                achievementRecyclerView.setAdapter(achievementAdapter);
+                            });
+                        }
+                    } else {
+                        // Pop toast if fail to load achievements
+                        Toast.makeText(getContext(), "Failed to load achievements", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

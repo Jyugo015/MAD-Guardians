@@ -7,6 +7,9 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import com.google.firebase.Timestamp;
+import java.io.Serializable;
+
 @Entity(tableName = "comment",
         foreignKeys = {
             @ForeignKey(
@@ -37,7 +40,7 @@ import androidx.room.PrimaryKey;
             )
         }
 )
-public class Comment {
+public class Comment implements Serializable{
     @PrimaryKey
     @NonNull
     private String commentId;
@@ -53,14 +56,16 @@ public class Comment {
     private String replyUserId;
     @NonNull
     @ColumnInfo(defaultValue = "0")
-    private int isRead;
+    private boolean isRead;
     @NonNull
-    private String timestamp;
+    private String authorId;
+//    @NonNull
+//    private Timestamp timestamp;
 
     // Constructor
     public Comment(@NonNull String commentId, @Nullable String userId, @NonNull String postId,
                    @NonNull String comment, @Nullable String rootComment, @Nullable String replyUserId,
-                   int isRead, @NonNull String timestamp) {
+                   boolean isRead, String authorId) {
         this.commentId = commentId;
         this.userId = userId;
         this.postId = postId;
@@ -68,7 +73,8 @@ public class Comment {
         this.rootComment = rootComment;
         this.replyUserId = replyUserId;
         this.isRead = isRead;
-        this.timestamp = timestamp;
+        this.authorId = authorId;
+//        this.timestamp = timestamp;
     }
     public Comment() {
     }
@@ -84,7 +90,7 @@ public class Comment {
     }
 
     // Getter and Setter for userId
-    @Nullable
+    @NonNull
     public String getUserId() {
         return userId;
     }
@@ -134,21 +140,31 @@ public class Comment {
     }
 
     // Getter and Setter for isRead
-    public int isRead() {
+    public boolean isRead() {
         return isRead;
     }
 
-    public void setIsRead(int isRead) {
-        this.isRead = isRead;
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
+
+    @NonNull
+    public String getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(@NonNull String authorId) {
+        this.authorId = authorId;
     }
 
     // Getter and Setter for timestamp
-    @NonNull
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(@NonNull String timestamp) {
-        this.timestamp = timestamp;
-    }
+//    @NonNull
+//    public String getTimestamp() {
+//        return timestamp;
+//    }
+//
+//    public void setTimestamp(@NonNull String timestamp) {
+//        this.timestamp = timestamp;
+//    }
 }

@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
+import java.io.Serializable;
 
 @Entity(tableName = "post",
         foreignKeys = {
@@ -52,7 +53,7 @@ import androidx.room.PrimaryKey;
                 )
         }
 )
-public class Post {
+public class Post implements Serializable{
     @PrimaryKey
     @NonNull
     private String postId;
@@ -74,7 +75,7 @@ public class Post {
     private String domainId;
     @Nullable
     private String folderId;
-    @NonNull
+    @Nullable
     private String date;
 
     public Post() {
@@ -83,7 +84,7 @@ public class Post {
     // Constructor
     public Post(String postId, @NonNull String userId, @NonNull String title, @NonNull String description,
                 @Nullable String imageSetId, @Nullable String videoSetId, @Nullable String fileSetId,
-                @Nullable String quizId, @NonNull String domainId, @Nullable String folderId, @NonNull String date) {
+                @Nullable String quizId, @NonNull String domainId, @Nullable String folderId, @Nullable String date) {
         this.postId = postId;
         this.userId = userId;
         this.title = title;

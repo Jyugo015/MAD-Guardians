@@ -14,9 +14,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 @Database(entities = {Achievement.class, Appointment.class, Badge.class, ChatHistory.class,
         Collection.class, Course.class, Comment.class, Counselor.class, CounselorAvailability.class,
         Domain.class, DomainInterested.class, Folder.class, Helpdesk.class, Issue.class,
-        MediaRead.class, Media.class, MediaSet.class, Notification.class, Post.class, Quiz.class,
+        MediaRead.class, Media.class, MediaSet.class, Post.class, Quiz.class,
         QuestionOption.class, QuizHistory.class, QuizOld.class, QuizQuestion.class,
-        QuizResult.class, Staff.class, Timeslot.class, User.class, UserHistory.class,
+        QuizResult.class, Staff.class, Timeslot.class, User.class,
         VerEducator.class, VerPost.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -36,8 +36,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract IssueDao issueDao();
     public abstract MediaReadDao mediaReadDao();
     public abstract MediaSetDao mediaSetDao();
-    public abstract MediaDao mediaDao();
-    public abstract NotificationDao notificationDao();
+//    public abstract MediaDao mediaDao();
+//    public abstract NotificationDao notificationDao();
     public abstract PostDao postDao();
     public abstract QuestionOptionDao questionOptionDao();
     public abstract QuizDao quizDao();
@@ -48,7 +48,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract StaffDao staffDao();
     public abstract TimeslotDao timeslotDao();
     public abstract UserDao userDao();
-    public abstract UserHistoryDao userHistoryDao();
+//    public abstract UserHistoryDao userHistoryDao();
     public abstract VerEducatorDao verEducatorDao();
     public abstract VerPostDao verPostDao();
 
@@ -60,7 +60,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "app_database")
-                            .addMigrations(AppDatabase.MIGRATION_1_2)
+//                            .addMigrations(AppDatabase.MIGRATION_1_2)
                             .build();
                 }
             }
@@ -389,19 +389,19 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("ALTER TABLE mediaSet_new RENAME TO mediaSet;");
 
             //notification
-            database.execSQL("DROP TABLE IF EXISTS notification_new;");
-            database.execSQL(
-                    "CREATE TABLE notification_new (" +
-                            "notificationId TEXT NOT NULL PRIMARY KEY, " +
-                            "userId TEXT NOT NULL, " +
-                            "message TEXT NOT NULL, " +
-                            "deliveredTime TEXT, " +
-                            "readTime TEXT, " +
-                            "FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE" +
-                            ");"
-            );
-            database.execSQL("DROP TABLE IF EXISTS notification;");
-            database.execSQL("ALTER TABLE notification_new RENAME TO notification;");
+//            database.execSQL("DROP TABLE IF EXISTS notification_new;");
+//            database.execSQL(
+//                    "CREATE TABLE notification_new (" +
+//                            "notificationId TEXT NOT NULL PRIMARY KEY, " +
+//                            "userId TEXT NOT NULL, " +
+//                            "message TEXT NOT NULL, " +
+//                            "deliveredTime TEXT, " +
+//                            "readTime TEXT, " +
+//                            "FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE" +
+//                            ");"
+//            );
+//            database.execSQL("DROP TABLE IF EXISTS notification;");
+//            database.execSQL("ALTER TABLE notification_new RENAME TO notification;");
 
             //post
             database.execSQL("DROP TABLE IF EXISTS post_new;");

@@ -29,7 +29,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.madguardians.database.CloudinaryUploadWorker;
-import com.example.madguardians.database.MediaHandler;
+import com.example.madguardians.utilities.MediaHandler;
 
 public class EducationQualificationFragment extends Fragment implements MediaHandler.MediaHandleCallback {
     private Button uploadButton;

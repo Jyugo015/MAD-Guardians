@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -32,6 +33,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Domain;
 import com.example.madguardians.database.DomainDao;
@@ -43,12 +46,20 @@ import com.example.madguardians.database.VerEducator;
 import com.example.madguardians.database.VerEducatorDao;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.Firebase;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class EditProfileFragment extends Fragment {
     // UI Elements
+    private static int IMAGE_REQ =1;
     private EditText ETname, mail, ETnumber;
     private TextView email, phone_number;
     private ImageView profileImageView;
@@ -87,18 +98,18 @@ public class EditProfileFragment extends Fragment {
         phone_number = rootView.findViewById(R.id.phone_number);
         profileImageView = rootView.findViewById(R.id.profile);
         verifiedContainer = rootView.findViewById(R.id.verifiedContainer);
-        appDatabase = AppDatabase.getDatabase(getContext());
+//        appDatabase = AppDatabase.getDatabase(getContext());
 
         sharedPreferences = getContext().getSharedPreferences("user_preferences", MODE_PRIVATE);
         userId = sharedPreferences.getString("user_id", null);
 
         // Initialize database and DAO
-        db = AppDatabase.getDatabase(getContext());
-        userDao = db.userDao();
-        verEducatorDao = db.verEducatorDao();
-        domainDao = db.domainDao();
-
-        Executor.executeTask(()-> {user = userDao.getById(userId);});
+//        db = AppDatabase.getDatabase(getContext());
+//        userDao = db.userDao();
+//        verEducatorDao = db.verEducatorDao();
+//        domainDao = db.domainDao();
+//
+//        Executor.executeTask(()-> {user = userDao.getById(userId);});
         // Set click listener for profile image
         profileImageView.setOnClickListener(v -> openImageChooser());
 
@@ -117,176 +128,261 @@ public class EditProfileFragment extends Fragment {
                         new String[]{Manifest.permission.READ_MEDIA_IMAGES}, 1);
             }
         }
-
-//        // Get the BottomNavigationView from the parent Activity
-//        BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.bottom_nav_view);
-//
-//        // Wait for the layout to be drawn and then get the BottomNavigationView's height
-//        rootView.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-//            // Get the height of the BottomNavigationView
-//            int bottomNavHeight = bottomNavigationView.getHeight();
-//
-//            // Adjust the fragment content padding to avoid the BottomNavigationView
-//            rootView.setPadding(0, 0, 0, bottomNavHeight);
-//        });
-
-
-
         return rootView;
     }
 
     // This method will open the image chooser
     private void openImageChooser() {
         // Create a new Intent to pick an image
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        Intent intent = new Intent();
         intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
 
-        // Use ActivityResultContracts to handle the result
-        imagePickerLauncher.launch(intent);
+        // Use startActivityForResult to handle the result
+        startActivityForResult(intent, IMAGE_REQ);
     }
     // ActivityResultContract to handle the image picking result
-    private final ActivityResultCallback<ActivityResult> pickImageCallback = result -> {
-        if (result.getResultCode() == Activity.RESULT_OK) {
-            Intent data = result.getData();
-            if (data != null) {
-                Uri imageUri = data.getData(); // Get the URI of the selected image
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
-//                    profileImageView.setImageBitmap(bitmap);
-                    user.setProfilePic(imageUri.toString());
-                    Glide.with(EditProfileFragment.this)
-                            .load(bitmap)
-                            .circleCrop()
-                            .into(profileImageView);
-
-                } catch (Exception e) {
-                    Toast.makeText(getContext(), "Failed to load image", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final ActivityResultLauncher<Intent> imagePickerLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), pickImageCallback);
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openImageChooser();
-            } else {
-                Toast.makeText(getContext(), "Permission denied", Toast.LENGTH_SHORT).show();
-            }
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == IMAGE_REQ && resultCode == Activity.RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            uploadImageToCloudinary(imageUri);
         }
     }
-    private void loadUserData(String userId) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            User user = userDao.getById(userId);
-            // Query the user from the database in a background thread
-//            User user = userDao.getById(userId);
 
-            // Update the UI on the main thread
-            getActivity().runOnUiThread(() -> {
-                if (user != null) {
-                    // Populate the UI with the user's data
-                    ETname.setText(user.getName());
-                    mail.setText(user.getEmail());
-                    ETnumber.setText(user.getPhoneNo() != null ? user.getPhoneNo() : "+60xx-xxxxxxx");
+    // Upload to Cloudinary
+    private void uploadImageToCloudinary(Uri imageUri) {
+        String filePath = getPathFromUri(imageUri);
+        new Thread(() -> {
+            try {
+                // Cloudinary setting
+                Map<String, String> cloudinaryConfig = new HashMap<>();
+                cloudinaryConfig.put("cloud_name", getString(R.string.cloud_name));
+                cloudinaryConfig.put("api_key", getString(R.string.api_key));
+                cloudinaryConfig.put("api_secret", getString(R.string.api_secret));
 
-                    // Check if the user has a profile pic
-                    String profilePicUrl = user.getProfilePic();
-                    if (profilePicUrl == null || profilePicUrl.equals("url link of default profile pic")) {
-                        profileImageView.setImageResource(R.drawable.ic_profile);
-                    } else {
+                Cloudinary cloudinary = new Cloudinary(cloudinaryConfig);
+
+                // upload to Cloudinary
+                Map response = cloudinary.uploader().upload(filePath, ObjectUtils.emptyMap());
+                String imageUrl = (String) response.get("secure_url");
+
+                // Update Firestore user data
+                updateProfilePicInFirestore(imageUrl);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    // Update Firestore user data
+    private void updateProfilePicInFirestore(String imageUrl) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("user")
+                .document(userId)
+                .update("profilePic", imageUrl)
+                .addOnSuccessListener(aVoid -> {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Profile picture updated successfully", Toast.LENGTH_SHORT).show();
                         Glide.with(EditProfileFragment.this)
-                                .load(profilePicUrl)
+                                .load(imageUrl)
                                 .circleCrop()
                                 .into(profileImageView);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Failed to update profile picture in Firestore", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
+    }
+
+    // get path from uri
+    private String getPathFromUri(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContext().getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null) {
+            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            String filePath = cursor.getString(columnIndex);
+            cursor.close();
+            return filePath;
+        }
+        return null;
+    }
+    // Load user data from Firestore
+    private void loadUserData(String userId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("user")
+                .document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        DocumentSnapshot document = task.getResult();
+
+                        if (document.exists()) {
+                            String name = document.getString("name");
+                            String emailText = document.getString("email");
+                            String phoneNo = document.getString("phoneNo");
+                            String profilePicUrl = document.getString("profilePic");
+
+                            // Update UI with user data
+                            if (name != null) ETname.setText(name);
+                            if (emailText != null) mail.setText(emailText);
+                            if (phoneNo != null) ETnumber.setText(phoneNo);
+
+                            if (profilePicUrl == null || profilePicUrl.equals("url link of default profile pic")) {
+                                profileImageView.setImageResource(R.drawable.ic_profile);
+                            } else {
+                                Glide.with(EditProfileFragment.this)
+                                        .load(profilePicUrl)
+                                        .circleCrop()
+                                        .into(profileImageView);
+                            }
+                        } else {
+                            Toast.makeText(getContext(), "User data not found", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "Failed to load user data", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(getContext(), "User data not found", Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
+                });
     }
 
     private void saveProfile() {
-        // Get data from EditText fields
         String name = ETname.getText().toString();
         String emailText = mail.getText().toString();
         String phoneNumber = ETnumber.getText().toString();
 
-        // Validate the input fields
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(emailText) || TextUtils.isEmpty(phoneNumber)) {
             Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-            if (user != null) {
-                user.setName(name);
-                user.setEmail(emailText);
-                user.setPhoneNo(phoneNumber);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                // Save the profile pic URI if available
-                String currentProfilePic = user.getProfilePic();
-                System.out.println(currentProfilePic);
-                if (currentProfilePic != null) {
-                    user.setProfilePic(currentProfilePic); // Ensure profilePic is set
-                }
+        db.collection("user")
+                .whereEqualTo("name", name)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            if (!document.getId().equals(userId)) {
+                                Toast.makeText(getContext(), "Name is already taken by another user", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                        }
+                    }
 
-                // Update the user in Firestore
-                FirestoreManager firestoreManager = new FirestoreManager(appDatabase);
-                Executor.executeTask(() -> firestoreManager.onInsertUpdate("update","user", user, getContext()));
+                    db.collection("user")
+                            .whereEqualTo("email", emailText)
+                            .get()
+                            .addOnCompleteListener(emailTask -> {
+                                if (emailTask.isSuccessful() && !emailTask.getResult().isEmpty()) {
+                                    for (QueryDocumentSnapshot document : emailTask.getResult()) {
+                                        if (!document.getId().equals(userId)) {
+                                            Toast.makeText(getContext(), "Email is already registered by another user", Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+                                    }
+                                }
 
-                getActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Profile saved successfully", Toast.LENGTH_SHORT).show()
-                );
+                                Map<String, Object> updates = new HashMap<>();
+                                updates.put("name", name);
+                                updates.put("email", emailText);
+                                updates.put("phoneNo", phoneNumber);
+
+                                db.collection("user")
+                                        .document(userId)
+                                        .update(updates)
+                                        .addOnSuccessListener(aVoid ->
+                                                Toast.makeText(getContext(), "Profile saved successfully", Toast.LENGTH_SHORT).show()
+                                        )
+                                        .addOnFailureListener(e ->
+                                                Toast.makeText(getContext(), "Failed to save profile", Toast.LENGTH_SHORT).show()
+                                        );
+                            });
+                });
+    }
+
+    private void loadVerifiedStatus(String userId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("verEducator")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<String> domainIds = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String verifiedStatus = document.getString("verifiedStatus");
+                            if ("approved".equalsIgnoreCase(verifiedStatus)) {
+                                String domainId = document.getString("domainId");
+                                if (domainId != null) {
+                                    domainIds.add(domainId);
+                                }
+                            }
+                        }
+
+                        // Update UI with verified domains
+                        loadDomainNames(domainIds);
+                    } else {
+                        Toast.makeText(getContext(), "Failed to load verified educators", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    private void loadDomainNames(List<String> domainIds) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        List<String> domainNames = new ArrayList<>();
+
+        // If no domainID，show nothing
+        if (domainIds.isEmpty()) {
+            updateVerifiedContainer(domainNames);
+            return;
+        }
+
+        // Chenk domainName in domain table
+        db.collection("domain")
+                .whereIn("domainId", domainIds) // check all domainId
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String domainName = document.getString("domainName");
+                            if (domainName != null) {
+                                domainNames.add(domainName);
+                            }
+                        }
+                        //Update UI
+                        updateVerifiedContainer(domainNames);
+                    } else {
+                        Toast.makeText(getContext(), "Failed to load domain names", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void updateVerifiedContainer(List<String> domainNames) {
+        getActivity().runOnUiThread(() -> {
+            verifiedContainer.removeAllViews();
+
+            if (domainNames.isEmpty()) {
+                TextView noRecordTextView = new TextView(getContext());
+                noRecordTextView.setText("No Verification Records");
+                noRecordTextView.setTextSize(16);
+                verifiedContainer.addView(noRecordTextView);
             } else {
-                getActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "User not found", Toast.LENGTH_SHORT).show()
-                );
+                for (String domainName : domainNames) {
+                    TextView verifiedTextView = new TextView(getContext());
+                    verifiedTextView.setText(domainName);
+                    verifiedTextView.setTextSize(16);
+                    verifiedTextView.setPadding(10, 10, 10, 10);
+                    verifiedContainer.addView(verifiedTextView);
+                }
             }
         });
     }
 
-    private void loadVerifiedStatus(String userId) {
-        // Use Executor to run the database query in the background
-        Executors.newSingleThreadExecutor().execute(() -> {
-            // Retrieve VerEducator Data on background thread
-            List<VerEducator> verEducatorList = verEducatorDao.getAll();
 
-            // Post back to the main thread to update the UI
-            getActivity().runOnUiThread(() -> {
-                // Clear container
-                verifiedContainer.removeAllViews();
-
-                if (verEducatorList != null && !verEducatorList.isEmpty()) {
-                    for (VerEducator verEducator : verEducatorList) {
-                        String domainName = domainDao.getById(verEducator.getDomainId()).getDomainName();
-
-                        // If domainName is not null and the status is approved
-                        if (domainName != null && verEducator.getVerifiedStatus().equalsIgnoreCase("approved")) {
-                            // Add new TextView to show Domain Name
-                            TextView verifiedTextView = new TextView(getContext());
-                            verifiedTextView.setText(domainName);
-                            verifiedTextView.setTextSize(16);
-                            verifiedTextView.setPadding(10, 10, 10, 10);
-
-                            // Add TextView to container
-                            verifiedContainer.addView(verifiedTextView);
-                        }
-                    }
-                } else {
-                    // No VerEducator Data, display a message
-                    TextView noRecordTextView = new TextView(getContext());
-                    noRecordTextView.setText("No Verification Records");
-                    noRecordTextView.setTextSize(16);
-                    verifiedContainer.addView(noRecordTextView);
-                }
-            });
-        });
-    }
 }

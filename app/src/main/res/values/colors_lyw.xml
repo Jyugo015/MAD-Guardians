@@ -41,4 +41,10 @@
     <color name="line_7_color">#E4E8EE</color>
     <color name="rectangle_2901_color">#D9D9D9</color>
 
+    <color name="pic_container_ek1_color">#D1F4CD</color>
+    <color name="favourite_container_color">#9DDE99</color>
+    <color name="_5_views_color">#1FA1A1A1</color>
+    <color name="pic_container_color">#EEFFEC</color>
+    <color name="profile_container_color">#669E71</color>
+    <color name="grey">#FF808080</color>">
 </resources>
