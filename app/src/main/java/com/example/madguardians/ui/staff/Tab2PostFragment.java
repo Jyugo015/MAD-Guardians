@@ -1,139 +1,227 @@
 package com.example.madguardians.ui.staff;
 
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.madguardians.database.AppDatabase;
-import com.example.madguardians.database.FirestoreManager;
-import com.example.madguardians.database.HelpdeskDao;
-import com.example.madguardians.database.Post;
-import com.example.madguardians.database.PostDao;
-import com.example.madguardians.database.UserDao;
-import com.example.madguardians.database.VerPost;
-import com.example.madguardians.database.VerPostDao;
+//import com.example.madguardians.database.FirestoreManager;
+import com.example.madguardians.notification.NotificationUtils;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.Map;
 
-public class Tab2PostFragment extends BaseTab2Fragment<Post> implements RecycleViewPostAdapter.OnPostActionListener {
-    private FirestoreManager firestoreManager;
-    private NotificationManager notificationManager;
-    private VerPostDao verPostDao;
-    private UserDao userDao;
+public class Tab2PostFragment extends BaseTab1Fragment<VerPost> implements RecycleViewVerPostAdapter.OnPostActionListener {
+    private RecycleViewVerPostAdapter adapter;
+    private NotificationUtils notificationUtils;
+    private List<VerPost> verPostList = new ArrayList<>();
 
     public Tab2PostFragment() {
-
+        // Required empty constructor
     }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        AppDatabase appDatabase = AppDatabase.getDatabase(requireContext());
-        firestoreManager = new FirestoreManager(appDatabase);
-        notificationManager = new NotificationManager(requireContext());
-        verPostDao = appDatabase.verPostDao();
-        userDao = appDatabase.userDao();
+        notificationUtils = new NotificationUtils();
+        fetchData();
     }
 
     @Override
-    protected List<Post> getData() {
-        PostDao postDao = AppDatabase.getDatabase(requireContext()).postDao();
-        List<Post> postList = postDao.getAll().getValue(); // Retrieve all posts
-        List<Post> postPendingList = new ArrayList<>();
-
-        if (postList == null || postList.isEmpty()) {
-            showToast("No posts available.");
-            return postPendingList; // Return empty list if no posts are available
-        }
-
-        for (Post post : postList) {
-            VerPost verPost = verPostDao.getByPostId(post.getPostId());
-            if (verPost != null && "pending".equals(verPost.getVerifiedStatus())) {
-                postPendingList.add(post);
-            }
-        }
-
-        if (postPendingList.isEmpty()) {
-            showToast("No pending posts available.");
-        }
-
-        return postPendingList;
+    protected void fetchData() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("verPost")
+                .whereEqualTo("verifiedStatus", "pending") // Filter by verifiedStatus == "pending"
+                .orderBy("timestamp", Query.Direction.DESCENDING) // Sort by timestamp
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        List<VerPost> tempList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            VerPost verPost = document.toObject(VerPost.class);
+                            verPost.setVerPostId(document.getId());
+                            tempList.add(verPost);
+                        }
+                        updateRecyclerViewAdapter(tempList);
+                    } else {
+                        showToast("No pending VerPosts.");
+                        System.out.println("No pending VerPosts.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    logError("Failed to fetch pending VerPosts.", e);
+                    showToast("Failed to fetch pending VerPosts.");
+                    System.out.println("Failed to fetch pending VerPosts.");
+                });
     }
 
     @Override
-    protected RecyclerView.Adapter<?> getAdapter(List<Post> data) {
-        return new RecycleViewPostAdapter(data, requireContext(), this);
+    protected void updateRecyclerViewAdapter(List<VerPost> data) {
+        if (adapter == null) {
+            adapter = new RecycleViewVerPostAdapter(data, requireContext(), this);
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.updateData(data); // Make sure updateData is implemented in your adapter
+        }
+        verPostList = data;
     }
 
     @Override
-    public void onRejectClicked(Post post, int position) {
+    public void onRejectClicked(VerPost post, int position) {
         handlePostAction(post, "rejected", "Rejected");
     }
 
     @Override
-    public void onApprovedClicked(Post post, int position) {
-        handlePostAction(post, "approved", "Approved");
+    public void onApprovedClicked(VerPost verPost, int position) {
+        handlePostAction(verPost, "approved", "Approved");
     }
 
     @Override
-    public void onDeleteClicked(Post post, int position) {
-        try {
-            VerPost verPost = verPostDao.getByPostId(post.getPostId());
-            if (verPost != null) {
-                firestoreManager.onDelete("verPost", verPost);
-            }
-            firestoreManager.onDelete("post", post);
+    public void onDeleteClicked(VerPost verPost, int position) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection("verPost")
+                .document(verPost.getVerPostId())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    logMessage("Successfully deleted VerPost: " + verPost.getVerPostId());
 
-            sendNotificationToUser(post, "Your post \"" + post.getTitle() + "\" has been deleted.");
-            showToast("Deleted: " + post.getTitle());
-        } catch (Exception e) {
-            logError("Failed to delete post", e);
-            showToast("Failed to delete: " + e.getMessage());
-        }
+                    firestore.collection("post")
+                            .document(verPost.getPostId())
+                            .get()
+                            .addOnSuccessListener(documentSnapshot -> {
+                                if (documentSnapshot.exists()) {
+                                    Post post = documentSnapshot.toObject(Post.class);
+
+                                    if (post != null) {
+                                        String postTitle = post.getTitle();
+                                        String postUserId = post.getUserId();
+
+                                        firestore.collection("post")
+                                                .document(verPost.getPostId())
+                                                .delete()
+                                                .addOnSuccessListener(aVoid1 -> {
+                                                    logMessage("Successfully deleted Post: " + verPost.getPostId());
+                                                    showToast("Deleted post: " + postTitle);
+
+                                                    notificationUtils.createTestNotification(
+                                                            postUserId,
+                                                            "Your post \"" + postTitle + "\" has been deleted."
+                                                    );
+
+                                                    verPostList.remove(position);
+                                                    adapter.notifyItemRemoved(position);
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    logError("Failed to delete Post: " + verPost.getPostId(), e);
+                                                    showToast("Failed to delete Post: " + postTitle);
+                                                });
+                                    } else {
+                                        logError("Post object is null", null);
+                                        showToast("Failed to retrieve Post object.");
+                                    }
+                                } else {
+                                    logError("Post document does not exist", null);
+                                    showToast("Post document does not exist.");
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                logError("Failed to retrieve Post", e);
+                                showToast("Failed to retrieve Post.");
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    logError("Failed to delete VerPost: " + verPost.getVerPostId(), e);
+                    showToast("Failed to delete VerPost.");
+                });
     }
 
     @Override
-    public void onCourseTitleClicked(Post post, int position) {
-        // Handle course title click
-        showToast("Course Title clicked: " + post.getTitle());
-        // Add any additional actions here
+    public void onCourseTitleClicked(VerPost post, int position) {
+        showToast("Course Title clicked.");
     }
 
-    private void handlePostAction(Post post, String actionStatus, String actionName) {
-        try {
-            String currentTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-            VerPost verPost = verPostDao.getByPostId(post.getPostId());
-            if (verPost != null) {
-                VerPost updatedVerPost = new VerPost(
-                        verPost.getVerPostId(),
-                        post.getPostId(),
-                        "staffId",  // Replace with actual staff ID if available
-                        actionStatus,
-                        currentTimestamp
-                );
-                firestoreManager.onInsertUpdate("update","verPost", updatedVerPost, requireContext());
+    private void handlePostAction(VerPost post, String verifiedStatus, String actionName) {
+        Timestamp currentTimestamp = Timestamp.now();
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
-                sendNotificationToUser(post, "Your post \"" + post.getTitle() + "\" has been " + actionStatus + ".");
-                showToast(actionName + ": " + post.getTitle());
-            }
-        } catch (Exception e) {
-            logError("Failed to " + actionName.toLowerCase() + " post", e);
-            showToast("Failed to " + actionName.toLowerCase() + ": " + e.getMessage());
-        }
-    }
+        firestore.collection("verPost")
+                .whereEqualTo("postId", post.getPostId())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String verPostId = document.getId();
 
-    private void sendNotificationToUser(Post post, String message) {
-        try {
-            notificationManager.sendNotification(post.getUserId(), message);
-        } catch (Exception e) {
-            logError("Failed to send notification", e);
-        }
+                        Map<String, Object> updatedVerPost = new HashMap<>();
+                        updatedVerPost.put("postId", post.getPostId());
+                        updatedVerPost.put("staffId", "staffId"); // Replace with actual staff ID
+                        updatedVerPost.put("verifiedStatus", verifiedStatus);
+                        updatedVerPost.put("timestamp", currentTimestamp);
+
+                        firestore.collection("verPost")
+                                .document(verPostId)
+                                .set(updatedVerPost, SetOptions.merge())
+                                .addOnSuccessListener(aVoid -> {
+                                    post.setVerifiedStatus(verifiedStatus); // Update local data
+                                    int index = verPostList.indexOf(post);
+                                    if (index != -1) {
+                                        verPostList.set(index, post);
+                                        adapter.notifyItemChanged(index); // Notify adapter to rebind this item
+                                    }
+
+                                    firestore.collection("post")
+                                            .document(post.getPostId())
+                                            .get()
+                                            .addOnSuccessListener(postDocument -> {
+                                                if (postDocument.exists()) {
+                                                    Post relatedPost = postDocument.toObject(Post.class);
+                                                    if (relatedPost != null) {
+                                                        notificationUtils.createTestNotification(
+                                                                relatedPost.getUserId(),
+                                                                "Your post \"" + relatedPost.getTitle() + "\" has been " + verifiedStatus + "."
+                                                        );
+                                                        showToast(actionName + ": " + relatedPost.getTitle());
+                                                    } else {
+                                                        showToast("Failed to retrieve post details for notification.");
+                                                    }
+                                                } else {
+                                                    showToast("Post not found for postId: " + post.getPostId());
+                                                }
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                logError("Failed to retrieve post details", e);
+                                                showToast("Failed to retrieve post details: " + e.getMessage());
+                                            });
+                                })
+                                .addOnFailureListener(e -> {
+                                    logError("Failed to update verPost", e);
+                                    showToast("Failed to " + actionName.toLowerCase() + ": " + e.getMessage());
+                                });
+                    } else {
+                        showToast("No verPost found for the post: " + post.getPostId());
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    logError("Failed to retrieve verPost", e);
+                    showToast("Failed to " + actionName.toLowerCase() + ": " + e.getMessage());
+                });
     }
 
     private void showToast(String message) {
@@ -141,7 +229,14 @@ public class Tab2PostFragment extends BaseTab2Fragment<Post> implements RecycleV
     }
 
     private void logError(String message, Exception e) {
-        // Replace with proper logging framework
-        e.printStackTrace();
+        if (e != null) {
+            Log.e("Tab2PostFragment", message, e);
+        } else {
+            Log.e("Tab2PostFragment", message);
+        }
+    }
+
+    private void logMessage(String message) {
+        Log.d("Tab2PostFragment", message);
     }
 }

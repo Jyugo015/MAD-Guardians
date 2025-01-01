@@ -27,8 +27,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class StaffFragment extends Fragment {
-
-
     private Button handlePostButton;
     private Button handleReportedPostButton;
     private Button handleReportedCommentButton;
@@ -54,19 +52,23 @@ public class StaffFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-
         View view = inflater.inflate(R.layout.fragment_staff, container, false);
-
 
         tvStaffName = view.findViewById(R.id.TVUsername);
         tvEmail = view.findViewById(R.id.TVEmail);
         tvUserId = view.findViewById(R.id.TVUserId);
 //        tvAge = view.findViewById(R.id.TVAge);
+//
+//        // Set default values
+//        tvStaffName.setText("Loading name...");
+//        tvEmail.setText("Loading email...");
+//        tvUserId.setText("Loading user ID...");
+
         // Get SharedPreferences
         sharedPreferences = requireContext().getSharedPreferences("staff_preferences", getContext().MODE_PRIVATE);
         staffId = sharedPreferences.getString("staff_id", null); // Retrieve logged-in staff ID
-
+        Log.d("StaffFragment", "Retrieved staffId from SharedPreferences: " + staffId);
+//        System.out.println(staffId);
 
         // Initialize database and DAO
 //        appDatabase = AppDatabase.getDatabase(getContext());
@@ -85,7 +87,10 @@ public class StaffFragment extends Fragment {
         View.OnClickListener OCLHandlePost = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handlePostFragment);
+                Bundle bundle = new Bundle();
+                System.out.println("Click, pass "+staffId);
+                bundle.putString("staffId", staffId);
+                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handlePostFragment,bundle);
             }
         };
 
@@ -93,19 +98,25 @@ public class StaffFragment extends Fragment {
         View.OnClickListener OCLHandleReportedPost = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleReportedPostFragment);
+                Bundle bundle = new Bundle();
+                bundle.putString("staffId", staffId);
+                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleReportedPostFragment,bundle);
             }
         };
         View.OnClickListener OCLHandleReportedComment = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleReportedCommentFragment);
+                Bundle bundle = new Bundle();
+                bundle.putString("staffId", staffId);
+                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleReportedCommentFragment,bundle);
             }
         };
         View.OnClickListener OCLHandleEducator = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleEducatorFragment);
+                Bundle bundle = new Bundle();
+                bundle.putString("staffId", staffId);
+                Navigation.findNavController(view).navigate(R.id.action_nav_staff_to_handleEducatorFragment,bundle);
             }
         };
 //        handlePostButton.setOnClickListener(OCLHandlePost);

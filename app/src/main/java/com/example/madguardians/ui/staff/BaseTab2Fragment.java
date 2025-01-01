@@ -17,7 +17,7 @@ import com.example.madguardians.R;
 import java.util.List;
 
 public abstract class BaseTab2Fragment<T> extends Fragment {
-    private RecyclerView recyclerView;
+    protected RecyclerView recyclerView;
 
     @Nullable
     @Override
@@ -27,13 +27,14 @@ public abstract class BaseTab2Fragment<T> extends Fragment {
         // Set up RecyclerView
         recyclerView = view.findViewById(R.id.recyclerView_handlePost_tab2);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(getAdapter(getData()));
 
+        fetchData(); // Fetch data when the view is created
         return view;
     }
 
-    // Abstract methods for subclasses to implement
-    protected abstract List<T> getData();
+    // Abstract method to fetch data
+    protected abstract void fetchData();
 
-    protected abstract RecyclerView.Adapter<?> getAdapter(List<T> data);
+    // Abstract method to set the adapter
+    protected abstract void updateRecyclerViewAdapter(List<T> data);
 }
