@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.madguardians.R;
+import com.example.madguardians.notification.NotificationUtils;
 import com.example.madguardians.ui.consult.adapter_lo.ChatRecyclerAdapter;
 import com.example.madguardians.ui.consult.model_lo.ChatMessageModel;
 import com.example.madguardians.ui.consult.model_lo.ChatroomModel;
@@ -72,11 +73,13 @@ public class ChatFragment extends Fragment {
         recyclerView = view.findViewById(R.id.chat_recycler_view);
         imageView = view.findViewById(R.id.profile_pic_image_view);
 
+
         if(counselorID != null){
-        otherUsername.setText(counselorName);}
+            otherUsername.setText(counselorName);}
         else {
             otherUsername.setText(anotherUserName);
         }
+
         sendMessageBtn.setOnClickListener(v -> {
             String message = messageInput.getText().toString().trim();
             if (!message.isEmpty()) {
@@ -119,11 +122,20 @@ public class ChatFragment extends Fragment {
         chatroomModel.setLastMessageTimestamp(Timestamp.now());
         chatroomModel.setLastMessage(message);
         FirebaseUtil.getChatroomReference(chatroomId).set(chatroomModel);
+        NotificationUtils notificationUtils = new NotificationUtils();
+
+
 
         ChatMessageModel chatMessageModel = new ChatMessageModel(message, FirebaseUtil.currentUserId(getContext()), Timestamp.now());
         FirebaseUtil.getChatroomMessageReference(chatroomId).add(chatMessageModel).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 messageInput.setText("");
+                if(counselorID != null){
+                    notificationUtils.createTestNotification(counselorID, message);}
+                else {
+                    notificationUtils.createTestNotification(otherUserId,message);
+                }
+
             }
         });
     }
