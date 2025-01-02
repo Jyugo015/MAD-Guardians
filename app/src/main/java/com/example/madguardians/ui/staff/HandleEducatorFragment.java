@@ -1,51 +1,71 @@
-//package com.example.madguardians.ui.staff;
-//
-//import android.os.Bundle;
-//
-//import androidx.fragment.app.Fragment;
-//import androidx.recyclerview.widget.RecyclerView;
-//import androidx.viewpager2.widget.ViewPager2;
-//
-//import android.view.LayoutInflater;
-//import android.view.View;
-//import android.view.ViewGroup;
-//
-//import com.example.madguardians.R;
-//import com.google.android.material.tabs.TabLayout;
-//import com.google.android.material.tabs.TabLayoutMediator;
-//
-//public class HandleEducatorFragment extends Fragment {
-//
-//    private TabLayout tabLayout;
-//    private ViewPager2 viewPager;
-//    private RecyclerView recyclerView;
-//    private RecyclerView.Adapter mAdapter;
-//    private RecyclerView.LayoutManager layoutManager;
-//
-//    public HandleEducatorFragment() {
-//        // Required empty public constructor
-//    }
-//
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-//                             Bundle savedInstanceState) {
-//        View view = inflater.inflate(R.layout.staff_fragment_handle_educator_hzw, container, false);
-//
-//        tabLayout = view.findViewById(R.id.tabLayout_HandleEducator);
-//        viewPager = view.findViewById(R.id.viewPager_HandleEducator);
-//
-//        // Set up the adapter for ViewPager2
-//        ViewPageAdapter adapter = new ViewPageAdapter(requireActivity());
-//        adapter.addFragment(new Tab1EducatorFragment(), "All");
-//        adapter.addFragment(new Tab2EducatorFragment(), "Pending");
-//        adapter.addFragment(new Tab3EducatorFragment(), "Completed");
-//        viewPager.setAdapter(adapter);
-//
-//        // Use TabLayoutMediator to link TabLayout and ViewPager2
-//        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-//            tab.setText(adapter.getTitle(position));
-//        }).attach();
-//
-//        return view;
-//    }
-//}
+package com.example.madguardians.ui.staff;
+
+import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.example.madguardians.R;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+
+public class HandleEducatorFragment extends Fragment {
+
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+
+    public HandleEducatorFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.staff_fragment_handle_educator_hzw, container, false);
+
+        tabLayout = view.findViewById(R.id.tabLayout_HandleEducator);
+        viewPager = view.findViewById(R.id.viewPager_HandleEducator);
+
+        // Retrieve the staffId from arguments
+        String staffId = getArguments() != null ? getArguments().getString("staffId") : null;
+        System.out.println("handle "+staffId);
+
+        // Create Tab1PostFragment and pass the staffId as arguments
+        Tab1EducatorFragment tab1 = new Tab1EducatorFragment();
+        Bundle tab1Args = new Bundle();
+        tab1Args.putString("staffId", staffId);
+        tab1.setArguments(tab1Args);
+
+        Tab2EducatorFragment tab2 = new Tab2EducatorFragment();
+        Bundle tab2Args = new Bundle();
+        tab2Args.putString("staffId", staffId);
+        tab2.setArguments(tab2Args);
+
+        Tab3EducatorFragment tab3 = new Tab3EducatorFragment();
+        Bundle tab3Args = new Bundle();
+        tab3Args.putString("staffId", staffId);
+        tab3.setArguments(tab3Args);
+
+        // Set up the adapter for ViewPager2
+        ViewPageAdapter adapter = new ViewPageAdapter(requireActivity());
+        adapter.addFragment(tab1, "All");
+        adapter.addFragment(tab2, "Pending");
+        adapter.addFragment(tab3, "Completed");
+        viewPager.setAdapter(adapter);
+
+        // Use TabLayoutMediator to link TabLayout and ViewPager2
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            tab.setText(adapter.getTitle(position));
+        }).attach();
+
+        return view;
+    }
+}
