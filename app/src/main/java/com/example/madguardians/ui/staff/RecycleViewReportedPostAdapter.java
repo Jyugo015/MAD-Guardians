@@ -11,17 +11,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Course;
 import com.example.madguardians.database.CourseDao;
-import com.example.madguardians.database.Helpdesk;
+import com.example.madguardians.database.Media;
+import com.example.madguardians.ui.staff.Helpdesk;
 import com.example.madguardians.database.Issue;
 import com.example.madguardians.database.IssueDao;
 import com.example.madguardians.database.Post;
 import com.example.madguardians.database.PostDao;
 import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +35,21 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
     private List<Helpdesk> helpdeskList;
     private Context context;
     private OnReportedPostActionListener onReportedPostActionListener;
+    private com.example.madguardians.ui.staff.Helpdesk helpdesk;
+    private final FirebaseFirestore firestore;
+    private final CollectionReference postRef,userRef,issueRef,courseRef;
 
     // Constructor
     public RecycleViewReportedPostAdapter(List<Helpdesk> helpdeskList, Context context,OnReportedPostActionListener onReportedPostActionListener) {
         this.helpdeskList = helpdeskList!=null?helpdeskList:new ArrayList<>();
         this.context = context;
         this.onReportedPostActionListener = onReportedPostActionListener;
+
+        this.firestore = FirebaseFirestore.getInstance();
+        this.postRef = firestore.collection("post");
+        this.userRef = firestore.collection("user");
+        this.issueRef = firestore.collection("issue");
+        this.courseRef = firestore.collection("course");
     }
 
     @Override
@@ -48,7 +62,10 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
             return R.layout.staff_one_line_handle_reported_post_completed_hzw;
         }
     }
-
+    public void updateData(List<Helpdesk> newData) {
+        this.helpdeskList = newData; // Assuming postList is the list in your adapter
+        notifyDataSetChanged(); // Notify the adapter about data changes
+    }
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -60,75 +77,157 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         Helpdesk helpdesk = helpdeskList.get(position);
 
-        PostDao postDao = AppDatabase.getDatabase(context).postDao();
-        CourseDao courseDao = AppDatabase.getDatabase(context).courseDao();
-        UserDao userDao = AppDatabase.getDatabase(context).userDao();
-        IssueDao issueDao = AppDatabase.getDatabase(context).issueDao();
-
-        User user = userDao.getById(helpdesk.getUserId());
-        String authorName = "Unknown";
-        String title = "Title not found";
-        if (helpdesk.getPostId() != null) {
-            Post post = postDao.getById(helpdesk.getPostId()).getValue();
-            if (post != null) {
-                title = post.getTitle();
-                User author = userDao.getById(post.getUserId());
-                if (author != null) {
-                    authorName = author.getName();
-                }
-            }
-        } else if (helpdesk.getCourseId()!=null) {
-            Course course = courseDao.getById(helpdesk.getCourseId());
-            if (course!=null){
-                title = course.getTitle();
-                Post post = postDao.getById(course.getPost1()).getValue();
-                if (post!=null){
-                    User author = userDao.getById(post.getUserId());
-                    authorName = author.getName();
-                }
-            }
-        } else if (helpdesk.getQuizId()!=null) {
-            Post post = postDao.getById(helpdesk.getQuizId()).getValue();
-            if (post!=null){
-                title = post.getTitle();
-                User author = userDao.getById(post.getUserId());
-                if (author!=null){
-                    authorName = author.getName();
-                }
-            }
-        }
-
-        //show reason
-        Issue issue = issueDao.getById(helpdesk.getIssueId());
-        if (issue!=null){
-            holder.tvReason.setText(issue.getType());
-        }
-
-        // Bind data to views
-        holder.tvCourseTitle.setText(title);
-        holder.tvAuthorName.setText(authorName);
+        // Reset ViewHolder to avoid stale data
+        holder.tvCourseTitle.setText("Loading...");
+        holder.tvAuthorName.setText("Loading...");
+        holder.tvReason.setText("");
         holder.tvStatus.setText(helpdesk.getHelpdeskStatus());
 
+        // Fetch Issue details using issueId
+        if (helpdesk.getIssueId() != null) {
+            issueRef.document(helpdesk.getIssueId()).get()
+                    .addOnSuccessListener(issueSnapshot -> {
+                        if (issueSnapshot.exists()) {
+                            Issue issue = issueSnapshot.toObject(Issue.class);
+                            if (issue != null) {
+                                holder.tvReason.setText(issue.getType() != null ? issue.getType() : "No Reason");
+                            } else {
+                                holder.tvReason.setText("No Reason");
+                            }
+                        } else {
+                            holder.tvReason.setText("Issue Not Found");
+                        }
+                    })
+                    .addOnFailureListener(e -> holder.tvReason.setText("Error fetching issue"));
+        }
+
+        // Fetch related details (Post, Course, or Quiz) based on available IDs
+        if (helpdesk.getPostId() != null) {
+            postRef.document(helpdesk.getPostId()).get()
+                    .addOnSuccessListener(postSnapshot -> {
+                        if (postSnapshot.exists()) {
+                            Post post = postSnapshot.toObject(Post.class);
+                            if (post != null) {
+                                // Set Title
+                                holder.tvCourseTitle.setText(post.getTitle() != null ? post.getTitle() : "No Title");
+
+                                // Set Image if available
+                                if (post.getImageSetId() != null) {
+                                    firestore.collection("media")
+                                            .whereEqualTo("mediaSetId", post.getImageSetId())
+                                            .get()
+                                            .addOnSuccessListener(mediaSnapshot -> {
+                                                if (!mediaSnapshot.isEmpty()) {
+                                                    DocumentSnapshot mediaDoc = mediaSnapshot.getDocuments().get(0);
+                                                    Media media = mediaDoc.toObject(Media.class);
+                                                    if (media != null && media.getUrl() != null) {
+                                                        Glide.with(context)
+                                                                .load(media.getUrl())
+                                                                .placeholder(R.drawable.placeholder_image) // Placeholder while loading
+                                                                .error(R.drawable.error_image)            // Fallback in case of error
+                                                                .into(holder.ivPost);
+                                                    } else {
+                                                        holder.ivPost.setImageResource(R.drawable.placeholder_image);
+                                                    }
+                                                } else {
+                                                    holder.ivPost.setImageResource(R.drawable.placeholder_image);
+                                                }
+                                            })
+                                            .addOnFailureListener(e -> holder.ivPost.setImageResource(R.drawable.error_image));
+                                } else {
+                                    holder.ivPost.setImageResource(R.drawable.placeholder_image);
+                                }
+
+                                // Fetch User details for post author
+                                userRef.document(post.getUserId()).get()
+                                        .addOnSuccessListener(userSnapshot -> {
+                                            if (userSnapshot.exists()) {
+                                                User author = userSnapshot.toObject(User.class);
+                                                holder.tvAuthorName.setText(author != null && author.getName() != null
+                                                        ? author.getName()
+                                                        : "Unknown Author");
+                                            } else {
+                                                holder.tvAuthorName.setText("Unknown Author");
+                                            }
+                                        })
+                                        .addOnFailureListener(e -> holder.tvAuthorName.setText("Error fetching author"));
+                            }
+                        } else {
+                            holder.tvCourseTitle.setText("Post Not Found");
+                            holder.ivPost.setImageResource(R.drawable.placeholder_image);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        holder.tvCourseTitle.setText("Error fetching post");
+                        holder.ivPost.setImageResource(R.drawable.error_image);
+                    });
+
+        } else if (helpdesk.getCourseId() != null) {
+            courseRef.document(helpdesk.getCourseId()).get()
+                    .addOnSuccessListener(courseSnapshot -> {
+                        if (courseSnapshot.exists()) {
+                            Course course = courseSnapshot.toObject(Course.class);
+                            if (course != null) {
+                                holder.tvCourseTitle.setText(course.getTitle() != null ? course.getTitle() : "No Title");
+
+                                // Fetch Post details related to the course
+                                if (course.getPost1() != null) {
+                                    postRef.document(course.getPost1()).get()
+                                            .addOnSuccessListener(postSnapshot -> {
+                                                if (postSnapshot.exists()) {
+                                                    Post post = postSnapshot.toObject(Post.class);
+                                                    if (post != null) {
+                                                        userRef.document(post.getUserId()).get()
+                                                                .addOnSuccessListener(userSnapshot -> {
+                                                                    if (userSnapshot.exists()) {
+                                                                        User author = userSnapshot.toObject(User.class);
+                                                                        holder.tvAuthorName.setText(author != null && author.getName() != null
+                                                                                ? author.getName()
+                                                                                : "Unknown Author");
+                                                                    } else {
+                                                                        holder.tvAuthorName.setText("Unknown Author");
+                                                                    }
+                                                                })
+                                                                .addOnFailureListener(e -> holder.tvAuthorName.setText("Error fetching author"));
+                                                    }
+                                                }
+                                            })
+                                            .addOnFailureListener(e -> holder.tvAuthorName.setText("Error fetching course post"));
+                                }
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> holder.tvCourseTitle.setText("Error fetching course"));
+        }
+
+        // Set Helpdesk status
+        holder.tvStatus.setText(helpdesk.getHelpdeskStatus());
+
+        // Handle actions based on Helpdesk status
         if ("pending".equals(helpdesk.getHelpdeskStatus())) {
-            if (holder.btnKeep != null) {
-                holder.btnKeep.setOnClickListener(v -> {
-                    if (onReportedPostActionListener != null) {
-                        onReportedPostActionListener.onKeepClicked(helpdesk, position);
-                        helpdesk.setHelpdeskStatus("reviewed");
-                        notifyItemChanged(position); // Refresh item
-                    }
-                });
-            }
-            if (holder.btnDelete != null) {
-                holder.btnDelete.setOnClickListener(v -> {
-                    if (onReportedPostActionListener != null) {
-                        onReportedPostActionListener.onDeleteClicked(helpdesk, position);
-                        notifyItemChanged(position); // Refresh item
-                    }
-                });
-            }
+            holder.btnKeep.setOnClickListener(v -> {
+                if (onReportedPostActionListener != null) {
+                    onReportedPostActionListener.onKeepClicked(helpdesk, position);
+                    firestore.collection("helpdesk")
+                            .document(helpdesk.getHelpdeskId())
+                            .update("helpdeskStatus", "reviewed");
+                    notifyItemChanged(position);
+                }
+            });
+
+            holder.btnDelete.setOnClickListener(v -> {
+                if (onReportedPostActionListener != null) {
+                    onReportedPostActionListener.onDeleteClicked(helpdesk, position);
+                    firestore.collection("helpdesk")
+                            .document(helpdesk.getHelpdeskId())
+                            .delete();
+                    helpdeskList.remove(position);
+                    notifyItemRemoved(position);
+                }
+            });
         }
     }
+
 
     @Override
     public int getItemCount() {

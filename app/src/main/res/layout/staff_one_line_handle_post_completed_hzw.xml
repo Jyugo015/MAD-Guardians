@@ -20,7 +20,7 @@
         android:layout_width="221dp"
         android:layout_height="28dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="15dp"
         android:text="Course Title"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/IVPost"
@@ -87,5 +87,5 @@
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/IVPost" />
+        app:layout_constraintTop_toBottomOf="@+id/BTNDelete" />
 </androidx.constraintlayout.widget.ConstraintLayout>

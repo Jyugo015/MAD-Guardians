@@ -67,8 +67,8 @@ public class RecycleViewVerPostAdapter extends RecyclerView.Adapter<RecycleViewV
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         VerPost verPost = verPostList.get(position);
-        System.out.println(verPost.getPostId());
-        System.out.println(verPost.getVerPostId());
+//        System.out.println(verPost.getPostId());
+//        System.out.println(verPost.getVerPostId());
         // Reset ViewHolder to avoid stale data
         holder.tvCourseTitle.setText("Loading...");
         holder.tvDate.setText("");

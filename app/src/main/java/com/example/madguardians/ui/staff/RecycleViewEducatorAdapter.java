@@ -7,28 +7,46 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
 import com.example.madguardians.database.AppDatabase;
+import com.example.madguardians.database.Media;
 import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
-import com.example.madguardians.database.VerEducator;
+import com.example.madguardians.ui.staff.VerEducator;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleViewEducatorAdapter.PostViewHolder> {
     private List<VerEducator> educatorList;
     private Context context;
     private OnHandleEducatorActionListener onHandleEducatorActionListener;
+    private final FirebaseFirestore firestore;
+    private final CollectionReference userRef;
     // Constructor
     public RecycleViewEducatorAdapter(List<VerEducator> verEducatorList, Context context, OnHandleEducatorActionListener onHandleEducatorActionListener) {
         this.educatorList = verEducatorList!=null?verEducatorList:new ArrayList<>();
         this.context = context;
         this.onHandleEducatorActionListener = onHandleEducatorActionListener;
+
+        this.firestore = FirebaseFirestore.getInstance();
+        this.userRef = firestore.collection("user");
+    }
+    public void updateData(List<VerEducator> newData) {
+        this.educatorList = newData; // Assuming postList is the list in your adapter
+        notifyDataSetChanged(); // Notify the adapter about data changes
     }
 
     @Override
@@ -53,55 +71,86 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         VerEducator verEducator = educatorList.get(position);
 
-        UserDao userDao = AppDatabase.getDatabase(context).userDao();
-        User applier = userDao.getById(verEducator.getUserId());
+        // Default placeholder values
+        holder.ivPost.setImageResource(R.drawable.hzw_ic_profile);
+        holder.tvEducatorName.setText("Loading...");
+        holder.tvStatus.setText(verEducator.getVerifiedStatus() != null ? verEducator.getVerifiedStatus() : "Unknown");
 
-        holder.tvEducatorName.setText(applier.getName());
-        //add time
-        holder.tvDate.setText("Date");
-        holder.tvStatus.setText(verEducator.getVerifiedStatus());
-        holder.tvEducatorName.setOnClickListener(v -> {
-            if (onHandleEducatorActionListener != null) {
-                onHandleEducatorActionListener.onEducatorNameClicked(verEducator, position);
-            }
-        });
-        holder.tvViewProof.setOnClickListener(v -> {
+        // Check if timestamp is not null and format it
+        if (verEducator.getTimestamp() != null) {
+            // Convert Timestamp to Date and format as String
+            Date date = verEducator.getTimestamp().toDate();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            String formattedDate = sdf.format(date);
+            holder.tvDate.setText(formattedDate);
+        } else {
+            holder.tvDate.setText("No Date");
+        }
+
+        // Fetch user details
+        userRef.document(verEducator.getUserId()).get()
+                .addOnSuccessListener(userSnapshot -> {
+                    if (userSnapshot.exists()) {
+                        User user = userSnapshot.toObject(User.class);
+                        if (user != null) {
+                            holder.tvEducatorName.setText(user.getName() != null ? user.getName() : "Unknown author");
+                            if (user.getProfilePic() != null) {
+                                Glide.with(context).load(user.getProfilePic()).into(holder.ivPost);
+                            } else{
+                                holder.ivPost.setImageResource(R.drawable.hzw_ic_profile);
+                            }
+                        }
+                    }
+                });
+        // Handle actions based on verifiedStatus
+        String verifiedStatus = verEducator.getVerifiedStatus();
+        if ("pending".equals(verifiedStatus)) {
+
+            holder.btnReject.setOnClickListener(v -> {
+                if (onHandleEducatorActionListener != null) {
+                    onHandleEducatorActionListener.onRejectClicked(verEducator, position);
+                    firestore.collection("verPost")
+                            .document(verEducator.getVerEducatorId())
+                            .update("verifiedStatus", "rejected");
+                    notifyItemChanged(position);
+                }
+            });
+
+            holder.btnApprove.setOnClickListener(v -> {
+                if (onHandleEducatorActionListener != null) {
+                    onHandleEducatorActionListener.onApprovedClicked(verEducator, position);
+                    firestore.collection("verPost")
+                            .document(verEducator.getVerEducatorId())
+                            .update("verifiedStatus", "approved");
+                    notifyItemChanged(position);
+                }
+            });
+        } else {
+
+            holder.btnDelete.setOnClickListener(v -> {
+                if (onHandleEducatorActionListener != null) {
+                    System.out.println("Delete button clicked for position: ");
+                    onHandleEducatorActionListener.onDeleteClicked(verEducator, position);
+                }
+            });
+        }
+        holder.tvViewProof.setOnClickListener(v->{
             if (onHandleEducatorActionListener != null) {
                 onHandleEducatorActionListener.onViewProofClicked(verEducator, position);
+                String message = "View proof clicked.";
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                System.out.println(message);
             }
         });
-        // Handle buttons based on post status
-        if ("pending".equals(verEducator.getVerifiedStatus())) {
-            if (holder.btnReject != null) {
-                holder.btnReject.setOnClickListener(v -> {
-                    if (onHandleEducatorActionListener != null) {
-                        onHandleEducatorActionListener.onRejectClicked(verEducator, position);
-                        verEducator.setVerifiedStatus("rejected"); // Update status
-                        notifyItemChanged(position); // Refresh item
-                    }
-                });
+        holder.tvEducatorName.setOnClickListener(v->{
+            if(onHandleEducatorActionListener!=null){
+                onHandleEducatorActionListener.onEducatorNameClicked(verEducator,position);
+                String message = "Educator name clicked.";
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                System.out.println(message);
             }
-
-            if (holder.btnApprove != null) {
-                holder.btnApprove.setOnClickListener(v -> {
-                    if (onHandleEducatorActionListener != null) {
-                        onHandleEducatorActionListener.onApprovedClicked(verEducator, position);
-                        verEducator.setVerifiedStatus("approved"); // Update status
-                        notifyItemChanged(position); // Refresh item
-                    }
-                });
-            }
-        } else {
-            if (holder.btnDelete != null) {
-                holder.btnDelete.setOnClickListener(v -> {
-                    if (onHandleEducatorActionListener != null) {
-                        onHandleEducatorActionListener.onDeleteClicked(verEducator, position);
-                    }
-                });
-            }
-        }
+        });
     }
-
     @Override
     public int getItemCount() {
         return educatorList!=null?educatorList.size():null;

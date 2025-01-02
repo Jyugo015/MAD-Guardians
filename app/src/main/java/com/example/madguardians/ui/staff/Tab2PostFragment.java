@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Tab2PostFragment extends BaseTab1Fragment<VerPost> implements RecycleViewVerPostAdapter.OnPostActionListener {
+public class Tab2PostFragment extends BaseTab2Fragment<VerPost> implements RecycleViewVerPostAdapter.OnPostActionListener {
     private RecycleViewVerPostAdapter adapter;
     private NotificationUtils notificationUtils;
     private List<VerPost> verPostList = new ArrayList<>();
@@ -47,9 +47,9 @@ public class Tab2PostFragment extends BaseTab1Fragment<VerPost> implements Recyc
     @Override
     protected void fetchData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         db.collection("verPost")
-                .whereEqualTo("verifiedStatus", "pending") // Filter by verifiedStatus == "pending"
-                .orderBy("timestamp", Query.Direction.DESCENDING) // Sort by timestamp
+                .orderBy("timestamp", Query.Direction.DESCENDING) // Order by timestamp
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
@@ -57,20 +57,57 @@ public class Tab2PostFragment extends BaseTab1Fragment<VerPost> implements Recyc
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             VerPost verPost = document.toObject(VerPost.class);
                             verPost.setVerPostId(document.getId());
-                            tempList.add(verPost);
+
+                            // Client-side filtering: check if status is "pending"
+                            if ("pending".equals(verPost.getVerifiedStatus())) {
+                                tempList.add(verPost);
+                            }
                         }
-                        updateRecyclerViewAdapter(tempList);
+
+                        // Update adapter with filtered list
+                        if (tempList.isEmpty()) {
+                            showToast("No pending VerPosts found.");
+                        } else {
+                            updateRecyclerViewAdapter(tempList);
+                        }
                     } else {
-                        showToast("No pending VerPosts.");
-                        System.out.println("No pending VerPosts.");
+                        showToast("Failed to retrieve VerPosts.");
                     }
                 })
                 .addOnFailureListener(e -> {
-                    logError("Failed to fetch pending VerPosts.", e);
-                    showToast("Failed to fetch pending VerPosts.");
-                    System.out.println("Failed to fetch pending VerPosts.");
+                    logError("Error fetching VerPosts", e);
+                    showToast("Error fetching VerPosts: " + e.getMessage());
                 });
     }
+
+//    @Override
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        db.collection("verPost")
+//                .whereEqualTo("verifiedStatus", "pending") // Filter by verifiedStatus == "pending"
+//                .orderBy("timestamp", Query.Direction.DESCENDING) // Sort by timestamp
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<VerPost> tempList = new ArrayList<>();
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            System.out.println("Pending verPost"+document.getData());
+//                            VerPost verPost = document.toObject(VerPost.class);
+//                            verPost.setVerPostId(document.getId());
+//                            tempList.add(verPost);
+//                        }
+//                        updateRecyclerViewAdapter(tempList);
+//                    } else {
+//                        showToast("No pending VerPosts.");
+//                        System.out.println("No pending VerPosts.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    logError("Failed to fetch pending VerPosts.", e);
+//                    showToast("Failed to fetch pending VerPosts.");
+//                    System.out.println("Failed to fetch pending VerPosts.");
+//                });
+//    }
 
     @Override
     protected void updateRecyclerViewAdapter(List<VerPost> data) {

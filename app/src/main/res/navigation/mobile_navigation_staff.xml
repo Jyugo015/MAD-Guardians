@@ -55,15 +55,27 @@
         android:id="@+id/handleReportedPostFragment"
         android:name="com.example.madguardians.ui.staff.HandleReportedPostFragment"
         android:label="Handle Reported Post"
-        tools:layout="@layout/staff_fragment_handle_reported_post_hzw" />
+        tools:layout="@layout/staff_fragment_handle_reported_post_hzw" >
+        <argument
+            android:name="staffId"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/handleReportedCommentFragment"
         android:name="com.example.madguardians.ui.staff.HandleReportedCommentFragment"
         android:label="Handle Reported Comment"
-        tools:layout="@layout/staff_fragment_handle_reported_comment_hzw" />
+        tools:layout="@layout/staff_fragment_handle_reported_comment_hzw" >
+        <argument
+            android:name="staffId"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/handleEducatorFragment"
         android:name="com.example.madguardians.ui.staff.HandleEducatorFragment"
         android:label="Handle Educator"
-        tools:layout="@layout/staff_fragment_handle_educator_hzw" />
+        tools:layout="@layout/staff_fragment_handle_educator_hzw" >
+        <argument
+            android:name="staffId"
+            app:argType="string" />
+    </fragment>
 </navigation>
