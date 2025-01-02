@@ -214,62 +214,59 @@ public class UploadPostFragment extends Fragment{
         postViewModel.setTitle(ETTitle.getText().toString());
         postViewModel.setDescription(ETDescription.getText().toString());
         postViewModel.setLevel(level);
+        postViewModel.setUploading(true);
         Log.d(TAG, "confirmSelection: level " + level);
 
-        //updatePost if want
-        if (postViewModel.getPostId() != null) {
-            updatePost();
-        } else {
-            //uploadPost
-            Log.d(TAG, "confirmSelection: uploading media");
-            uploadMedias(postViewModel.getImagesUri(), FirebaseController.IMAGE, new UploadCallback<String>() {
-                @Override
-                public void onSuccess(String mediaSetId) {
-                    Log.d(TAG, "onSuccess upload images in post");
-                    postViewModel.setImageUploaded(true);
-                    postViewModel.setImageSetId(mediaSetId);
-                    uploadPostIfAvailable();
-                }
-                @Override
-                public void onFailure(Exception e) {
-                    Log.d(TAG, "onFailure upload images in post");
-                    Log.e(TAG, "onFailure: ", e);
-                }
-            });
-            uploadMedias(postViewModel.getVideosUri(), FirebaseController.VIDEO, new UploadCallback<String>() {
-                @Override
-                public void onSuccess(String mediaSetId) {
-                    Log.d(TAG, "onSuccess upload video in post");
-                    postViewModel.setVideosUploaded(true);
-                    postViewModel.setVideoSetId(mediaSetId);
-                    uploadPostIfAvailable();
-                }
-                @Override
-                public void onFailure(Exception e) {
-                    Log.d(TAG, "onFailure upload video in post");
-                    Log.e(TAG, "onFailure: ", e);
-                }
-            });
-            uploadMedias(postViewModel.getPdfsUri(), FirebaseController.PDF, new UploadCallback<String>() {
-                @Override
-                public void onSuccess(String mediaSetId) {
-                    Log.d(TAG, "onSuccess upload pdfs in post");
-                    postViewModel.setPdfsUploaded(true);
-                    postViewModel.setPdfSetId(mediaSetId);
-                    uploadPostIfAvailable();
-                }
-                @Override
-                public void onFailure(Exception e) {
-                    Log.d(TAG, "onFailure upload pdfs in post");
-                    Log.e(TAG, "onFailure: ", e);
-                }
-            });
-            Log.d("post confirmed", "post title: " + postViewModel.getTitle());
-            Log.d("post confirmed", "post description: " + postViewModel.getDescription());
-            Log.d("post confirmed", "post imagesUri: " + postViewModel.getImagesUri().toString());
-            Log.d("post confirmed", "post videosUri: " + postViewModel.getVideosUri().toString());
-            Log.d("post confirmed", "post pdfUris: " + postViewModel.getPdfsUri().toString());
-        }
+        //uploadPost
+        Log.d(TAG, "confirmSelection: uploading media");
+        uploadMedias(postViewModel.getImagesUri(), FirebaseController.IMAGE, new UploadCallback<String>() {
+            @Override
+            public void onSuccess(String mediaSetId) {
+                Log.d(TAG, "onSuccess upload images in post");
+                postViewModel.setImageUploaded(true);
+                postViewModel.setImageSetId(mediaSetId);
+                uploadPostIfAvailable();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.d(TAG, "onFailure upload images in post");
+                Log.e(TAG, "onFailure: ", e);
+            }
+        });
+        uploadMedias(postViewModel.getVideosUri(), FirebaseController.VIDEO, new UploadCallback<String>() {
+            @Override
+            public void onSuccess(String mediaSetId) {
+                Log.d(TAG, "onSuccess upload video in post");
+                postViewModel.setVideosUploaded(true);
+                postViewModel.setVideoSetId(mediaSetId);
+                uploadPostIfAvailable();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.d(TAG, "onFailure upload video in post");
+                Log.e(TAG, "onFailure: ", e);
+            }
+        });
+        uploadMedias(postViewModel.getPdfsUri(), FirebaseController.PDF, new UploadCallback<String>() {
+            @Override
+            public void onSuccess(String mediaSetId) {
+                Log.d(TAG, "onSuccess upload pdfs in post");
+                postViewModel.setPdfsUploaded(true);
+                postViewModel.setPdfSetId(mediaSetId);
+                uploadPostIfAvailable();
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.d(TAG, "onFailure upload pdfs in post");
+                Log.e(TAG, "onFailure: ", e);
+            }
+        });
+        Log.d("post confirmed", "post title: " + postViewModel.getTitle());
+        Log.d("post confirmed", "post description: " + postViewModel.getDescription());
+        Log.d("post confirmed", "post imagesUri: " + postViewModel.getImagesUri().toString());
+        Log.d("post confirmed", "post videosUri: " + postViewModel.getVideosUri().toString());
+        Log.d("post confirmed", "post pdfUris: " + postViewModel.getPdfsUri().toString());
+
 
         if (level >= 1 && level <= 2) {
             int newLevel = level + 1;
@@ -283,41 +280,54 @@ public class UploadPostFragment extends Fragment{
         }
     }
 
-    private void updatePost() {
-        HashMap<String, Object> hashMap = PostFB.createPostData(userId, postViewModel.getTitle(), postViewModel.getDescription(), postViewModel.getImageSetId(), postViewModel.getVideoSetId(), postViewModel.getPdfSetId(), postViewModel.getQuizSetId(), folderId, generateDate());
-        PostFB.updatePost(hashMap);
-    }
-
     private void uploadPostIfAvailable() {
         Log.d(TAG, "uploadPostIfAvailable: ");
         if (postViewModel.isImageUploaded() && postViewModel.isVideosUploaded() && postViewModel.isPdfsUploaded()) {
             Log.d(TAG, "uploadPostIfAvailable: All media uploaded");
             Queue<HashMap<String, Object>> queue = new LinkedList<>();
             HashMap<String, Object> hashMap = PostFB.createPostData(userId, postViewModel.getTitle(), postViewModel.getDescription(), postViewModel.getImageSetId(), postViewModel.getVideoSetId(), postViewModel.getPdfSetId(), postViewModel.getQuizSetId(), folderId, generateDate());
-            queue.add(hashMap);
 
-            Log.d(TAG, "uploadPostIfAvailable: uploading post");
-            PostFB.uploadNextPost(queue, new UploadCallback<List<HashMap<String, Object>>>(){
-                @Override
-                public void onSuccess(List<HashMap<String, Object>> postHashMaps) {
-                    Log.d(TAG, "uploadPostIfAvailable: successfully uploaded post " + level);
-                    postViewModel.setPostId(postHashMaps.get(0).get("postId").toString());
-                }
-                @Override
-                public void onFailure(Exception e) {
-                    Log.e(TAG, "onFailure: uploadPostIFAvaillable", e);
-                }
-            });
+            if (postViewModel.getPostId() == null) {
+                Log.d(TAG, "uploadPostIfAvailable: uploading post");
+                PostFB.insertPost(hashMap, new UploadCallback<String>(){
+                    @Override
+                    public void onSuccess(String postId) {
+                        Log.d(TAG, "uploadPostIfAvailable: successfully uploaded post " + level);
+                        postViewModel.setUploading(false);
+                        postViewModel.setPostId(postId);
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e(TAG, "onFailure: uploadPostIFAvaillable", e);
+                    }
+                });
+            } else {
+                hashMap.put("postId", postViewModel.getPostId());
+                queue.add(hashMap);
+            }
         }
     }
 
     private void uploadMedias(List<Uri> uris, String mediaType, UploadCallback<String> mediaSetIdCallback) {
         Log.d(TAG, "uploadMedias: queing");
-        uriQueue.add(uris);
-        mediaTypeQueue.add(mediaType);
-        callbackQueue.add(mediaSetIdCallback);
-        if (uriQueue.size() == 1) {
-            uploadMedia();
+        if (uris == null || uris.isEmpty()) {
+            if (mediaType.equals(FirebaseController.IMAGE)) {
+                postViewModel.setImageUploaded(true);
+            }
+            else if (mediaType.equals(FirebaseController.VIDEO)) {
+                postViewModel.setVideosUploaded(true);
+            }
+            else if (mediaType.equals(FirebaseController.PDF)) {
+                postViewModel.setPdfsUploaded(true);
+            }
+            mediaSetIdCallback.onSuccess(null);
+        } else {
+            uriQueue.add(uris);
+            mediaTypeQueue.add(mediaType);
+            callbackQueue.add(mediaSetIdCallback);
+            if (uriQueue.size() == 1) {
+                uploadMedia();
+            }
         }
     }
     private void uploadMedia() {
@@ -333,84 +343,66 @@ public class UploadPostFragment extends Fragment{
         List<Uri> uris = uriQueue.peek();
         String mediaType = mediaTypeQueue.peek();
         UploadCallback mediaSetIdCallback = callbackQueue.peek();
-        if (uris != null && !uris.isEmpty()) {
-            Log.d(TAG, "uploadMedia: here2");
-            Queue<Uri> queue = new LinkedList<>(uris);
-            FirebaseController.generateDocumentId(FirebaseController.MEDIASET, new UploadCallback<String>() {
-                @Override
-                public void onSuccess(String mediaSetId) {
-                    Log.d(TAG, "onSuccess: mediaType " + mediaType);
-                    if (mediaType.equals(FirebaseController.IMAGE)) {
-                        imagesHandler.uploadMediasInBackground(queue, new UploadCallback<List<String>>(){
-                            @Override
-                            public void onSuccess(List<String> URLs) {
-                                for (String URL: URLs) {
-                                    HashMap<String, Object> hashMap = MediaFB.createMediaData(FirebaseController.IMAGE, mediaSetId, URL);
-                                    insertMedia(hashMap, mediaSetId, mediaSetIdCallback);
-                                    uriQueue.poll();
-                                    mediaTypeQueue.poll();
-                                    callbackQueue.poll();
-                                    uploadMedia();
-                                };
-                            }
-                            @Override
-                            public void onFailure(Exception e) {mediaSetIdCallback.onFailure(e);}
-                        });
-                    } else if (mediaType.equals(FirebaseController.VIDEO)){
-                        videosHandler.uploadMediasInBackground(queue, new UploadCallback<List<String>>(){
-                            @Override
-                            public void onSuccess(List<String> URLs) {
-                                for (String URL: URLs) {
-                                    HashMap<String, Object> hashMap = MediaFB.createMediaData(FirebaseController.VIDEO, mediaSetId, URL);
-                                    insertMedia(hashMap, mediaSetId, mediaSetIdCallback);
-                                    uriQueue.poll();
-                                    mediaTypeQueue.poll();
-                                    callbackQueue.poll();
-                                    uploadMedia();
-                                };
-                            }
-                            @Override
-                            public void onFailure(Exception e) {mediaSetIdCallback.onFailure(e);}
-                        });
-                    } else if (mediaType.equals(FirebaseController.PDF)){
-                        Log.d(TAG, "onSuccess: uploading pdf");
-                        pdfsHandler.uploadMediasInBackground(queue, new UploadCallback<List<String>>(){
-                            @Override
-                            public void onSuccess(List<String> URLs) {
-                                for (String URL: URLs) {
-                                    HashMap<String, Object> hashMap = MediaFB.createMediaData(FirebaseController.PDF, mediaSetId, URL);
-                                    insertMedia(hashMap, mediaSetId, mediaSetIdCallback);
-                                    uriQueue.poll();
-                                    mediaTypeQueue.poll();
-                                    callbackQueue.poll();
-                                    uploadMedia();
-                                };
-                            }
-                            @Override
-                            public void onFailure(Exception e) {mediaSetIdCallback.onFailure(e);}
-                        });
-                    }
+        Log.d(TAG, "uploadMedia: here2");
+        Queue<Uri> queue = new LinkedList<>(uris);
+        FirebaseController.generateDocumentId(FirebaseController.MEDIASET, new UploadCallback<String>() {
+            @Override
+            public void onSuccess(String mediaSetId) {
+                Log.d(TAG, "onSuccess: mediaType " + mediaType);
+                if (mediaType.equals(FirebaseController.IMAGE)) {
+                    imagesHandler.uploadMediasInBackground(queue, new UploadCallback<List<String>>(){
+                        @Override
+                        public void onSuccess(List<String> URLs) {
+                            for (String URL: URLs) {
+                                HashMap<String, Object> hashMap = MediaFB.createMediaData(FirebaseController.IMAGE, mediaSetId, URL);
+                                insertMedia(hashMap, mediaSetId, mediaSetIdCallback);
+                                uriQueue.poll();
+                                mediaTypeQueue.poll();
+                                callbackQueue.poll();
+                                uploadMedia();
+                            };
+                        }
+                        @Override
+                        public void onFailure(Exception e) {mediaSetIdCallback.onFailure(e);}
+                    });
+                } else if (mediaType.equals(FirebaseController.VIDEO)){
+                    videosHandler.uploadMediasInBackground(queue, new UploadCallback<List<String>>(){
+                        @Override
+                        public void onSuccess(List<String> URLs) {
+                            for (String URL: URLs) {
+                                HashMap<String, Object> hashMap = MediaFB.createMediaData(FirebaseController.VIDEO, mediaSetId, URL);
+                                insertMedia(hashMap, mediaSetId, mediaSetIdCallback);
+                                uriQueue.poll();
+                                mediaTypeQueue.poll();
+                                callbackQueue.poll();
+                                uploadMedia();
+                            };
+                        }
+                        @Override
+                        public void onFailure(Exception e) {mediaSetIdCallback.onFailure(e);}
+                    });
+                } else if (mediaType.equals(FirebaseController.PDF)){
+                    Log.d(TAG, "onSuccess: uploading pdf");
+                    pdfsHandler.uploadMediasInBackground(queue, new UploadCallback<List<String>>(){
+                        @Override
+                        public void onSuccess(List<String> URLs) {
+                            for (String URL: URLs) {
+                                HashMap<String, Object> hashMap = MediaFB.createMediaData(FirebaseController.PDF, mediaSetId, URL);
+                                insertMedia(hashMap, mediaSetId, mediaSetIdCallback);
+                                uriQueue.poll();
+                                mediaTypeQueue.poll();
+                                callbackQueue.poll();
+                                uploadMedia();
+                            };
+                        }
+                        @Override
+                        public void onFailure(Exception e) {mediaSetIdCallback.onFailure(e);}
+                    });
                 }
-                @Override
-                public void onFailure(Exception e) {mediaSetIdCallback.onFailure(e);}
-            });
-        } else {
-            Log.d(TAG, "uploadMedia: uris is empty");
-            if (mediaType.equals(FirebaseController.IMAGE)) {
-                postViewModel.setImageUploaded(true);
             }
-            else if (mediaType.equals(FirebaseController.VIDEO)) {
-                postViewModel.setVideosUploaded(true);
-            }
-            else if (mediaType.equals(FirebaseController.PDF)) {
-                postViewModel.setPdfsUploaded(true);
-            }
-            uriQueue.poll();
-            mediaTypeQueue.poll();
-            callbackQueue.poll();
-            mediaSetIdCallback.onSuccess(null);
-            uploadMedia();
-        }
+            @Override
+            public void onFailure(Exception e) {mediaSetIdCallback.onFailure(e);}
+        });
     }
 
     private void insertMedia(HashMap<String, Object> hashMap, String mediaSetId, UploadCallback<String> callback) {
