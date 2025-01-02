@@ -64,7 +64,7 @@ public abstract class BaseTab1Fragment<T> extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView_handlePost_tab1);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        fetchData(); // Fetch data when the view is created
+//        fetchData(); // Fetch data when the view is created
         return view;
     }
 
