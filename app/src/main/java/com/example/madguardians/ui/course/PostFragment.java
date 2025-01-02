@@ -1,5 +1,8 @@
 package com.example.madguardians.ui.course;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,9 +23,14 @@ import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.firebase.PostFB;
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,6 +43,9 @@ public class PostFragment extends Fragment {
     private View view;
     private static int NUMBER_OF_SEGMENT;
     private int lastViewId;
+    FirebaseFirestore firestore;
+    SharedPreferences sharedPreferences;
+    String userId;
 
     public PostFragment() {
         // Required empty public constructor
@@ -48,6 +59,9 @@ public class PostFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPreferences = getContext().getSharedPreferences("user_preferences", MODE_PRIVATE);
+        userId = sharedPreferences.getString("user_id", null);
+        firestore = FirebaseFirestore.getInstance();
         if (getArguments() != null) {
             PostFB.getPost(getArguments().getString("postId"), new UploadCallback<PostFB>(){
                 @Override
@@ -157,10 +171,13 @@ public class PostFragment extends Fragment {
         Button BTNReport = mediaSegment.findViewById(R.id.BTNReport);
 
         // set text in the button
-        if (isRead(media))
-            BTNStart.setText("Completed");
-        else
-            BTNStart.setText("Start!");
+        isRead(media, isRead -> {
+            if (isRead) {
+                BTNStart.setText("Completed");
+            } else {
+                BTNStart.setText("Start!");
+            }
+        });
 
         if (typeMedia.equalsIgnoreCase("image")){
             IVImage.setImageResource(R.drawable.ic_image);
@@ -178,7 +195,7 @@ public class PostFragment extends Fragment {
         BTNStart.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("mediaId", media.getMediaId());
-            setIsRead(media.getMediaId());
+            handleReadStatus(media);
 
             if (typeMedia.equalsIgnoreCase("image"))
                 Navigation.findNavController(v).navigate(R.id.nav_img, bundle);
@@ -223,12 +240,171 @@ public class PostFragment extends Fragment {
 
     ////////////////////////////////////////////////////////////////////////////////
     // yewoon
-    private boolean isRead(MediaFB pdfMedia) {
+    private void getCourseIdByPostId(String postId, FirestoreCallback callback) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
-        return true;
+        // check post1 == postId
+        firestore.collection("course")
+                .whereEqualTo("post1", postId)
+                .get()
+                .addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful() && !task1.getResult().isEmpty()) {
+                        for (QueryDocumentSnapshot document : task1.getResult()) {
+                            String courseId = document.getString("courseId");
+                            callback.onSuccess(courseId);
+                            return;
+                        }
+                    }
+
+                    // check post2 == postId
+                    firestore.collection("course")
+                            .whereEqualTo("post2", postId)
+                            .get()
+                            .addOnCompleteListener(task2 -> {
+                                if (task2.isSuccessful() && !task2.getResult().isEmpty()) {
+                                    for (QueryDocumentSnapshot document : task2.getResult()) {
+                                        String courseId = document.getString("courseId");
+                                        callback.onSuccess(courseId);
+                                        return;
+                                    }
+                                }
+
+                                // check post3 == postId
+                                firestore.collection("course")
+                                        .whereEqualTo("post3", postId)
+                                        .get()
+                                        .addOnCompleteListener(task3 -> {
+                                            if (task3.isSuccessful() && !task3.getResult().isEmpty()) {
+                                                for (QueryDocumentSnapshot document : task3.getResult()) {
+                                                    String courseId = document.getString("courseId");
+                                                    callback.onSuccess(courseId);
+                                                    return;
+                                                }
+                                            }
+
+                                            // if not result
+                                            Log.e("Firestore", "Course not found for postId: " + postId);
+                                            callback.onFailure(new Exception("Course not found"));
+                                        });
+                            });
+                });
     }
 
-    private void setIsRead(String mediaId) {
+    public interface FirestoreCallback {
+        void onSuccess(String courseId);
+        void onFailure(Exception e);
+    }
+    private void checkAndUpdateReadStatus(MediaFB pdfMedia, FirestoreCallback callback) {
+        String postId = post.getPostId(); // Get PostId
+
+        getCourseIdByPostId(postId, new FirestoreCallback() {
+            @Override
+            public void onSuccess(String courseId) {
+                // check userHistory
+                firestore.collection("userHistory")
+                        .whereEqualTo("userId", userId)
+                        .whereEqualTo("courseId", courseId)
+                        .whereEqualTo("mediaId", pdfMedia.getMediaId())
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                if (!task.getResult().isEmpty()) {
+                                    // Have record，update time
+                                    for (DocumentSnapshot document : task.getResult()) {
+                                        firestore.collection("userHistory")
+                                                .document(document.getId())
+                                                .update("timestamp", System.currentTimeMillis())
+                                                .addOnSuccessListener(aVoid -> {
+                                                    Log.d("Firestore", "Timestamp updated for mediaId: " + pdfMedia.getMediaId());
+                                                    callback.onSuccess("updated"); // Update
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Log.e("Firestore", "Error updating timestamp: ", e);
+                                                    callback.onFailure(e);
+                                                });
+                                    }
+                                } else {
+                                    // no record，create new record
+                                    Map<String, Object> history = new HashMap<>();
+                                    history.put("userId", userId);
+                                    history.put("courseId", courseId);
+                                    history.put("mediaId", pdfMedia.getMediaId());
+                                    history.put("timestamp", System.currentTimeMillis());
+
+                                    firestore.collection("userHistory")
+                                            .add(history)
+                                            .addOnSuccessListener(documentReference -> {
+                                                Log.d("Firestore", "New record created for mediaId: " + pdfMedia.getMediaId());
+                                                callback.onSuccess("created"); // New Record created
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e("Firestore", "Error creating record: ", e);
+                                                callback.onFailure(e);
+                                            });
+                                }
+                            } else {
+                                Log.e("Firestore", "Error fetching user history: ", task.getException());
+                                callback.onFailure(task.getException());
+                            }
+                        });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("Firestore", "Error fetching courseId for checkAndUpdateReadStatus", e);
+                callback.onFailure(e);
+            }
+        });
+    }
+    private void isRead(MediaFB pdfMedia, ReadStatusCallback callback) {
+        String postId = post.getPostId(); // Get PostId
+
+        getCourseIdByPostId(postId, new FirestoreCallback() {
+            @Override
+            public void onSuccess(String courseId) {
+                firestore.collection("userHistory")
+                        .whereEqualTo("userId", userId)
+                        .whereEqualTo("courseId", courseId)
+                        .whereEqualTo("mediaId", pdfMedia.getMediaId())
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                                // have record, isRead
+                                callback.onResult(true);
+                            } else {
+                                // No record, unRead
+                                callback.onResult(false);
+                            }
+                        });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("Firestore", "Error fetching courseId for isRead check", e);
+                callback.onResult(false); // Fail to search userHistory
+            }
+        });
+    }
+    public interface ReadStatusCallback {
+        void onResult(boolean isRead);
+    }
+
+    private void handleReadStatus(MediaFB pdfMedia) {
+        checkAndUpdateReadStatus(pdfMedia, new FirestoreCallback() {
+            @Override
+            public void onSuccess(String result) {
+                if ("updated".equals(result)) {
+                    Log.d("ReadStatus", "Media record updated.");
+                } else if ("created".equals(result)) {
+                    Log.d("ReadStatus", "New media record created.");
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("ReadStatus", "Error handling read status: ", e);
+            }
+        });
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -237,3 +413,4 @@ public class PostFragment extends Fragment {
     }
 
 }
+

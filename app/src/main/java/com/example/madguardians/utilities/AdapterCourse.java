@@ -1,5 +1,9 @@
 package com.example.madguardians.utilities;
 
+import static java.security.AccessController.getContext;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
@@ -16,9 +21,13 @@ import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
 import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.firebase.DomainFB;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseViewHolder> {
@@ -67,13 +76,16 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
             holder.verifyStatus.setImageResource(R.drawable.ic_verifying);
         }
         // check if it id collected
-        if (isCollected(courseFB)) {
-            holder.button_collection.setChecked(true);
-        }
+//        if (isCollected(courseFB)) {
+//            holder.button_collection.setChecked(true);
+//        }
+        checkCollectionStatus(courseFB, holder.button_collection, holder.itemView.getContext());
+        holder.button_collection.setOnClickListener(v -> toggleCollection(courseFB, holder.button_collection));
+
 
         // Handle button clicks
         holder.button_start.setOnClickListener(v -> listener.onStartClick(courseFB));
-        holder.button_collection.setOnClickListener(v -> listener.onCollectionClick(courseFB));
+//        holder.button_collection.setOnClickListener(v -> listener.onCollectionClick(courseFB));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -84,10 +96,111 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
 
     ////////////////////////////////////////////////////////////////////////////////////
     // yewoon
+    private void checkCollectionStatus(CourseFB courseFB, ToggleButton button_collection, Context context) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String userId = getUserId(context);
 
-    private boolean isCollected(CourseFB courseFB) {
-        return true;
+        db.collection("collection")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("courseId", courseFB.getCourseId())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (!task.getResult().isEmpty()) {
+                            // collected
+                            button_collection.setChecked(true);
+                        } else {
+                            // uncollected
+                            button_collection.setChecked(false);
+                        }
+                    } else {
+                        // search fail, set as false
+                        button_collection.setChecked(false);
+                    }
+                });
     }
+
+    private void toggleCollection(CourseFB courseFB, ToggleButton button_collection) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String userId = getUserId(button_collection.getContext());
+
+        if (button_collection.isChecked()) {
+            generateCollectionId(db, userId, courseFB.getCourseId(), new OnCollectionIdGeneratedListener() {
+                @Override
+                public void onCollectionIdGenerated(String collectionId) {
+                    Map<String, Object> collection = new HashMap<>();
+                    collection.put("collectionId", collectionId);
+                    collection.put("userId", userId);
+                    collection.put("courseId", courseFB.getCourseId());
+
+                    db.collection("collection").document(collectionId)
+                            .set(collection)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(button_collection.getContext(), "Collected", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(button_collection.getContext(), "Collect Fail", Toast.LENGTH_SHORT).show();
+                                button_collection.setChecked(false); // reset to false
+                            });
+                }
+            });
+        } else {
+            // Remove collection
+            db.collection("collection")
+                    .whereEqualTo("userId", userId)
+                    .whereEqualTo("courseId", courseFB.getCourseId())
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                db.collection("collection").document(document.getId())
+                                        .delete()
+                                        .addOnSuccessListener(aVoid -> {
+                                            Toast.makeText(button_collection.getContext(), "Remove collection", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(button_collection.getContext(), "Remove collection fail", Toast.LENGTH_SHORT).show();
+                                            button_collection.setChecked(true); // reset to true
+                                        });
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void generateCollectionId(FirebaseFirestore db, String userId, String courseId, OnCollectionIdGeneratedListener listener) {
+        db.collection("collection")
+                .orderBy("collectionId", Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (!task.getResult().isEmpty()) {
+                            String latestCollectionId = task.getResult().getDocuments().get(0).getString("collectionId");
+                            int latestNumber = Integer.parseInt(latestCollectionId.substring(3));
+                            int newNumber = latestNumber + 1;
+                            String newCollectionId = String.format("COL%06d", newNumber);
+                            listener.onCollectionIdGenerated(newCollectionId);
+                        } else {
+                            // if null set as COL000001
+                            listener.onCollectionIdGenerated("COL000001");
+                        }
+                    } else {
+                        Log.e("FirestoreError", "Failed to get the latest collectionId", task.getException());
+                        Toast.makeText(db.getApp().getApplicationContext(), "Failed to generate collectionId", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private String getUserId(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("user_id", null);
+    }
+
+    interface OnCollectionIdGeneratedListener {
+        void onCollectionIdGenerated(String collectionId);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////
 
     private void showImage(CourseViewHolder holder, CourseFB courseFB) {

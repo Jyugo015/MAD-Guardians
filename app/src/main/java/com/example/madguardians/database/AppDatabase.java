@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
         Domain.class, DomainInterested.class, Folder.class, Helpdesk.class, Issue.class,
         MediaRead.class, Media.class, MediaSet.class, Post.class, Quiz.class,
         QuestionOption.class, QuizHistory.class, QuizOld.class, QuizQuestion.class,
-        QuizResult.class, Staff.class, Timeslot.class, User.class, UserHistory.class,
+        QuizResult.class, Staff.class, Timeslot.class, User.class,
         VerEducator.class, VerPost.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -48,7 +48,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract StaffDao staffDao();
     public abstract TimeslotDao timeslotDao();
     public abstract UserDao userDao();
-    public abstract UserHistoryDao userHistoryDao();
+//    public abstract UserHistoryDao userHistoryDao();
     public abstract VerEducatorDao verEducatorDao();
     public abstract VerPostDao verPostDao();
 
