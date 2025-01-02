@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class Post {
+public class PostFB {
     private static final String TABLE_NAME = FirebaseController.POST;
     private String postId;
     private String userId;
@@ -26,8 +26,9 @@ public class Post {
     private String date;
     private static List<HashMap<String, Object>> list = new ArrayList<>();
     private static Queue<HashMap<String, Object>> insertQueue = new LinkedList<>();
+    private static final String TAG = "PostFB";
 
-    public Post(String postId, String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String quizId, String domainId, String folderId, String date) {
+    public PostFB(String postId, String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String quizId, String domainId, String folderId, String date) {
         this.postId = postId;
         this.userId = userId;
         this.title = title;
@@ -41,7 +42,7 @@ public class Post {
         this.date = date;
     }
 
-    public static void getPost(String postId, UploadCallback<Post> callback) {
+    public static void getPost(String postId, UploadCallback<PostFB> callback) {
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), postId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> result) {
@@ -55,7 +56,7 @@ public class Post {
         });
     }
 
-    public static Post mapHashMapToPost(HashMap<String, Object> data) {
+    public static PostFB mapHashMapToPost(HashMap<String, Object> data) {
         String postId = (String) data.get("postId");
         String userId = (String) data.get("userId");
         String title = (String) data.get("title");
@@ -67,7 +68,7 @@ public class Post {
         String domainId = (String) data.get("domainId");
         String folderId = (String) data.get("folderId");
         String date = (String) data.get("date");
-        return new Post(postId, userId, title, description, imageSetId, videoSetId, fileSetId, quizId, domainId, folderId, date);
+        return new PostFB(postId, userId, title, description, imageSetId, videoSetId, fileSetId, quizId, domainId, folderId, date);
     }
 
     public static void intializePosts() {
@@ -95,7 +96,9 @@ public class Post {
                 FirebaseController.insertFirebase(TABLE_NAME, id, post, new UploadCallback<HashMap<String, Object>>() {
                     @Override
                     public void onSuccess(HashMap<String, Object> result) {
-                        list.add(result);
+                        HashMap<String, Object> data = new HashMap<>();
+                        data.put(FirebaseController.getIdName(TABLE_NAME), id);
+                        list.add(data);
                         uploadNextPost(postQueue, callback);
                     }
                     @Override
@@ -146,6 +149,20 @@ public class Post {
                 }
             });
         }
+    }
+
+    public static void updatePost(HashMap<String, Object> hashMap) {
+        String postId = (String) hashMap.get("postId");
+        FirebaseController.updateFirebase(TABLE_NAME, hashMap, new UploadCallback<HashMap<String, Object>>(){
+            @Override
+            public void onSuccess(HashMap<String, Object> result) {
+                Log.e(TAG, "onSuccess: updatePost " + postId);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, "onFailure: updatePost", e);
+            }
+        });
     }
 
     public static HashMap<String, Object> createPostData(String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String quizId, String folderId, String date) {

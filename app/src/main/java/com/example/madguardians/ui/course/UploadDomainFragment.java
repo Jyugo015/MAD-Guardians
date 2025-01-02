@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.madguardians.R;
-import com.example.madguardians.firebase.Course;
+import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.utilities.AdapterCourse;
 import com.example.madguardians.utilities.UploadCallback;
 
@@ -30,7 +30,7 @@ public class UploadDomainFragment extends Fragment implements AdapterCourse.OnIt
     private View view;
     private String folderId;
     private String domainId;
-    private ArrayList<Course> courses;
+    private ArrayList<CourseFB> cours;
     private RecyclerView RVCourse;
     private AdapterCourse courseAdapter;
     public static UploadDomainFragment newInstance(String param1, String param2) {
@@ -42,16 +42,16 @@ public class UploadDomainFragment extends Fragment implements AdapterCourse.OnIt
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        courses = new ArrayList<>();
+        cours = new ArrayList<>();
 
         if (getArguments() != null) {
             domainId = getArguments().getString("domainId");
             folderId = getArguments().getString("folderId");
-            Course.getCoursesByFolderId(folderId, new UploadCallback<List<Course>>(){
+            CourseFB.getCoursesByFolderId(folderId, new UploadCallback<List<CourseFB>>(){
                 @Override
-                public void onSuccess(List<Course> result) {
-                    courses.addAll(result);
-                    courseAdapter = new AdapterCourse(courses, UploadDomainFragment.this);
+                public void onSuccess(List<CourseFB> result) {
+                    cours.addAll(result);
+                    courseAdapter = new AdapterCourse(cours, UploadDomainFragment.this);
                     RVCourse.setAdapter(courseAdapter);
                 }
                 @Override
@@ -83,15 +83,15 @@ public class UploadDomainFragment extends Fragment implements AdapterCourse.OnIt
     }
 
     @Override
-    public void onStartClick(Course course) {
+    public void onStartClick(CourseFB courseFB) {
         Log.w("Home Fragment", "onStartClick" );
         Bundle bundle = new Bundle();
-        bundle.putString("courseId", course.getCourseId());
+        bundle.putString("courseId", courseFB.getCourseId());
         Navigation.findNavController(this.getView()).navigate(R.id.nav_course_overview, bundle);
     }
 
     @Override
-    public void onCollectionClick(Course course) {
+    public void onCollectionClick(CourseFB courseFB) {
 
     }
 }

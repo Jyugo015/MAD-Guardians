@@ -11,14 +11,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class Media {
+public class MediaFB {
     private static String TABLE_NAME = FirebaseController.MEDIA;
     private String mediaId;
     private String mediaSetId;
     private String url;
     private static Queue<HashMap<String, Object>> insertQueue = new LinkedList<>();
 
-    private Media(String mediaId, String mediaSetId, String url) {
+    private MediaFB(String mediaId, String mediaSetId, String url) {
         this.mediaId = mediaId;
         this.mediaSetId = mediaSetId;
         this.url = url;
@@ -48,44 +48,56 @@ public class Media {
         hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003", "https://res.cloudinary.com/dmgpozfee/video/upload/v1734399444/ku2zmz8wrd67bbcup1o4.mp4"));
         hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003", "https://res.cloudinary.com/dmgpozfee/video/upload/v1734399444/ku2zmz8wrd67bbcup1o4.mp4"));
         for (HashMap<String, Object> dataHashMap:hashMapList) {
-            insertMedia(dataHashMap);
+            insertMedia(dataHashMap, new UploadCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    Log.d(TABLE_NAME, "onSuccess:  initialise media");
+                }
+                @Override
+                public void onFailure(Exception e) {
+
+                }
+            });
         }
     }
 
-    public static void insertMedia(HashMap<String, Object> data) {
+    public static void insertMedia(HashMap<String, Object> data, UploadCallback<Boolean> isUploadedCallback) {
         insertQueue.add(data);
         // start for the first, after that the method will call by itself, making sure no repetitive calling
         if (insertQueue.size() == 1) {
-            processQueue();
+            processQueue(isUploadedCallback);
         }
     }
 
-    private static void processQueue() {
+    private static void processQueue(UploadCallback<Boolean> isUploadedCallback) {
         if (!insertQueue.isEmpty()) {
             HashMap<String, Object> dataHashMap = insertQueue.peek();
-            String TABLE_NAME = (String) dataHashMap.get("tableName");
-            FirebaseController.generateDocumentId(TABLE_NAME, new UploadCallback<String>() {
+            String tableName = (String) dataHashMap.remove("tableName");
+            Log.d(TABLE_NAME, "processQueue: tableName: "+ tableName);
+            FirebaseController.generateDocumentId(tableName, new UploadCallback<String>() {
                 @Override
                 public void onSuccess(String id) {
-                    FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
+                    Log.d(TABLE_NAME, "processQueue: mediaId: "+ id);
+                FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
                         @Override
                         public void onSuccess(HashMap<String, Object> result) {
-                            Log.d("initializeDomainList", "onSuccess");
+                            Log.d("processQueue media", "onSuccess");
                             insertQueue.poll();
-                            processQueue();
+                            processQueue(isUploadedCallback);
                         }
                         @Override
                         public void onFailure(Exception e) {
-                            Log.e("initializeDomainList", "onFailure");
+                            Log.e("processQueue media", "onFailure", e);
                             insertQueue.poll();
-                            processQueue();
+                            processQueue(isUploadedCallback);
                         }
                     });
                 }
                 @Override
-                public void onFailure(Exception e) {
-                }
+                public void onFailure(Exception e) {isUploadedCallback.onFailure(e);}
             });
+        } else {
+            isUploadedCallback.onSuccess(true);
         }
     }
 
@@ -97,12 +109,12 @@ public class Media {
         return data;
     }
 
-    public static void getMedias(String mediaSetId, UploadCallback<List<Media>> callback) {
-        Log.d("TAG", "mediaSetId: " + mediaSetId);
+    public static void getMedias(String mediaSetId, UploadCallback<List<MediaFB>> callback) {
+        Log.d(TABLE_NAME, "mediaSetId: " + mediaSetId);
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(FirebaseController.MEDIASET), mediaSetId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> mediaHashMapList) {
-                ArrayList<Media> medias = new ArrayList<>();
+                ArrayList<MediaFB> medias = new ArrayList<>();
                 for (HashMap<String, Object> mediaHashMap:mediaHashMapList) {
                     medias.add(mapHashMapToMedia(mediaHashMap));
                 }
@@ -115,15 +127,15 @@ public class Media {
         });
     }
 
-    private static Media mapHashMapToMedia(HashMap<String, Object> media) {
-        return new Media((String) media.get("mediaId"), (String) media.get("mediaSetId"), (String) media.get("url"));
+    private static MediaFB mapHashMapToMedia(HashMap<String, Object> media) {
+        return new MediaFB((String) media.get("mediaId"), (String) media.get("mediaSetId"), (String) media.get("url"));
     }
 
-    public static void getMedia(String mediaId, UploadCallback<Media> callback) {
+    public static void getMedia(String mediaId, UploadCallback<MediaFB> callback) {
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), mediaId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> result) {
-                Media media = mapHashMapToMedia(result.get(0));
+                MediaFB media = mapHashMapToMedia(result.get(0));
                 callback.onSuccess(media);
             }
             @Override

@@ -1,5 +1,6 @@
-package com.example.madguardians.ui.course;
+package com.example.madguardians.utilities;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,21 +16,16 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.media3.common.MediaItem;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
 import com.bumptech.glide.Glide;
-import com.example.madguardians.database.CloudinaryUploadWorker;
-import com.example.madguardians.utilities.AdapterMedia;
-import com.example.madguardians.utilities.UploadCallback;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.example.madguardians.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -38,7 +34,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 public class MediasHandler {
@@ -52,13 +50,24 @@ public class MediasHandler {
     private WorkRequest uploadWorkRequest;
     private AdapterMedia mediaAdapter;
     private List<Uri> selectedMedias;
+    private List<String> ImageURLs = new ArrayList<>();
+    private List<String> VideoURLs = new ArrayList<>();
+    private List<String> PdfURLs = new ArrayList<>();
     private String mediaType;
+    private Cloudinary cloudinary;
+    private static final String TAG = "MediasHandler";
 
     public MediasHandler(@NonNull Context context, @NonNull ActivityResultLauncher<Intent> activityResultLauncher, String mediaType, @Nullable RecyclerView RVMedias) {
         this.context = context;
         this.activityResultLauncher = activityResultLauncher;
         this.mediaType = mediaType;
 //        this.callback = callback;
+
+        Map<String, String> cloudinaryConfig = new HashMap<>();
+        cloudinaryConfig.put("cloud_name", context.getString(R.string.cloud_name));
+        cloudinaryConfig.put("api_key", context.getString(R.string.api_key));
+        cloudinaryConfig.put("api_secret", context.getString(R.string.api_secret));
+        cloudinary = new Cloudinary(cloudinaryConfig);
 
         if (RVMedias != null) {
             selectedMedias = new ArrayList<>();
@@ -108,19 +117,19 @@ public class MediasHandler {
         if (uri != null) {
             long size = 0;
             if (mediaType.equalsIgnoreCase("image") || mediaType.equalsIgnoreCase("pdf")) {
-                Log.d("TAG", "handleResult: here1");
+                Log.d(TAG, "handleResult: here1");
                 String[] projection = {MediaStore.Images.Media.DATA, OpenableColumns.SIZE};
                 try (Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);) {
-                    Log.d("TAG", "handleResult: here2");
+                    Log.d(TAG, "handleResult: here2");
                     if (cursor != null && cursor.moveToFirst()){
-                        Log.d("TAG", "handleResult: here3");
+                        Log.d(TAG, "handleResult: here3");
                         int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-                        Log.d("TAG", "size: " + sizeIndex);
+                        Log.d(TAG, "size: " + sizeIndex);
                         if (sizeIndex != -1){
-                            Log.d("TAG", "handleResult: here4");
+                            Log.d(TAG, "handleResult: here4");
                             size = cursor.getLong(sizeIndex);
                             if (size < 10485760) {
-                                Log.d("TAG", "handleResult: here5");
+                                Log.d(TAG, "handleResult: here5");
 //                                String filePath = getPathFromUri(uri);
                                 selectedMedias.add(uri);
                                 Log.d("pick images / pdfs", "Selected Images / Pdfs: " + selectedMedias.toString());
@@ -129,9 +138,9 @@ public class MediasHandler {
                             } else
                                 Toast.makeText(context, "The file is too large (Maximum 10MB), please try another file", Toast.LENGTH_LONG).show();
                         } else
-                            Log.d("TAG", "handleResult: here6");
+                            Log.d(TAG, "handleResult: here6");
                     } else
-                        Log.d("TAG", "handleResult: here7");
+                        Log.d(TAG, "handleResult: here7");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -154,25 +163,6 @@ public class MediasHandler {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-//            } else if (mediaType.equalsIgnoreCase("pdf")) {
-//                try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
-//                    if (cursor != null && cursor.moveToFirst()){
-//                        int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-//                        if (sizeIndex != -1){
-//                            size = cursor.getLong(sizeIndex);
-//                            if (size < 10485760) {
-//                                Log.d("TAG", "handleResult: pdfUri: " + uri);
-//                                byte[] filePathBytes = getBytesFromUri(uri);
-////                                String filePath = saveBytesToCacheFile(filePathBytes);
-//                                Log.d("TAG", "handleResult: path: " + filePath);
-////                                callback.onMediaSelected(filePath, "pdf");
-//                            } else
-//                                Toast.makeText(context, "The file is too large (Maximum 10MB), please try another file", Toast.LENGTH_LONG).show();
-//                        }
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
             }
         } else {
             Log.d("Media Handler", "The filepath is null");
@@ -198,126 +188,92 @@ public class MediasHandler {
             throw new RuntimeException(e);
         }
     }
-    public void uploadImageInBackground(Uri uri, String database, @Nullable ImageView imageView) {
+
+    public void uploadImagesInBackground(Queue<Uri> uris, UploadCallback<List<String>> callback) {
+        if (uris.isEmpty()) {
+            callback.onSuccess(ImageURLs);
+            ImageURLs.clear();
+            return;
+        }
+        Uri uri = uris.poll();
         String filePath = getPathFromUri(uri);
-        Toast.makeText(context, "Uploading image", Toast.LENGTH_LONG).show();
-        Data data = new Data.Builder()
-                .putString("filePath", filePath)
-                .putString("fileType", "image")
-                .build();
-
-        uploadWorkRequest = new OneTimeWorkRequest.Builder(CloudinaryUploadWorker.class)
-                .setInputData(data)
-                .build();
-
-        WorkManager.getInstance(context).enqueue(uploadWorkRequest);
-
-        WorkManager.getInstance(context).getWorkInfoByIdLiveData(uploadWorkRequest.getId())
-                .observe((LifecycleOwner) context, workInfo -> {
-                    if (workInfo != null && workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                        // Retrieve the uploaded UR
-                        String imageUrl = workInfo.getOutputData().getString("uploadedUrl");
-
-                        Log.d("TAG", "uploadImageInBackground: Succeeded " + imageUrl);
-                        if (imageUrl != null) {
-                            Toast.makeText(context, "Video Uploaded Successfully", Toast.LENGTH_SHORT).show();
-
-                            // Other logic (eg. save in the database
-                            handleUploadedURL(imageUrl, database);
-
-                            if (imageView != null) {
-                                displayImage(context, imageUrl, imageView);
-                            }
-                        } else {
-                            Log.d("TAG", "uploadImageInBackground: null url");
-                        }
-                    } else if (workInfo != null && workInfo.getState() == WorkInfo.State.FAILED) {
-                        Toast.makeText(context, "Video Upload Failed", Toast.LENGTH_SHORT).show();
-                    }
+        Toast.makeText(context, "Uploading image", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            try {
+                Map response = cloudinary.uploader().upload(filePath, ObjectUtils.emptyMap());
+                String imageUrl = (String) response.get("secure_url");
+                // Save the url for later need
+                ((Activity) context).runOnUiThread(() -> {
+                    Log.d("Cloudinary URL", imageUrl);
+                    ImageURLs.add(imageUrl);
+                    uploadImagesInBackground(uris, callback);
                 });
+            } catch (IOException e) {
+                callback.onFailure(e);
+            }
+        }).start();
     }
 
-    public void uploadVideoInBackground(Uri uri, String database, @Nullable ExoPlayer player) {
+    public void uploadVideosInBackground(Queue<Uri> uris, UploadCallback<List<String>> callback) {
+        if (uris.isEmpty()) {
+            callback.onSuccess(VideoURLs);
+            VideoURLs.clear();
+            return;
+        }
+        Uri uri = uris.poll();
         String filePath = getPathFromUri(uri);
-        Toast.makeText(context, "Uploading video", Toast.LENGTH_LONG).show();
-        Data data = new Data.Builder()
-                .putString("filePath", filePath)
-                .putString("fileType", "video")
-                .build();
-
-        Log.d("here", "uploadVideoInBackground fileType: " + data.getString("fileType"));
-        uploadWorkRequest = new OneTimeWorkRequest.Builder(CloudinaryUploadWorker.class)
-                .setInputData(data)
-                .build();
-
-        WorkManager.getInstance(context).enqueue(uploadWorkRequest);
-
-        WorkManager.getInstance(context).getWorkInfoByIdLiveData(uploadWorkRequest.getId())
-                .observe((LifecycleOwner) context, workInfo -> {
-                    if (workInfo != null && workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                        // Retrieve the uploaded UR
-                        String videoUrl = workInfo.getOutputData().getString("uploadedUrl");
-
-                        Log.d("TAG", "uploadVideoInBackground: Succeeded " + videoUrl);
-                        if (videoUrl != null) {
-                            Toast.makeText(context, "Video Uploaded Successfully", Toast.LENGTH_SHORT).show();
-
-                            // Other logic (eg. save in the database
-                            handleUploadedURL(videoUrl, database);
-
-                            if (player != null) {
-                                Log.d("Cloudinary URL", videoUrl);
-                                playVideo(videoUrl, player);
-                            }
-                        } else {
-                            Log.d("TAG", "uploadImageInBackground: null url");
-                        }
-                    } else if (workInfo != null && workInfo.getState() == WorkInfo.State.FAILED) {
-                        Toast.makeText(context, "Video Upload Failed", Toast.LENGTH_SHORT).show();
-                    }
+        Toast.makeText(context, "Uploading videos", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            try {
+                Map response = cloudinary.uploader().upload(filePath, ObjectUtils.asMap("resource_type", "video"));
+                String videoUrl = (String) response.get("secure_url");
+//                // Add the URL to the list (ensure thread safety)
+//                synchronized (VideoURLs) {
+//                    VideoURLs.add(videoUrl);
+//                }
+                // Save the url for later need
+                ((Activity) context).runOnUiThread(() -> {
+                    Log.d("Cloudinary URL", videoUrl);
+                    VideoURLs.add(videoUrl);
+                    uploadVideosInBackground(uris, callback);
                 });
+            } catch (IOException e) {
+                callback.onFailure(e);
+            }
+        }).start();
     }
 
-    public void uploadPdfInBackground(Uri uri, String database, @Nullable WebView webView) {
+    public void uploadPdfInBackground(Queue<Uri> uris, UploadCallback<List<String>> callback) {
+
+        Toast.makeText(context, "Uploading pdf", Toast.LENGTH_SHORT).show();
+        if (uris.isEmpty()) {
+            callback.onSuccess(PdfURLs);
+            PdfURLs.clear();
+            return;
+        }
+        Uri uri = uris.poll();
         byte[] filePathBytes = getBytesFromUri(uri);
         String filePath = saveBytesToCacheFile(filePathBytes);
-        Toast.makeText(context, "Uploading pdf", Toast.LENGTH_LONG).show();
-        Data data = new Data.Builder()
-                .putString("filePath", filePath)
-                .putString("fileType", "pdf")
-                .build();
-
-        uploadWorkRequest = new OneTimeWorkRequest.Builder(CloudinaryUploadWorker.class)
-                .setInputData(data)
-                .build();
-
-        WorkManager.getInstance(context).enqueue(uploadWorkRequest);
-
-        WorkManager.getInstance(context).getWorkInfoByIdLiveData(uploadWorkRequest.getId())
-                .observe((LifecycleOwner) context, workInfo -> {
-                    if (workInfo != null && workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                        // Retrieve the uploaded UR
-                        String pdfUrl = workInfo.getOutputData().getString("uploadedUrl");
-
-                        Log.d("TAG", "uploadImageInBackground: Succeeded " + pdfUrl);
-                        if (pdfUrl != null) {
-                            Toast.makeText(context, "Video Uploaded Successfully", Toast.LENGTH_SHORT).show();
-
-                            // Other logic (eg. save in the database
-                            handleUploadedURL(pdfUrl, database);
-                            deleteCacheFile("/data/user/0/com.example.testroom/cache/temp.pdf");
-                            if (webView != null){
-                                displayPDF(pdfUrl, webView);
-                                Log.d("TAG", "uploadPdfInBackground: display pdf");
-                            }
-
-                        } else {
-                            Log.d("TAG", "uploadImageInBackground: null url");
-                        }
-                    } else if (workInfo != null && workInfo.getState() == WorkInfo.State.FAILED) {
-                        Toast.makeText(context, "Video Upload Failed", Toast.LENGTH_SHORT).show();
-                    }
+        Toast.makeText(context, "Uploading pdf", Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            try {
+                Map response = cloudinary.uploader().upload(filePath, ObjectUtils.asMap("resource_type", "video"));
+                String pdfUrl = (String) response.get("secure_url");
+                // Add the URL to the list (ensure thread safety)
+//                synchronized (PdfURLs) {
+//                    PdfURLs.add(pdfUrl);
+//                }
+                // Save the url for later need
+                ((Activity) context).runOnUiThread(() -> {
+                    Log.d("Cloudinary URL", pdfUrl);
+                    PdfURLs.add(pdfUrl);
+                    deleteCacheFile(filePath);
+                    uploadPdfInBackground(uris, callback);
                 });
+            } catch (IOException e) {
+                callback.onFailure(e);
+            }
+        }).start();
     }
 
     private String saveBytesToCacheFile(byte[] filePathBytes) {
@@ -343,7 +299,7 @@ public class MediasHandler {
     }
 
     private void handleUploadedURL(String imageUrl, String database) {
-        Log.d("TAG", "handleUploadedURL: Wow still can work!");
+        Log.d(TAG, "handleUploadedURL: Wow still can work!");
     }
 
     // Display Image
@@ -386,9 +342,6 @@ public class MediasHandler {
         selectedMedias.clear();
         selectedMedias.addAll(savedMedias);
         mediaAdapter.notifyDataSetChanged();
-    }
-
-    public void uploadImagesInBackground(Queue<Uri> queue, UploadCallback<List<String>> uploadCallback) {
     }
 }
 

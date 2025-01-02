@@ -20,8 +20,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.madguardians.R;
-import com.example.madguardians.firebase.Course;
-import com.example.madguardians.firebase.Domain;
+import com.example.madguardians.firebase.CourseFB;
+import com.example.madguardians.firebase.DomainFB;
+import com.example.madguardians.firebase.FolderFB;
+import com.example.madguardians.firebase.MediaFB;
+import com.example.madguardians.firebase.PostFB;
 import com.example.madguardians.utilities.AdapterCourse;
 import com.example.madguardians.utilities.UploadCallback;
 
@@ -46,9 +49,9 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
     private RecyclerView RVCourse;
     private AdapterCourse courseAdapter;
     private Spinner SPDomain;
-    private List<Course> courseList = new ArrayList<>();
-    List<Domain> domains = new ArrayList<>();
-    List<Domain> selectedDomain = new ArrayList<>();
+    private List<CourseFB> courseFBList = new ArrayList<>();
+    List<DomainFB> domains = new ArrayList<>();
+    List<DomainFB> selectedDomain = new ArrayList<>();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -75,32 +78,32 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        courseAdapter = new AdapterCourse(courseList, HomeFragment.this);
+        courseAdapter = new AdapterCourse(courseFBList, HomeFragment.this);
 
         Log.d("TAG", "onCreate: start1");
-//        Course.initializeCourseList();
-//        Domain.initialiseDomains();
-//        Post.intializePosts();
-//        Media.initialiseMedia();
-//        Folder.initialiseFolders();
+//        CourseFB.initializeCourseList();
+//        DomainFB.initialiseDomains();
+//        PostFB.intializePosts();
+//        MediaFB.initialiseMedia();
+//        FolderFB.initialiseFolders();
         Log.d("TAG", "onCreate: start2");
-        Course.getCourses(new UploadCallback<List<Course>>() {
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        CourseFB.getCourses(new UploadCallback<List<CourseFB>>() {
             @Override
-            public void onSuccess(List<Course> courseList) {
-                courseAdapter.updateCourseList(courseList);
-                Log.d("TAG", "onSuccess: size = " + courseList.size());
-                Log.d("TAG", "onSuccess: start3" + courseList.toString());
+            public void onSuccess(List<CourseFB> courseFBList) {
+                courseAdapter.updateCourseList(courseFBList);
+                Log.d("TAG", "onSuccess: size = " + courseFBList.size());
+                Log.d("TAG", "onSuccess: start3" + courseFBList.toString());
             }
             @Override
             public void onFailure(Exception e) {
                 Log.e("TAG", "onFailure: " + e.getMessage());
             }
         });
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         RVCourse = view.findViewById(R.id.RVCourse);
@@ -114,9 +117,9 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
             Navigation.findNavController(view).navigate(R.id.nav_domains);
         });
 
-        Domain.getDomains(new UploadCallback<List<Domain>>() {
+        DomainFB.getDomains(new UploadCallback<List<DomainFB>>() {
             @Override
-            public void onSuccess(List<Domain> result) {
+            public void onSuccess(List<DomainFB> result) {
                 domains.clear();
                 domains.addAll(result);
                 CustomSpinnerAdapter adapter = new CustomSpinnerAdapter(getContext(), domains);
@@ -128,7 +131,6 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
             }
         });
 
-
         return view;
     }
 
@@ -139,23 +141,23 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
 
 
     @Override
-    public void onStartClick(Course course) {
+    public void onStartClick(CourseFB courseFB) {
         Log.w("Home Fragment", "onStartClick" );
         Bundle bundle = new Bundle();
-        bundle.putString("courseId", course.getCourseId());
+        bundle.putString("courseId", courseFB.getCourseId());
         Navigation.findNavController(this.getView()).navigate(R.id.nav_course_overview, bundle);
     }
 
     @Override
-    public void onCollectionClick(Course course) {
+    public void onCollectionClick(CourseFB courseFB) {
 
     }
 
-    private class CustomSpinnerAdapter extends ArrayAdapter<Domain> {
+    private class CustomSpinnerAdapter extends ArrayAdapter<DomainFB> {
 
         Context context;
-        List<Domain> domains;
-        public CustomSpinnerAdapter(@NonNull Context context, List<Domain> domains) {
+        List<DomainFB> domains;
+        public CustomSpinnerAdapter(@NonNull Context context, List<DomainFB> domains) {
             super(context, android.R.layout.simple_list_item_1, domains);
             this.context = context;
             this.domains = domains;
@@ -180,7 +182,7 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
             CheckBox checkBox = convertView.findViewById(R.id.checkbox);
 
             if (isDropdown) {
-                Domain domain = domains.get(position);
+                DomainFB domain = domains.get(position);
                 textView.setText(domain.getDomainName());
                 checkBox.setChecked(selectedDomain.contains(domain));
 

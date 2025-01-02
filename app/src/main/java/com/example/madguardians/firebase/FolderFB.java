@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class Folder {
+public class FolderFB {
     private static final String TABLE_NAME = FirebaseController.FOLDER;
     private String folderId;
     private String name;
@@ -20,7 +20,7 @@ public class Folder {
     private String rootFolder = null;
     private static Queue<HashMap<String, Object>> insertQueue = new LinkedList<>();
 
-    public Folder(String folderId, String name, String userId, String domainId, String rootFolder) {
+    public FolderFB(String folderId, String name, String userId, String domainId, String rootFolder) {
         this.folderId = folderId;
         this.name = name;
         this.userId = userId;
@@ -64,7 +64,7 @@ public class Folder {
         }
     }
 
-    public static void getFolder(String folderId, UploadCallback<Folder> callback) {
+    public static void getFolder(String folderId, UploadCallback<FolderFB> callback) {
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), folderId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> result) {
@@ -78,8 +78,8 @@ public class Folder {
         });
     }
 
-    public static void getFolders(String userId, UploadCallback<List<Folder>> callback) {
-        ArrayList<Folder> list = new ArrayList<>();
+    public static void getFolders(String userId, UploadCallback<List<FolderFB>> callback) {
+        ArrayList<FolderFB> list = new ArrayList<>();
         FirebaseController.getMatchedCollection(TABLE_NAME, "userId", userId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> folderHashMapList) {
@@ -96,13 +96,13 @@ public class Folder {
         });
     }
 
-    private static Folder mapHashMapToFolder(HashMap<String, Object> folderHashMap) {
+    private static FolderFB mapHashMapToFolder(HashMap<String, Object> folderHashMap) {
         String folderId = (String) folderHashMap.get("folderId");
         String name = (String) folderHashMap.get("name");
         String userId = (String) folderHashMap.get("userId");
         String domainId = (String) folderHashMap.get("domainId");
         String rootFolder = (String) folderHashMap.get("rootFolder");
-        return new Folder(folderId, name, userId, domainId, rootFolder);
+        return new FolderFB(folderId, name, userId, domainId, rootFolder);
     }
 
     public static void initialiseFolders() {
