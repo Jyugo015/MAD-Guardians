@@ -24,8 +24,9 @@ public class PostFB {
     private String domainId;
     private String folderId;
     private String date;
-    private static List<HashMap<String, Object>> list = new ArrayList<>();
     private static Queue<HashMap<String, Object>> insertQueue = new LinkedList<>();
+    private static Queue<UploadCallback<String>> postIdCallbackQueue = new LinkedList<>();
+
     private static final String TAG = "PostFB";
 
     public PostFB(String postId, String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String quizId, String domainId, String folderId, String date) {
@@ -79,43 +80,16 @@ public class PostFB {
         hashMapList.add(createPostData("U0001",  "Java3",  "This is description 3",  null,  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002",  FirebaseController.findStarting(FirebaseController.QUIZ) + "00001",   FirebaseController.findStarting(FirebaseController.FOLDER) + "00001",  "11/12/2024"));
         hashMapList.add(createPostData("U0002",  "Java4",  "This is description 4",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001",  null,  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002",  FirebaseController.findStarting(FirebaseController.QUIZ) + "00001",    FirebaseController.findStarting(FirebaseController.FOLDER) + "00001",  "11/12/2024"));
         for (HashMap<String, Object> dataHashMap:hashMapList) {
-            insertPost(dataHashMap);
+            insertPost(dataHashMap, new UploadCallback<String>() {
+                public void onSuccess(String result) {}
+                public void onFailure(Exception e) {}
+            });
         }
     }
 
-    public static void uploadNextPost(Queue<HashMap<String, Object>> postQueue, UploadCallback<List<HashMap<String, Object>>> callback) {
-        if (postQueue.isEmpty()) {
-            callback.onSuccess(list); // All post is uploaded
-            list.clear();
-            return;
-        }
-        HashMap<String, Object> post = postQueue.poll();
-        FirebaseController.generateDocumentId(TABLE_NAME, new UploadCallback<String>() {
-            @Override
-            public void onSuccess(String id) {
-                FirebaseController.insertFirebase(TABLE_NAME, id, post, new UploadCallback<HashMap<String, Object>>() {
-                    @Override
-                    public void onSuccess(HashMap<String, Object> result) {
-                        HashMap<String, Object> data = new HashMap<>();
-                        data.put(FirebaseController.getIdName(TABLE_NAME), id);
-                        list.add(data);
-                        uploadNextPost(postQueue, callback);
-                    }
-                    @Override
-                    public void onFailure(Exception e) {
-                        callback.onFailure(e);
-                    }
-                });
-            }
-            @Override
-            public void onFailure(Exception e) {
-                callback.onFailure(e);
-            }
-        });
-    }
-
-    private static void insertPost(HashMap<String, Object> dataHashMap) {
+    public static void insertPost(HashMap<String, Object> dataHashMap, UploadCallback<String> postIdCallback) {
         insertQueue.add(dataHashMap);
+        postIdCallbackQueue.add(postIdCallback);
         // start for the first, after that the method will call by itself, making sure no repetitive calling
         if (insertQueue.size() == 1) {
             processQueue();
@@ -125,29 +99,53 @@ public class PostFB {
     private static void processQueue() {
         if (!insertQueue.isEmpty()) {
             HashMap<String, Object> dataHashMap = insertQueue.peek();
-            FirebaseController.generateDocumentId(TABLE_NAME, new UploadCallback<String>() {
-                @Override
-                public void onSuccess(String id) {
-                    FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
-                        @Override
-                        public void onSuccess(HashMap<String, Object> result) {
-                            Log.d("initializeDomainList", "onSuccess");
-                            insertQueue.poll();
-                            processQueue();
-                        }
-                        @Override
-                        public void onFailure(Exception e) {
-                            Log.e("initializeDomainList", "onFailure");
-                            insertQueue.poll();
-                            processQueue();
-                        }
-                    });
-                }
-                @Override
-                public void onFailure(Exception e) {
-                    Log.e("TAG", "onFailure: ", e);
-                }
-            });
+            UploadCallback<String> postIdCallback = postIdCallbackQueue.peek();
+            if (dataHashMap.get(FirebaseController.getIdName(TABLE_NAME)) == null) {
+                FirebaseController.generateDocumentId(TABLE_NAME, new UploadCallback<String>() {
+                    @Override
+                    public void onSuccess(String id) {
+                        FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
+                            @Override
+                            public void onSuccess(HashMap<String, Object> result) {
+                                Log.d("initializeDomainList", "onSuccess");
+                                insertQueue.poll();
+                                postIdCallback.onSuccess((String) result.get(FirebaseController.getIdName(TABLE_NAME)));
+                                processQueue();
+                            }
+                            @Override
+                            public void onFailure(Exception e) {
+                                Log.e("initializeDomainList", "onFailure");
+                                insertQueue.poll();
+                                postIdCallback.onFailure(e);
+                                processQueue();
+                            }
+                        });
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("TAG", "onFailure: ", e);
+                    }
+                });
+            } else {
+                String id = (String) dataHashMap.get(FirebaseController.getIdName(TABLE_NAME));
+                FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
+                    @Override
+                    public void onSuccess(HashMap<String, Object> result) {
+                        Log.d("initializeDomainList", "onSuccess");
+                        insertQueue.poll();
+                        postIdCallback.onSuccess((String) result.get(FirebaseController.getIdName(TABLE_NAME)));
+                        processQueue();
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("initializeDomainList", "onFailure");
+                        insertQueue.poll();
+                        postIdCallback.onFailure(e);
+                        processQueue();
+                    }
+                });
+            }
+
         }
     }
 
