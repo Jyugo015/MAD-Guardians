@@ -54,7 +54,17 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
 
         // Set the data
         holder.title.setText(courseFB.getTitle());
-        holder.author.setText(courseFB.getAuthor());
+        FirebaseController.getMatchedCollection(FirebaseController.USER, FirebaseController.getIdName(FirebaseController.USER), courseFB.getAuthor(), new UploadCallback<List<HashMap<String, Object>>>(){
+            @Override
+            public void onSuccess(List<HashMap<String, Object>> result) {
+                if (! result.isEmpty())
+                    holder.author.setText((String) result.get(0).get("name"));
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("TAG", "onFailure: failed to get username", e);
+            }
+        });
         holder.date.setText(courseFB.getDate());
 //        holder.views.setText(course.getViews());
 //        holder.comments.setText(course.getComments());

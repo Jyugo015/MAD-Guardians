@@ -108,7 +108,7 @@ public class FolderFB {
     public static void initialiseFolders() {
         Log.d("TAG", "initialiseFolders: here1");
         ArrayList<HashMap<String, Object>> hashMapList = new ArrayList<>();
-        String userId = "U00001";
+        String userId = "U0001";
         hashMapList.add(createFolderData(userId, "Language", "D00001", null));
         hashMapList.add(createFolderData(userId, "Computer Science", "D00002", null));
         hashMapList.add(createFolderData(userId, "Physics", "D00003", null));

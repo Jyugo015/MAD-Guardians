@@ -49,6 +49,7 @@ public class CourseFB {
         this.date = date;
     }
     public static void insertCourse(HashMap<String, Object> data, UploadCallback<String> callback) {
+        Log.d(TAG, "insertCourse: ");
         insertCourseQueue.add(data);
         // start for the first, after that the method will call by itself, making sure no repetitive calling
         if (insertCourseQueue.size() == 1) {
@@ -57,6 +58,7 @@ public class CourseFB {
     }
     private static void processQueue(UploadCallback<String> callback) {
         if (!insertCourseQueue.isEmpty()) {
+            Log.d(TAG, "insertCourse: start ");
             HashMap<String, Object> dataHashMap = insertCourseQueue.peek();
             FirebaseController.generateDocumentId(TABLE_NAME, new UploadCallback<String>() {
                 @Override
@@ -165,11 +167,11 @@ public class CourseFB {
     public static void initializeCourseList() {
         Log.d(TAG, "initializeCourseList: here1");
         ArrayList<HashMap<String, Object>> courseHashMapList = new ArrayList<>();
-        courseHashMapList.add(createCourseData("Python","Daniel Liang", "This is Java", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00001", "F00001", generateDate()));
-        courseHashMapList.add(createCourseData("Java", "Daniel Chong", "This is Python", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00004", "P00002","P00003", "D00001", "F00002", generateDate()));
-        courseHashMapList.add(createCourseData("C++", "Michille Liang", "This is C++", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00002", "F00003", generateDate()));
-        courseHashMapList.add(createCourseData("JavaScript", "Jane Smith", "This is JavaScript", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00004", generateDate()));
-        courseHashMapList.add(createCourseData("PHP", "Benz Harris", "This is PHP", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Python","U0001", "This is Java", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00001", "F00001", generateDate()));
+        courseHashMapList.add(createCourseData("Java", "U0002", "This is Python", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00004", "P00002","P00003", "D00001", "F00002", generateDate()));
+        courseHashMapList.add(createCourseData("C++", "U0003", "This is C++", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00002", "F00003", generateDate()));
+        courseHashMapList.add(createCourseData("JavaScript", "U0004", "This is JavaScript", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00004", generateDate()));
+        courseHashMapList.add(createCourseData("PHP", "U0005", "This is PHP", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00005", generateDate()));
         Log.d(TAG, "initializeCourseList: here2");
         for (HashMap<String, Object> dataHashMap:courseHashMapList) {
             insertCourse(dataHashMap, new UploadCallback<String>() {
@@ -241,6 +243,7 @@ public class CourseFB {
         data.put("domainId", domainId);
         data.put("folderId", folderId);
         data.put("date", date);
+        Log.d(TAG, "createCourseData: inserted folderId: " + folderId);
         return data;
     }
 
