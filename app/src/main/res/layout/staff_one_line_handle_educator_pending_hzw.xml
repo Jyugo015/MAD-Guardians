@@ -12,7 +12,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:backgroundTint="@color/custom_red"
-        app:cardCornerRadius="54dp"
+        app:cardCornerRadius="60dp"
         app:cardElevation="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -24,7 +24,7 @@
             android:layout_height="110dp"
             android:layout_gravity="center"
             android:clipToOutline="true"
-            app:cardCornerRadius="50dp"
+            app:cardCornerRadius="60dp"
             app:cardElevation="0dp">
 
             <!-- ImageView inside the Inner CardView -->

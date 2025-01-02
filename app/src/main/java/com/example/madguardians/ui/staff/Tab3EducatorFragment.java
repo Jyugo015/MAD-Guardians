@@ -1,137 +1,213 @@
-//package com.example.madguardians.ui.staff;
-//
-//import android.os.Bundle;
-//import android.util.Log;
-//import android.widget.Toast;
-//
-//import androidx.annotation.Nullable;
-//import androidx.recyclerview.widget.RecyclerView;
-//
-//import com.example.madguardians.database.AppDatabase;
-//import com.example.madguardians.database.FirestoreManager;
-//import com.example.madguardians.database.Helpdesk;
-//import com.example.madguardians.database.User;
-//import com.example.madguardians.database.UserDao;
-//import com.example.madguardians.database.VerEducator;
-//import com.example.madguardians.database.VerEducatorDao;
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//public class Tab3EducatorFragment extends BaseTab3Fragment<VerEducator>
-//        implements RecycleViewEducatorAdapter.OnHandleEducatorActionListener {
-//
-//    private FirestoreManager firestoreManager;
-//    private NotificationManager notificationManager;
-//    private VerEducatorDao verEducatorDao;
-//    private UserDao userDao;
-//
-//    public Tab3EducatorFragment() {
-//
-//    }
-//    @Override
-//    public void onCreate(@Nullable Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//        firestoreManager = new FirestoreManager(AppDatabase.getDatabase(requireContext()));
-//        notificationManager = new NotificationManager(requireContext());
-//        verEducatorDao = AppDatabase.getDatabase(requireContext()).verEducatorDao();
-//        userDao = AppDatabase.getDatabase(requireContext()).userDao();
-//    }
-//
-//    @Override
-//    protected List<VerEducator> getData() {
-//        List<VerEducator> verEducatorReviewedList = new ArrayList<>();
-//
-//        try {
-//            List<VerEducator> verEducatorList = verEducatorDao.getAll();
-//
-//            for (VerEducator verEducator : verEducatorList) {
-//                if (verEducator != null && !"pending".equals(verEducator.getVerifiedStatus())) {
-//                    verEducatorReviewedList.add(verEducator);
-//                }
-//            }
-//        } catch (Exception e) {
-//            logError("Error while fetching VerEducator data", e);
-//            showToast("Failed to load reviewed educators: " + e.getMessage());
-//        }
-//
-//        return verEducatorReviewedList;
-//    }
-//
-//
-//    @Override
-//    protected RecyclerView.Adapter<?> getAdapter(List<VerEducator> data) {
-//        // Bind data to the RecyclerView adapter
-//        return new RecycleViewEducatorAdapter(data, requireContext(), this);
-//    }
-//
-//    @Override
-//    public void onRejectClicked(VerEducator educator, int position) {
-//        handleEducatorAction(educator, "rejected", "Rejected");
-//    }
-//
-//    @Override
-//    public void onApprovedClicked(VerEducator educator, int position) {
-//        handleEducatorAction(educator, "approved", "Approved");
-//    }
-//
-//    private void saveApprovedFields(VerEducator educator, List<String> selectedFields) {
-//        User user = userDao.getById(educator.getUserId());
-//        if (selectedFields != null && !selectedFields.isEmpty()) {
-//            Log.d("SaveData", "Saving fields for " + user.getName() + ": " + selectedFields);
-//            // Implement your logic for saving selected fields
-//        } else {
-//            Log.d("SaveData", "No fields selected for " + user.getName());
-//        }
-//    }
-//
-//    @Override
-//    public void onDeleteClicked(VerEducator educator, int position) {
-//        handleEducatorAction(educator, "deleted", "Deleted");
-//    }
-//
-//    @Override
-//    public void onEducatorNameClicked(VerEducator educator, int position) {
-//
-//    }
-//
-//    @Override
-//    public void onViewProofClicked(VerEducator educator, int position) {
-//        ViewProofDialogFragment dialog = ViewProofDialogFragment.newInstance();
-//        dialog.show(getChildFragmentManager(), "ViewProofDialogFragment");
-//    }
-//    private void handleEducatorAction(VerEducator verEducator, String actionStatus, String actionName) {
-//        if (verEducator == null || getContext() == null) {
-//            logError(actionName + " failed: Null educator or context", null);
-//            return;
-//        }
-//
-//        try {
-//            verEducator.setStaffId(""); // Update staff ID (e.g., logged-in staff's ID if available)
-//            verEducator.setVerifiedStatus(actionStatus);
-//            firestoreManager.onInsertUpdate("update","verEducator", verEducator, requireContext());
-//
-//            sendNotificationToUser(verEducator, "Your qualification has been " + actionStatus + ".");
-//            User applier = userDao.getById(verEducator.getUserId());
-//
-//            showToast(actionName + ": " + (applier != null ? applier.getName() : "Unknown User"));
-//        } catch (Exception e) {
-//            logError("Failed to " + actionName.toLowerCase() + " educator", e);
-//        }
-//    }
-//    private void sendNotificationToUser(VerEducator verEducator, String message) {
-//        try {
-//            notificationManager.sendNotification(verEducator.getUserId(), message);
-//        } catch (Exception e) {
-//            logError("Failed to send notification", e);
-//        }
-//    }
-//    private void showToast(String message) {
-//        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-//    }
-//    private void logError(String message, Exception e) {
-//        Log.e("Tab1EducatorFragment", message, e);
-//        if (e != null) e.printStackTrace(); // Optional: Use proper logging for production
-//    }
-//}
+package com.example.madguardians.ui.staff;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import com.example.madguardians.notification.NotificationUtils;
+import com.example.madguardians.ui.staff.VerEducator;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Tab3EducatorFragment extends BaseTab3Fragment<VerEducator>
+        implements RecycleViewEducatorAdapter.OnHandleEducatorActionListener {
+
+    private RecycleViewEducatorAdapter adapter;
+    private NotificationUtils notificationUtils;
+    private List<VerEducator> verEducatorList = new ArrayList<>();
+    private String staffId;
+    public Tab3EducatorFragment() {
+
+    }
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        notificationUtils = new NotificationUtils();
+        if (getArguments() != null) {
+            staffId = getArguments().getString("staffId"); // Retrieve staffId
+            System.out.println(staffId);
+            System.out.println("Hi "+staffId);
+            fetchData(); // Use staffId as needed
+        }
+    }
+    @Override
+    protected void fetchData() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("verEducator")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        List<VerEducator> tempList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            VerEducator verEducator = document.toObject(VerEducator.class);
+                            verEducator.setVerEducatorId(document.getId());
+                            if (!"pending".equals(verEducator.getVerifiedStatus())) {
+                                tempList.add(verEducator);
+                            }
+                        }
+                        Log.d("FetchData", "Total pending VerEducators: " + tempList.size());
+                        updateRecyclerViewAdapter(tempList);
+                    } else {
+                        showToast("Failed to retrieve VerEducators.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    logError("Error fetching VerEducators", e);
+                    showToast("Error fetching VerEducators: " + e.getMessage());
+                });
+    }
+
+    @Override
+    protected void updateRecyclerViewAdapter(List<VerEducator> data) {
+        if (adapter == null) {
+            adapter = new RecycleViewEducatorAdapter(data, requireContext(), this);
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.updateData(data); // Make sure updateData is implemented in your adapter
+        }
+        verEducatorList = data;
+    }
+
+    @Override
+    public void onRejectClicked(VerEducator educator, int position) {
+        handleEducatorAction(educator, "rejected", "Rejected");
+    }
+
+    @Override
+    public void onApprovedClicked(VerEducator educator, int position) {
+        handleEducatorAction(educator, "approved", "Approved");
+    }
+
+    @Override
+    public void onDeleteClicked(VerEducator verEducator, int position) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+        // Delete VerEducator document
+        firestore.collection("verEducator")
+                .document(verEducator.getVerEducatorId())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    showToast("Successfully deleted VerEducator: " + verEducator.getVerEducatorId());
+
+                    // Notify user about deletion
+                    String userId = verEducator.getUserId();
+                    notificationUtils.createTestNotification(
+                            userId,
+                            "Your educator verification record has been deleted."
+                    );
+
+                    // Remove from list and notify adapter
+                    verEducatorList.remove(position);
+                    adapter.notifyItemRemoved(position);
+
+                    // Handle related data deletion
+                    if (verEducator.getImageSetId() != null) {
+                        firestore.collection("images")
+                                .document(verEducator.getImageSetId())
+                                .delete()
+                                .addOnSuccessListener(aVoid1 -> showToast("Deleted associated ImageSet: " + verEducator.getImageSetId()))
+                                .addOnFailureListener(e -> showToast("Failed to delete associated ImageSet: " + verEducator.getImageSetId()));
+                    }
+
+                    if (verEducator.getFileSetId() != null) {
+                        firestore.collection("files")
+                                .document(verEducator.getFileSetId())
+                                .delete()
+                                .addOnSuccessListener(aVoid2 -> showToast("Deleted associated FileSet: " + verEducator.getFileSetId()))
+                                .addOnFailureListener(e -> showToast("Failed to delete associated FileSet: " + verEducator.getFileSetId()));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    showToast("Failed to delete VerEducator: " + verEducator.getVerEducatorId());
+                });
+    }
+
+    @Override
+    public void onEducatorNameClicked(VerEducator educator, int position) {
+
+    }
+
+    @Override
+    public void onViewProofClicked(VerEducator educator, int position) {
+        ViewProofDialogFragment dialog = ViewProofDialogFragment.newInstance();
+        dialog.show(getChildFragmentManager(), "ViewProofDialogFragment");
+    }
+    private void handleEducatorAction(VerEducator verEducator, String verifiedStatus, String actionName) {
+        if (verEducator == null || getContext() == null) {
+            logError(actionName + " failed: Null educator or context", null);
+            return;
+        }
+
+        Timestamp currentTimestamp = Timestamp.now();
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+        firestore.collection("verEducator")
+                .whereEqualTo("verEducatorId", verEducator.getVerEducatorId())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                        DocumentSnapshot document = task.getResult().getDocuments().get(0);
+                        String verEducatorId = document.getId();
+
+                        Map<String, Object> updatedVerEducator = new HashMap<>();
+                        updatedVerEducator.put("verEducatorId", verEducator.getVerEducatorId());
+                        updatedVerEducator.put("staffId", staffId);
+                        updatedVerEducator.put("verifiedStatus", verifiedStatus);
+                        updatedVerEducator.put("timestamp", currentTimestamp);
+
+                        firestore.collection("verEducator")
+                                .document(verEducatorId)
+                                .set(updatedVerEducator, SetOptions.merge())
+                                .addOnSuccessListener(aVoid -> {
+                                    verEducator.setVerifiedStatus(verifiedStatus); // Update local data
+                                    int index = verEducatorList.indexOf(verEducator);
+                                    if (index != -1) {
+                                        verEducatorList.set(index, verEducator);
+                                        adapter.notifyItemChanged(index); // Notify adapter to rebind this item
+                                    }
+
+                                    // Create notification message
+                                    String notificationMessage = "Your qualification has been " + verifiedStatus + ".";
+
+                                    // Send notification to the user associated with the VerEducator
+                                    notificationUtils.createTestNotification(
+                                            verEducator.getUserId(),
+                                            notificationMessage
+                                    );
+
+                                    showToast(actionName + ": " + verifiedStatus + " for educator " + verEducator.getVerEducatorId());
+                                })
+                                .addOnFailureListener(e -> {
+                                    logError("Failed to update VerEducator", e);
+                                    showToast("Failed to " + actionName.toLowerCase() + ": " + e.getMessage());
+                                });
+                    } else {
+                        showToast("No VerEducator found for the educator ID: " + verEducator.getVerEducatorId());
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    logError("Failed to retrieve VerEducator", e);
+                    showToast("Failed to " + actionName.toLowerCase() + ": " + e.getMessage());
+                });
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+    }
+    private void logError(String message, Exception e) {
+        Log.e("Tab3EducatorFragment", message, e);
+        if (e != null) e.printStackTrace(); // Optional: Use proper logging for production
+    }
+}

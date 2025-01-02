@@ -38,7 +38,7 @@ public class HandlePostFragment extends Fragment {
         String staffId = getArguments() != null ? getArguments().getString("staffId") : null;
         System.out.println("handle "+staffId);
 
-        // Create Tab1PostFragment and pass the staffId as arguments
+        // Create fragments and pass the staffId as arguments
         Tab1PostFragment tab1 = new Tab1PostFragment();
         Bundle tab1Args = new Bundle();
         tab1Args.putString("staffId", staffId);

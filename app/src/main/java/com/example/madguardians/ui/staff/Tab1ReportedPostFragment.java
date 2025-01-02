@@ -1,68 +1,249 @@
-//package com.example.madguardians.ui.staff;
-//
-//import android.os.Bundle;
-//import android.widget.Toast;
-//
-//import androidx.annotation.Nullable;
-//import androidx.recyclerview.widget.RecyclerView;
-//import com.example.madguardians.database.*;
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//public class Tab1ReportedPostFragment extends BaseTab1Fragment<Helpdesk> implements RecycleViewReportedPostAdapter.OnReportedPostActionListener {
-//    private FirestoreManager firestoreManager;
-//    private HelpdeskDao helpdeskDao;
-//    private PostDao postDao;
-//    private VerPostDao verPostDao;
-//    private CourseDao courseDao;
-//    private QuizOldDao quizOldDao;
-//    private UserDao userDao;
-//    private IssueDao issueDao;
-//
-//    public Tab1ReportedPostFragment() {
-//
-//    }
-//
-//    @Override
-//    public void onCreate(@Nullable Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//        AppDatabase database = AppDatabase.getDatabase(requireContext());
-//        firestoreManager = new FirestoreManager(database);
-//        helpdeskDao = database.helpdeskDao();
-//        postDao = database.postDao();
-//        verPostDao = database.verPostDao();
-//        courseDao = database.courseDao();
-//        quizOldDao = database.quizOldDao();
-//        userDao = database.userDao();
-//        issueDao = database.issueDao();
-//    }
-//
-//    @Override
-//    protected List<Helpdesk> getData() {
-//        List<Helpdesk> helpdeskReportedList = new ArrayList<>();
-//        try {
-//            List<Helpdesk> helpdeskList = helpdeskDao.getAll();
-//            for (Helpdesk helpdesk : helpdeskList) {
-//                if (helpdesk.getPostId() != null || helpdesk.getCourseId() != null || helpdesk.getQuizId() != null) {
-//                    helpdeskReportedList.add(helpdesk);
-//                }
-//            }
-//
-//            if (helpdeskReportedList.isEmpty()) {
-//                showToast("No reported comment available.");
-//            }
-//        } catch (Exception e) {
-//            handleError("An error occurred while fetching data", e);
-//        }
-//        return helpdeskReportedList;
-//    }
-//
-//    @Override
-//    protected RecyclerView.Adapter<?> getAdapter(List<Helpdesk> data) {
-//        return new RecycleViewReportedPostAdapter(data, requireContext(), this);
-//    }
-//
+package com.example.madguardians.ui.staff;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
+import com.example.madguardians.database.*;
+import com.example.madguardians.notification.NotificationUtils;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Tab1ReportedPostFragment extends BaseTab1Fragment<Helpdesk> implements RecycleViewReportedPostAdapter.OnReportedPostActionListener {
+    private RecycleViewReportedPostAdapter adapter;
+    private NotificationUtils notificationUtils;
+    private List<Helpdesk> reportedPostList = new ArrayList<>();
+    private String staffId;
+    public Tab1ReportedPostFragment() {
+
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        notificationUtils = new NotificationUtils();
+//        System.out.println("Hi");
+        if (getArguments() != null) {
+            staffId = getArguments().getString("staffId"); // Retrieve staffId
+            System.out.println(staffId);
+            System.out.println("Hi "+staffId);
+            fetchData(); // Use staffId as needed
+        }
+    }
+//fetch course or post?
+    protected void fetchData() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("helpdesk")
+                .whereNotEqualTo("postId", null) // Filter records where postId is not null
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        List<Helpdesk> helpdeskReportedList = new ArrayList<>();
+
+                        // Add Helpdesk records with a postId
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Helpdesk helpdesk = document.toObject(Helpdesk.class);
+                            helpdeskReportedList.add(helpdesk);
+                        }
+
+                        // Query again for helpdesk records with a courseId (optional chaining)
+                        db.collection("helpdesk")
+                                .whereNotEqualTo("courseId", null)
+                                .get()
+                                .addOnCompleteListener(subTask -> {
+                                    if (subTask.isSuccessful() && subTask.getResult() != null) {
+                                        for (QueryDocumentSnapshot document : subTask.getResult()) {
+                                            Helpdesk helpdesk = document.toObject(Helpdesk.class);
+
+                                            // Ensure no duplicates between the two queries
+                                            if (!helpdeskReportedList.contains(helpdesk)) {
+                                                helpdeskReportedList.add(helpdesk);
+                                            }
+                                        }
+
+                                        // Sort by timestamp (if present)
+                                        helpdeskReportedList.sort((o1, o2) -> {
+                                            if (o1.getTimestamp() == null || o2.getTimestamp() == null) return 0;
+                                            return o2.getTimestamp().compareTo(o1.getTimestamp());
+                                        });
+
+                                        // Handle empty or non-empty result list
+                                        if (helpdeskReportedList.isEmpty()) {
+                                            System.out.println("No reported helpdesk items found.");
+                                            Log.d("Firestore", "No reported helpdesk items found.");
+                                            showToast("No reported helpdesk items found.");
+                                        } else {
+                                            System.out.println("Fetched " + helpdeskReportedList.size() + " helpdesk items.");
+                                            Log.d("Firestore", "Fetched " + helpdeskReportedList.size() + " helpdesk items.");
+                                            updateRecyclerViewAdapter(helpdeskReportedList);
+                                        }
+                                    } else {
+                                        System.out.println("Error fetching helpdesk records with courseId.");
+                                        Log.d("Firestore", "Error fetching helpdesk records with courseId: " + subTask.getException());
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    System.out.println("Error fetching helpdesk records with courseId: " + e.getMessage());
+                                    Log.d("Firestore", "Error fetching helpdesk records with courseId: " + e.getMessage());
+                                });
+
+                    } else {
+                        System.out.println("Failed to retrieve Helpdesk records with postId.");
+                        Log.d("Firestore", "Task unsuccessful or no result: " + task.getException());
+                        showToast("Failed to retrieve Helpdesk records with postId.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    System.out.println("Error fetching Helpdesk data: " + e.getMessage());
+                    Log.d("Firestore", "Error fetching Helpdesk data: " + e.getMessage());
+                    showToast("Error fetching Helpdesk data: " + e.getMessage());
+                });
+    }
+
+    @Override
+    protected void updateRecyclerViewAdapter(List<Helpdesk> data) {
+        if (adapter == null) {
+            adapter = new RecycleViewReportedPostAdapter(data, requireContext(), this);
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.updateData(data); // Make sure updateData is implemented in your adapter
+        }
+        reportedPostList = data;
+    }
+    @Override
+    public void onKeepClicked(Helpdesk helpdesk, int position) {
+        // Update both helpdeskStatus and staffId
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Create a map to hold the fields to update
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("helpdeskStatus", "kept");
+        updates.put("staffId", staffId);
+
+        db.collection("helpdesk")
+                .document(helpdesk.getHelpdeskId())
+                .update(updates) // Update multiple fields at once
+                .addOnSuccessListener(aVoid -> {
+                    logMessage("Helpdesk status and staffId updated for ID: " + helpdesk.getHelpdeskId());
+
+                    // Update the local list
+                    helpdesk.setHelpdeskStatus("kept");
+                    adapter.notifyItemChanged(position);
+
+                    // Notify the reporter
+                    if (helpdesk.getIssueId() != null) {
+                        db.collection("issue").document(helpdesk.getIssueId()).get()
+                                .addOnSuccessListener(issueSnapshot -> {
+                                    if (issueSnapshot.exists()) {
+                                        String issueType = issueSnapshot.getString("type");
+                                        notificationUtils.createTestNotification(helpdesk.getUserId(),
+                                                "Your reported issue with reason " + issueType + " has been reviewed. There is nothing changed.");
+                                    }
+                                })
+                                .addOnFailureListener(e -> Log.e("Firestore", "Failed to fetch issue details", e));
+                    }
+
+                    // Notify the user
+                    if (helpdesk.getCommentId() != null) {
+                        db.collection("comment").document(helpdesk.getCommentId()).get()
+                                .addOnSuccessListener(commentSnapshot -> {
+                                    if (commentSnapshot.exists()) {
+                                        String commentUserId = commentSnapshot.getString("userId");
+                                        notificationUtils.createTestNotification(commentUserId,
+                                                "Your comment has been reviewed. There is nothing changed.");
+                                    }
+                                })
+                                .addOnFailureListener(e -> Log.e("Firestore", "Failed to fetch comment details", e));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    logMessage("Failed to update helpdesk status and staffId: " + e.getMessage());
+                    showToast("Error updating helpdesk status and staffId: " + e.getMessage());
+                });
+    }
+
+
+    @Override
+    public void onDeleteClicked(Helpdesk helpdesk, int position) {
+        // Get Firestore instance
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // Create a map to hold the fields to update
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("helpdeskStatus", "deleted");
+        updates.put("staffId", staffId);
+
+        // Update the helpdesk status to "reviewed"
+        db.collection("helpdesk")
+                .document(helpdesk.getHelpdeskId())
+                .update(updates)  // Update multiple fields at once
+                .addOnSuccessListener(updateVoid -> {
+                    logMessage("Helpdesk status updated to reviewed for ID: " + helpdesk.getHelpdeskId());
+
+                    // Notify the reporter
+                    if (helpdesk.getIssueId() != null) {
+                        db.collection("issue")
+                                .document(helpdesk.getIssueId())
+                                .get()
+                                .addOnSuccessListener(issueSnapshot -> {
+                                    if (issueSnapshot.exists()) {
+                                        String issueType = issueSnapshot.getString("type");
+                                        String reporterMessage = "Your reported comment with reason '" + issueType + "' has been reviewed. It has been deleted.";
+                                        notificationUtils.createTestNotification(helpdesk.getUserId(), reporterMessage); // Notify reporter
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    logMessage("Failed to fetch issue details: " + e.getMessage());
+                                });
+                    } else {
+                        logMessage("Failed to fetch issue details. " );
+                    }
+
+                    // Notify the comment owner (user who posted the comment)
+                    db.collection("comment")
+                            .document(helpdesk.getCommentId())
+                            .get()
+                            .addOnSuccessListener(commentSnapshot -> {
+                                if (commentSnapshot.exists()) {
+                                    String commentUserId = commentSnapshot.getString("userId"); // Comment owner's userId
+                                    if (helpdesk.getReason() != null) {
+                                        String userMessage = "Your comment has been removed after being reported.";
+                                        notificationUtils.createTestNotification(commentUserId, userMessage); // Notify comment owner
+                                    }
+                                } else {
+                                    logMessage("Comment data not found for notification.");
+                                }
+
+                                // Delete the comment from Firestore
+                                db.collection("comment")
+                                        .document(helpdesk.getCommentId())
+                                        .delete()
+                                        .addOnSuccessListener(aVoid -> {
+                                            logMessage("Comment deleted successfully for ID: " + helpdesk.getCommentId());
+
+                                            // Update the adapter
+                                            helpdesk.setHelpdeskStatus("deleted");
+                                            adapter.notifyItemChanged(position);
+                                        })
+                                        .addOnFailureListener(deleteError -> {
+                                            logMessage("Failed to delete comment: " + deleteError.getMessage());
+                                            showToast("Error deleting comment: " + deleteError.getMessage());
+                                        });
+                            })
+                            .addOnFailureListener(e -> logMessage("Failed to fetch comment details: " + e.getMessage()));
+                })
+                .addOnFailureListener(updateError -> {
+                    logMessage("Failed to update helpdesk status: " + updateError.getMessage());
+                    showToast("Error updating helpdesk status: " + updateError.getMessage());
+                });
+    }
 //    @Override
 //    public void onKeepClicked(Helpdesk helpdesk, int position) {
 //        try {
@@ -107,7 +288,6 @@
 //            handleError("Failed to keep", e);
 //        }
 //    }
-//
 //    @Override
 //    public void onDeleteClicked(Helpdesk helpdesk, int position) {
 //        try {
@@ -163,19 +343,16 @@
 //            handleError("Failed to delete", e);
 //        }
 //    }
-//
-//    private void updateHelpdeskStatus(Helpdesk helpdesk, String status) {
-//        helpdesk.setStaffId("");
-//        helpdesk.setHelpdeskStatus(status);
-//        firestoreManager.onInsertUpdate("update","helpdesk", helpdesk, requireContext());
-//    }
-//
-//    private void showToast(String message) {
-//        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-//    }
-//
-//    private void handleError(String message, Exception e) {
-//        Toast.makeText(requireContext(), message + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
-//        e.printStackTrace();
-//    }
-//}
+
+    private void showToast(String message) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void handleError(String message, Exception e) {
+        Toast.makeText(requireContext(), message + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
+        e.printStackTrace();
+    }
+    private void logMessage(String message) {
+        Log.d("Tab1PostFragment", message);
+    }
+}

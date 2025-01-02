@@ -1,39 +1,44 @@
 package com.example.madguardians.ui.staff;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
-import com.example.madguardians.database.AppDatabase;
-import com.example.madguardians.database.Comment;
-import com.example.madguardians.database.CommentDao;
-import com.example.madguardians.database.Helpdesk;
-import com.example.madguardians.database.Issue;
-import com.example.madguardians.database.IssueDao;
-import com.example.madguardians.database.User;
-import com.example.madguardians.database.UserDao;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class RecycleViewReportedCommentAdapter extends RecyclerView.Adapter<RecycleViewReportedCommentAdapter.PostViewHolder> {
     private List<Helpdesk> helpdeskList;
     private Context context;
     private OnReportedCommentActionListener onReportedCommentActionListener;
     private Helpdesk helpdesk;
+    private final FirebaseFirestore firestore;
+    private final CollectionReference commentRef;
 
     // Constructor
     public RecycleViewReportedCommentAdapter(List<Helpdesk> helpdeskList, Context context, OnReportedCommentActionListener onReportedCommentActionListener) {
         this.helpdeskList = helpdeskList!=null?helpdeskList:new ArrayList<>();
         this.context = context;
         this.onReportedCommentActionListener = onReportedCommentActionListener;
+
+        this.firestore = FirebaseFirestore.getInstance();
+        this.commentRef = firestore.collection("comment");
     }
 
     @Override
@@ -47,6 +52,11 @@ public class RecycleViewReportedCommentAdapter extends RecyclerView.Adapter<Recy
         }
     }
 
+    public void updateData(List<Helpdesk> newData) {
+        this.helpdeskList = newData; // Assuming postList is the list in your adapter
+        notifyDataSetChanged(); // Notify the adapter about data changes
+    }
+
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -58,34 +68,135 @@ public class RecycleViewReportedCommentAdapter extends RecyclerView.Adapter<Recy
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         Helpdesk helpdesk = helpdeskList.get(position);
 
-        UserDao userDao = AppDatabase.getDatabase(context).userDao();
-        CommentDao commentDao = AppDatabase.getDatabase(context).commentDao();
-        IssueDao issueDao = AppDatabase.getDatabase(context).issueDao();
+        // Initialize Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        //need add timestamp in db
-        //holder.tvDate.setText(helpdesk.getDate());
-        holder.tvDate.setText("Date");
+        // Set default values for the UI
+        if("pending".equals(helpdesk.getHelpdeskStatus())){
+            holder.tvDescription.setText("Loading...");
+            holder.tvDate.setText("Loading...");
+            holder.tvInfo.setText("Loading...");
+            holder.tvInfo2.setText("......");
+        }else if("deleted".equals(helpdesk.getHelpdeskStatus())) {
+            holder.tvInfo.setText("Deleted");
+            holder.tvInfo2.setText("The reported comment has been removed.");
+        }
 
-        //retrieve data to show descr
-        User userReport = userDao.getById(helpdesk.getUserId());
-        String reportedName = userReport.getName();
+//        holder.tvReason.setText("Loading...");
+        holder.ivPost.setImageResource(R.drawable.hzw_ic_profile); // Set a placeholder image
 
-        Comment comment =commentDao.getById(helpdesk.getCommentId());
-        User userComment = userDao.getById(comment.getUserId());
-        String userName = userComment.getName();
-        String descr = reportedName + " reported on "+ userName +" comment.";
-        holder.tvDescription.setText(descr);
+        // Fetch User who reported the comment
+        if (helpdesk.getUserId() != null) {
+            db.collection("user").document(helpdesk.getUserId()).get()
+                    .addOnSuccessListener(userSnapshot -> {
+                        if (userSnapshot.exists()) {
+                            String reportedName = userSnapshot.getString("name");
+                            String profilePicUrl = userSnapshot.getString("profilePic");
 
-        //show reason
-        Issue issue = issueDao.getById(helpdesk.getIssueId());
-        holder.tvReason.setText(issue.getType());
+                            // Load profile picture into ivPost
+                            if (profilePicUrl != null && !profilePicUrl.isEmpty()) {
+                                Glide.with(holder.ivPost.getContext())
+                                        .load(profilePicUrl)
+                                        .placeholder(R.drawable.hzw_ic_profile)
+                                        .error(R.drawable.error_image)
+                                        .into(holder.ivPost);
+                            }
 
-        holder.tvDescription.setOnClickListener(v -> {
-            if (onReportedCommentActionListener != null) {
-                onReportedCommentActionListener.onReportedDescrClicked(helpdesk, position);
-            }
-        });
+                            // Fetch Comment details
+                            if (helpdesk.getCommentId() != null) {
+                                commentRef.document(helpdesk.getCommentId()).get()
+                                        .addOnSuccessListener(commentSnapshot -> {
+                                            if (commentSnapshot.exists()) {
+                                                String commentUserId = commentSnapshot.getString("userId");
+                                                String commentOrigin = commentSnapshot.getString("comment");
+                                                holder.tvInfo2.setText(commentOrigin);
+                                                System.out.println("Comment: "+commentOrigin);
+                                                // Fetch User who made the comment
+                                                if (commentUserId != null) {
+                                                    db.collection("user").document(commentUserId).get()
+                                                            .addOnSuccessListener(commentUserSnapshot -> {
+                                                                if (commentUserSnapshot.exists()) {
+                                                                    String userName = commentUserSnapshot.getString("name");
+                                                                    String descr = reportedName + " reported on " + userName + "'s comment:";
 
+                                                                    holder.tvInfo.setText(descr);
+                                                                    // Set click listener for description
+                                                                    holder.tvDescription.setOnClickListener(v -> {
+                                                                        if (onReportedCommentActionListener != null) {
+                                                                            onReportedCommentActionListener.onReportedDescrClicked(helpdesk, position);
+                                                                        }
+                                                                    });
+                                                                }
+                                                            })
+                                                            .addOnFailureListener(e -> Log.e("Firestore", "Failed to fetch comment user data", e));
+                                                }
+                                            }
+                                        })
+                                        .addOnFailureListener(e -> Log.e("Firestore", "Failed to fetch comment details", e));
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.e("Firestore", "Failed to fetch reported user data", e));
+        }
+
+        // Fetch Issue details
+        if (helpdesk.getIssueId() != null) {
+            db.collection("issue").document(helpdesk.getIssueId()).get()
+                    .addOnSuccessListener(issueSnapshot -> {
+                        if (issueSnapshot.exists()) {
+                            String issueType = issueSnapshot.getString("type");
+                            holder.tvDescription.setText(issueType);
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.e("Firestore", "Failed to fetch issue details", e));
+        }
+
+        if (helpdesk.getTimestamp() != null) {
+            // Convert Timestamp to String
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            String formattedDate = sdf.format(helpdesk.getTimestamp().toDate());
+            holder.tvDate.setText(formattedDate);
+        } else {
+            holder.tvDate.setText("Date not available");
+        }
+        // Handle actions based on verifiedStatus
+        String helpdeskStatus = helpdesk.getHelpdeskStatus();
+
+        if ("pending".equals(helpdeskStatus)) {
+
+            holder.btnKeep.setOnClickListener(v -> {
+                if (onReportedCommentActionListener != null) {
+                    onReportedCommentActionListener.onKeepClicked(helpdesk, position);
+                    firestore.collection("helpdesk")
+                            .document(helpdesk.getHelpdeskId())
+                            .update("helpdeskStatus", "kept");
+                    notifyItemChanged(position);
+                }
+            });
+
+            holder.btnDelete.setOnClickListener(v -> {
+                if (onReportedCommentActionListener != null) {
+                    onReportedCommentActionListener.onDeleteClicked(helpdesk, position);
+
+                    // Update Firestore
+                    firestore.collection("helpdesk")
+                            .document(helpdesk.getHelpdeskId())
+                            .update("helpdeskStatus", "deleted")
+                            .addOnSuccessListener(aVoid -> {
+                                // Update local data model
+                                helpdesk.setHelpdeskStatus("reviewed");
+                                // Update UI
+                                holder.tvInfo.setText("Deleted");
+                                holder.tvInfo2.setText("The reported comment has been deleted by staff.");
+                                notifyItemChanged(position);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("Firestore", "Failed to update helpdesk status", e);
+                                Toast.makeText(holder.itemView.getContext(), "Failed to delete comment", Toast.LENGTH_SHORT).show();
+                            });
+                }
+            });
+        }
     }
 
     @Override
@@ -100,18 +211,26 @@ public class RecycleViewReportedCommentAdapter extends RecyclerView.Adapter<Recy
 
     public static class PostViewHolder extends RecyclerView.ViewHolder {
         ImageView ivPost;
-        TextView tvDescription, tvDate, tvStatus, tvReason;
+        TextView tvDescription, tvDate, tvInfo, tvInfo2, tvStatus, tvReason;
+        Button btnKeep, btnDelete;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
             ivPost = itemView.findViewById(R.id.IVPost);
-            tvDescription = itemView.findViewById(R.id.TVDescr);
+            tvDescription = itemView.findViewById(R.id.TVDescr);//reason
             tvDate = itemView.findViewById(R.id.TVReportDate);
-            tvReason = itemView.findViewById(R.id.TVReason);
+            tvInfo = itemView.findViewById(R.id.TVInfo);
+            tvInfo2 = itemView.findViewById(R.id.TVInfo2);
+            tvStatus = itemView.findViewById(R.id.TVStatus);
+            btnKeep = itemView.findViewById(R.id.BTNKeep);
+            btnDelete = itemView.findViewById(R.id.BTNDelete);
+//            tvReason = itemView.findViewById(R.id.TVReason);
         }
     }
 
     public interface OnReportedCommentActionListener {
         void onReportedDescrClicked(Helpdesk helpdesk, int position);
+        void onKeepClicked(Helpdesk helpdesk, int position);
+        void onDeleteClicked(Helpdesk helpdesk, int position);
     }
 }

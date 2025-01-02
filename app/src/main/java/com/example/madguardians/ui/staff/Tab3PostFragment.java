@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Tab3PostFragment extends BaseTab1Fragment<VerPost> implements RecycleViewVerPostAdapter.OnPostActionListener {
+public class Tab3PostFragment extends BaseTab3Fragment<VerPost> implements RecycleViewVerPostAdapter.OnPostActionListener {
     private RecycleViewVerPostAdapter adapter;
     private NotificationUtils notificationUtils;
     private List<VerPost> verPostList = new ArrayList<>();
