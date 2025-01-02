@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -98,6 +99,7 @@ public class CourseOverviewFragment extends Fragment {
             });
             TVDate.setText("Date: " + courseFB.getDate());
             TVAuthor.setText(courseFB.getAuthor());
+            TVDescription.setText(courseFB.getDescription());
 
             androidx.constraintlayout.widget.ConstraintLayout LYLevel1 = view.findViewById(R.id.LYPost1);
             androidx.constraintlayout.widget.ConstraintLayout LYLevel2 = view.findViewById(R.id.LYPost2);
@@ -139,6 +141,10 @@ public class CourseOverviewFragment extends Fragment {
                 if (isChecked) setIsChecked(courseFB, true);
                 else setIsChecked(courseFB, false);
             });
+            Button btnReport = view.findViewById(R.id.BTNReport);
+            btnReport.setOnClickListener(v-> {
+                reportCourse(courseFB.getCourseId());
+            });
 
             view.clearFocus();
         }
@@ -164,8 +170,15 @@ public class CourseOverviewFragment extends Fragment {
         // change database
     }
 
+    ////////////////////////////////////////////////////////
+    // yewoon
     private boolean isCollected(CourseFB courseFB) {
         return true;
+    }
+
+    ////////////////////////////////////////////////////////
+    // zw
+    private void reportCourse(String courseId) {
     }
 }
 

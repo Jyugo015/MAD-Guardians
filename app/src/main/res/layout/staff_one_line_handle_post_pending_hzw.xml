@@ -20,7 +20,7 @@
         android:layout_width="221dp"
         android:layout_height="28dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="15dp"
         android:text="Course Title"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/IVPost"
@@ -68,15 +68,13 @@
         android:id="@+id/BTNReject"
         android:layout_width="100dp"
         android:layout_height="48dp"
-        android:layout_marginTop="8dp"
-        android:text="Reject"
-        android:fontFamily="@font/inter"
-        android:textStyle="bold"
-        android:textColor="@color/bg_white_color"
         android:background="@drawable/hzw_green_button_shape"
-        app:layout_constraintBottom_toBottomOf="@+id/IVPost"
-        app:layout_constraintStart_toStartOf="@+id/TVAuthorName"
-        app:layout_constraintTop_toBottomOf="@+id/TVStatus" />
+        android:fontFamily="@font/inter"
+        android:text="Reject"
+        android:textColor="@color/bg_white_color"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/TVCourseTitle"
+        app:layout_constraintTop_toTopOf="@+id/BTNApprove" />
 
     <Button
         android:id="@+id/BTNApprove"
@@ -84,11 +82,11 @@
         android:layout_height="48dp"
         android:layout_marginStart="1dp"
         android:layout_marginTop="8dp"
-        android:text="Approve"
-        android:fontFamily="@font/inter"
-        android:textStyle="bold"
-        android:textColor="@color/bg_white_color"
         android:background="@drawable/hzw_green_button_shape"
+        android:fontFamily="@font/inter"
+        android:text="Approve"
+        android:textColor="@color/bg_white_color"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/IVPost"
         app:layout_constraintEnd_toEndOf="@+id/TVStatus"
         app:layout_constraintHorizontal_bias="1.0"
@@ -106,5 +104,5 @@
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/IVPost" />
+        app:layout_constraintTop_toBottomOf="@+id/BTNReject" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -95,6 +95,7 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
         CourseFB.getCourses(new UploadCallback<List<CourseFB>>() {
             @Override
             public void onSuccess(List<CourseFB> courseFBList) {
+
                 courseAdapter.updateCourseList(courseFBList);
                 Log.d("TAG", "onSuccess: size = " + courseFBList.size());
                 Log.d("TAG", "onSuccess: start3" + courseFBList.toString());

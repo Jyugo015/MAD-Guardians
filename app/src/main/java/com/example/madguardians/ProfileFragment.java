@@ -26,10 +26,13 @@ import com.bumptech.glide.Glide;
 import com.example.madguardians.database.Achievement;
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Course;
+import com.example.madguardians.database.Notification;
 import com.example.madguardians.database.UserDao;
 import com.example.madguardians.database.UserHistory;
+import com.example.madguardians.notification.NotificationAdapter;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -47,7 +50,7 @@ public class ProfileFragment extends Fragment {
     private UserDao userDao;
     private TextView usernameTextView, emailTextView;
     private ImageView profileImageView;
-    private LinearLayout achievementContainer, learningHistoryContainer;
+    private ImageView haveNotificationImageView;
     private TextView viewAllAchievement, viewHistoryTextView;
     private TextView noAchievementsMessage, noHistoryMessage; // New TextView to show the "No achievements" message
     // Get SharedPreferences
@@ -89,6 +92,7 @@ public class ProfileFragment extends Fragment {
         viewHistoryTextView = rootView.findViewById(R.id.view_learning_history);
         noAchievementsMessage = rootView.findViewById(R.id.noAchievementsMessage);
         noHistoryMessage = rootView.findViewById(R.id.noHistoryMessage);
+        haveNotificationImageView = rootView.findViewById(R.id.IVHaveNotic);
 
         //Load user data
         loadUserData();
@@ -98,6 +102,9 @@ public class ProfileFragment extends Fragment {
 
         // Load learning history dynamically
         loadLearningHistory();
+
+        // Check if there are unread notifications
+        checkNotificationReadDot();
 
         // Set up View All onClick listener
         viewAllAchievement.setOnClickListener(v -> {
@@ -275,6 +282,25 @@ public class ProfileFragment extends Fragment {
                     } else {
                         // Pop toast if fail to load achievements
                         Toast.makeText(getContext(), "Failed to load achievements", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void checkNotificationReadDot() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Query Firestore
+        db.collection("notification")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("readTime", null)
+                .orderBy("deliveredTime", Query.Direction.DESCENDING)
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                        for (DocumentSnapshot document : queryDocumentSnapshots) {
+                            haveNotificationImageView.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        haveNotificationImageView.setVisibility(View.GONE);
                     }
                 });
     }
