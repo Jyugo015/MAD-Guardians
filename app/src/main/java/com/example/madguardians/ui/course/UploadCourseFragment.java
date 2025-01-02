@@ -24,6 +24,7 @@ import androidx.work.Configuration;
 import com.example.madguardians.R;
 import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.utilities.MediaHandler;
+import com.example.madguardians.utilities.MediasHandler;
 import com.example.madguardians.utilities.UploadCallback;
 
 import java.text.SimpleDateFormat;
@@ -70,7 +71,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             Log.d(TAG, "onCreate: folderId " + folderId);
         }
 //        WorkManager.initialize(getContext(), getWorkManagerConfiguration());
-        userId = "U00001";
+        userId = "U0001";
     }
 
     @Override
@@ -102,6 +103,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             saveCourse();
             Bundle bundle = new Bundle();
             bundle.putInt("level", 1);
+            bundle.putString("folderId", folderId);
             Navigation.findNavController(view).navigate(R.id.nav_upload_post, bundle);
         });
 //        btnLevel2.setOnClickListener(v -> {
@@ -116,7 +118,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
 //        });
         btnConfirm.setOnClickListener(v -> {
             if (! validateCourse()) {
-                Toast.makeText(getContext(),"Please complete title / description", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(),"Please complete title / description / cover image", Toast.LENGTH_SHORT).show();
             } else {
                 confirmSelection();
                 Toast.makeText(getContext(), "Uploading", Toast.LENGTH_SHORT).show();
@@ -136,14 +138,13 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
         Log.d(TAG, "saveCourse: folderId " + folderId);
         courseViewModel.setTitle(ETTitle.getText().toString());
         courseViewModel.setDescription(ETDescription.getText().toString());
-        courseViewModel.setCoverImageUri(courseViewModel.getCoverImageUri());
         courseViewModel.setDomainId(domainId);
         courseViewModel.setFolderId(folderId);
     }
 
     private boolean validateCourse() {
-        if (ETTitle.getText().toString().isEmpty() || ETDescription.getText().toString().isEmpty()) return false;
-            ArrayList<PostViewModel> posts = PostViewModel.selectedMedias;
+        if (ETTitle.getText().toString().isEmpty() || ETDescription.getText().toString().isEmpty() || courseViewModel.getCoverImageUri() == null) return false;
+        ArrayList<PostViewModel> posts = PostViewModel.selectedMedias;
         if (posts.isEmpty()) {
             Toast.makeText(getContext(), "Please upload at least one post", Toast.LENGTH_SHORT).show();
             return false;
@@ -232,7 +233,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
         Log.d(TAG, "uploadCourse: postId1 " + postId1);
         Log.d(TAG, "uploadCourse: postId2 " + postId2);
         Log.d(TAG, "uploadCourse: postId3 " + postId3);
-        HashMap<String, Object> courseHashMap = CourseFB.createCourseData(courseViewModel.getTitle(), userId, courseViewModel.getDescription(), coverImageUrl, postId1, postId2, postId3, courseViewModel.getDomainId(), courseViewModel.getFolderId(), generateDate());
+        HashMap<String, Object> courseHashMap = CourseFB.createCourseData(courseViewModel.getTitle(), userId, courseViewModel.getDescription(), coverImageUrl, postId1, postId2, postId3, domainId, folderId, generateDate());
         Log.d(TAG, "uploadPostIfAvailable: uploading course");
         CourseFB.insertCourse(courseHashMap, new UploadCallback<String>(){
             @Override

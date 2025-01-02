@@ -78,7 +78,7 @@ public class MediaFB {
                 @Override
                 public void onSuccess(String id) {
                     Log.d(TABLE_NAME, "processQueue: mediaId: "+ id);
-                FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
+                    FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
                         @Override
                         public void onSuccess(HashMap<String, Object> result) {
                             Log.d("processQueue media", "onSuccess");

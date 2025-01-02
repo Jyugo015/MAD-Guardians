@@ -33,11 +33,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MediasHandler {
 
@@ -47,12 +50,11 @@ public class MediasHandler {
     private final Context context;
     private final ActivityResultLauncher<Intent> activityResultLauncher;
 //    private final MediaHandleCallback callback;
-    private WorkRequest uploadWorkRequest;
     private AdapterMedia mediaAdapter;
     private List<Uri> selectedMedias;
-    private List<String> ImageURLs = new ArrayList<>();
-    private List<String> VideoURLs = new ArrayList<>();
-    private List<String> PdfURLs = new ArrayList<>();
+    private List<String> mediaURLs = new ArrayList<>();
+//    private List<String> VideoURLs = new ArrayList<>();
+//    private List<String> PdfURLs = new ArrayList<>();
     private String mediaType;
     private Cloudinary cloudinary;
     private static final String TAG = "MediasHandler";
@@ -189,91 +191,57 @@ public class MediasHandler {
         }
     }
 
-    public void uploadImagesInBackground(Queue<Uri> uris, UploadCallback<List<String>> callback) {
+    public void uploadMediasInBackground(Queue<Uri> uris, UploadCallback<List<String>> callback) {
         if (uris.isEmpty()) {
-            callback.onSuccess(ImageURLs);
-            ImageURLs.clear();
+            Log.d(TAG, "uploadMediasInBackground: done");
+            callback.onSuccess(mediaURLs);
+            mediaURLs.clear();
             return;
         }
+        Log.d(TAG, "uploadMediasInBackground: here1");
         Uri uri = uris.poll();
-        String filePath = getPathFromUri(uri);
-        Toast.makeText(context, "Uploading image", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "uploadMediasInBackground: here2");
+//        String filePath = (mediaType.equals(FirebaseController.IMAGE) || mediaType.equals(FirebaseController.VIDEO)) ? getPathFromUri(uri) : getBytesFromUri(uri);
+//        Log.d(TAG, "uploadMediasInBackground: filePath " + filePath);
+        Toast.makeText(context, "Uploading " + mediaType, Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             try {
-                Map response = cloudinary.uploader().upload(filePath, ObjectUtils.emptyMap());
-                String imageUrl = (String) response.get("secure_url");
-                // Save the url for later need
-                ((Activity) context).runOnUiThread(() -> {
-                    Log.d("Cloudinary URL", imageUrl);
-                    ImageURLs.add(imageUrl);
-                    uploadImagesInBackground(uris, callback);
-                });
+                Map response = null;
+                // Perform upload to Cloudinary
+                if (mediaType.equalsIgnoreCase("image") ) {
+                    Log.d(TAG, "uploadMediasInBackground: isImage");
+                    String filePath = getPathFromUri(uri);
+                    response = cloudinary.uploader().upload(filePath, ObjectUtils.emptyMap());
+                } else if (mediaType.equalsIgnoreCase("video")) {
+                    Log.d(TAG, "uploadMediasInBackground: isVideo");
+//                    String filePath = getPathFromUri(uri);
+                    byte[] filePath = getBytesFromUri(uri);
+                    response = cloudinary.uploader().upload(filePath, ObjectUtils.asMap("resource_type", "video"));
+                } else if (mediaType.equalsIgnoreCase("pdf")) {
+                    Log.d(TAG, "uploadMediasInBackground: isPDF");
+                    byte[] filePath = getBytesFromUri(uri);
+//                    File file = new File(filePath);
+//                    byte[] bytes = Files.readAllBytes(file.toPath());
+                    response = cloudinary.uploader().upload(filePath, ObjectUtils.asMap("resource_type", "raw"));
+                }
+
+                if (response != null){
+                    String mediaUrl = (String) response.get("secure_url");
+                    // Save the url for later need
+                    ((Activity) context).runOnUiThread(() -> {
+                        Log.d("Cloudinary URL", mediaUrl);
+                        mediaURLs.add(mediaUrl);
+                        uploadMediasInBackground(uris, callback);
+                    });
+                } else {
+                    Log.d(TAG, "uploadMediasInBackground: response is null");
+                }
+
             } catch (IOException e) {
                 callback.onFailure(e);
             }
         }).start();
-    }
 
-    public void uploadVideosInBackground(Queue<Uri> uris, UploadCallback<List<String>> callback) {
-        if (uris.isEmpty()) {
-            callback.onSuccess(VideoURLs);
-            VideoURLs.clear();
-            return;
-        }
-        Uri uri = uris.poll();
-        String filePath = getPathFromUri(uri);
-        Toast.makeText(context, "Uploading videos", Toast.LENGTH_SHORT).show();
-        new Thread(() -> {
-            try {
-                Map response = cloudinary.uploader().upload(filePath, ObjectUtils.asMap("resource_type", "video"));
-                String videoUrl = (String) response.get("secure_url");
-//                // Add the URL to the list (ensure thread safety)
-//                synchronized (VideoURLs) {
-//                    VideoURLs.add(videoUrl);
-//                }
-                // Save the url for later need
-                ((Activity) context).runOnUiThread(() -> {
-                    Log.d("Cloudinary URL", videoUrl);
-                    VideoURLs.add(videoUrl);
-                    uploadVideosInBackground(uris, callback);
-                });
-            } catch (IOException e) {
-                callback.onFailure(e);
-            }
-        }).start();
-    }
-
-    public void uploadPdfInBackground(Queue<Uri> uris, UploadCallback<List<String>> callback) {
-
-        Toast.makeText(context, "Uploading pdf", Toast.LENGTH_SHORT).show();
-        if (uris.isEmpty()) {
-            callback.onSuccess(PdfURLs);
-            PdfURLs.clear();
-            return;
-        }
-        Uri uri = uris.poll();
-        byte[] filePathBytes = getBytesFromUri(uri);
-        String filePath = saveBytesToCacheFile(filePathBytes);
-        Toast.makeText(context, "Uploading pdf", Toast.LENGTH_SHORT).show();
-        new Thread(() -> {
-            try {
-                Map response = cloudinary.uploader().upload(filePath, ObjectUtils.asMap("resource_type", "video"));
-                String pdfUrl = (String) response.get("secure_url");
-                // Add the URL to the list (ensure thread safety)
-//                synchronized (PdfURLs) {
-//                    PdfURLs.add(pdfUrl);
-//                }
-                // Save the url for later need
-                ((Activity) context).runOnUiThread(() -> {
-                    Log.d("Cloudinary URL", pdfUrl);
-                    PdfURLs.add(pdfUrl);
-                    deleteCacheFile(filePath);
-                    uploadPdfInBackground(uris, callback);
-                });
-            } catch (IOException e) {
-                callback.onFailure(e);
-            }
-        }).start();
     }
 
     private String saveBytesToCacheFile(byte[] filePathBytes) {
@@ -298,31 +266,31 @@ public class MediasHandler {
         }
     }
 
-    private void handleUploadedURL(String imageUrl, String database) {
-        Log.d(TAG, "handleUploadedURL: Wow still can work!");
-    }
+//    private void handleUploadedURL(String imageUrl, String database) {
+//        Log.d(TAG, "handleUploadedURL: Wow still can work!");
+//    }
 
     // Display Image
-    public static void displayImage(Context context, String imageUrl, ImageView imageView) {
-        Log.d("Cloudinary URL", imageUrl);
-        Glide.with(context).load(imageUrl).into(imageView);
-    }
-
-    // Display PDF
-    public static void displayPDF(String pdfUrl, WebView webView) {
-        Log.d("Cloudinary URL", pdfUrl);
-        webView.loadUrl("https://docs.google.com/gview?embedded=true&url=" + pdfUrl);
-    }
-
-    public static void playVideo(String videoUrl, ExoPlayer player) {
-//        mediaItem = MediaItem.fromUri(Uri.parse(toHTTPS("http://res.cloudinary.com/dmgpozfee/video/upload/v1731385187/cgtajcgfoloqc4calfov.mp4")));
-        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(videoUrl));
-        player.setMediaItem(mediaItem);
-
-        player.prepare();
-        player.setVolume(1.0f);
-        player.play();
-    }
+//    public static void displayImage(Context context, String imageUrl, ImageView imageView) {
+//        Log.d("Cloudinary URL", imageUrl);
+//        Glide.with(context).load(imageUrl).into(imageView);
+//    }
+//
+//    // Display PDF
+//    public static void displayPDF(String pdfUrl, WebView webView) {
+//        Log.d("Cloudinary URL", pdfUrl);
+//        webView.loadUrl("https://docs.google.com/gview?embedded=true&url=" + pdfUrl);
+//    }
+//
+//    public static void playVideo(String videoUrl, ExoPlayer player) {
+////        mediaItem = MediaItem.fromUri(Uri.parse(toHTTPS("http://res.cloudinary.com/dmgpozfee/video/upload/v1731385187/cgtajcgfoloqc4calfov.mp4")));
+//        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(videoUrl));
+//        player.setMediaItem(mediaItem);
+//
+//        player.prepare();
+//        player.setVolume(1.0f);
+//        player.play();
+//    }
 
     private void removeMedia(Uri uri) {
             selectedMedias.remove(uri);

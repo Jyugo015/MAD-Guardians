@@ -28,6 +28,7 @@ public class FirebaseController {
     public static final String COLLECTION = "collection";
     public static final String QUIZ = "quiz";
     public static final String FOLDER = "folder";
+    public static final String TAG = "FirebaseController";
 
     public static void insertFirebase(String tableName, String id, HashMap<String, Object> dataHashMap, UploadCallback callback) {
         Log.d("TAG", "insertFirebase: here1");
@@ -40,10 +41,10 @@ public class FirebaseController {
         dataHashMap.put(getIdName(finalTable), id);
         db.collection(finalTable).whereEqualTo(getIdName(finalTable), id).get()
             .addOnCompleteListener(task -> {
-            if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                Log.d("TAG", "insertFirebase: here2");
-                callback.onFailure(new Exception("Document already exists"));
-            } else {
+//            if (task.isSuccessful() && !task.getResult().isEmpty()) {
+//                Log.d("TAG", "insertFirebase: here2");
+//                callback.onFailure(new Exception("Document already exists"));
+//            } else {
                 Log.d("TAG", "insertFirebase: here3");
                 dataHashMap.put(getIdName(finalTable), id); // Ensure the fieldName and id are part of the new data
                 db.collection(finalTable)
@@ -51,8 +52,8 @@ public class FirebaseController {
                         .set(dataHashMap)
                         .addOnSuccessListener(v -> callback.onSuccess(dataHashMap))
                         .addOnFailureListener(e -> callback.onFailure(new Exception("Failed to create a new document")));
-            }
-            Log.d("TAG", "insertFirebase: here3");
+//            }
+//            Log.d("TAG", "insertFirebase: here4");
         }).addOnFailureListener(callback::onFailure);
     }
 
@@ -81,6 +82,7 @@ public class FirebaseController {
                 }).addOnFailureListener(callback::onFailure);
     }
     public static void getMatchedCollection(String tableName, String fieldName, String fieldValue, UploadCallback<List<HashMap<String, Object>>> callback) {
+
         db.collection(tableName)
                 .whereEqualTo(fieldName, fieldValue) // Query to match fieldName with fieldValue
                 .get()
@@ -162,7 +164,6 @@ public class FirebaseController {
     }
 
     public static void generateDocumentId(String tableName, UploadCallback<String> callback) {
-        final String[] newDocumentId = {null};
         String starting = findStarting(tableName);
         String finalTable;
         if (tableName.equals(IMAGE) || tableName.equals(VIDEO) || tableName.equals(PDF))
@@ -174,6 +175,8 @@ public class FirebaseController {
         Log.d("TAG", "generateDocumentId: here1");
 
         db.collection(finalTable)
+                .whereGreaterThanOrEqualTo(idName, starting) // Filter for IDs with the correct prefix
+                .whereLessThanOrEqualTo(idName, starting + "\uffff") // Ensure lexicographical range
                 .orderBy(idName, Query.Direction.DESCENDING)
                 .limit(1)
                 .get()
@@ -185,7 +188,16 @@ public class FirebaseController {
                         if (lastId != null) {
                             int idNumber = Integer.parseInt(lastId.substring(starting.length())) + 1;
                             String newId = starting + String.format("%05d", idNumber);
-                            callback.onSuccess(newId);
+                            HashMap<String, Object> hashMap = new HashMap<>();
+                            hashMap.put(getIdName(finalTable), newId);
+                            Log.d(TAG, "generateDocumentId: lastId: " + lastId);
+                            Log.d(TAG, "generateDocumentId: newId: " + newId);
+                            // create a new entry for that table
+                            db.collection(finalTable).document(newId)
+                                .set(hashMap)
+                                .addOnSuccessListener(v -> {
+                                    callback.onSuccess(newId);
+                                });
                         }
                     } else {
                         String newId = starting + "00001";

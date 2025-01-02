@@ -76,6 +76,7 @@ public class PostFragment extends Fragment {
         TextView TVTitle = view.findViewById(R.id.TVTitle);
         TextView TVDescription = view.findViewById(R.id.TVDescription);
         Button BTNComment = view.findViewById(R.id.BTNComment);
+        Button BTNReport = view.findViewById(R.id.BTNReport);
         if (post != null) {
             TVTitle.setText(post.getTitle());
             TVDescription.setText(post.getDescription());
@@ -141,6 +142,9 @@ public class PostFragment extends Fragment {
         BTNComment.setOnClickListener(v -> {
             connectToComment(post.getPostId());
         });
+        BTNReport.setOnClickListener(v -> {
+            reportPost(post.getPostId());
+        });
     }
 
     private void displayMediaSegment(ConstraintLayout clContainer, MediaFB media, String typeMedia) {
@@ -151,7 +155,6 @@ public class PostFragment extends Fragment {
         TextView TVDesc = mediaSegment.findViewById(R.id.TVDesc);
         Button BTNStart = mediaSegment.findViewById(R.id.BTNStart);
         Button BTNReport = mediaSegment.findViewById(R.id.BTNReport);
-
 
         // set text in the button
         if (isRead(media))
@@ -206,8 +209,16 @@ public class PostFragment extends Fragment {
 
         ////////////////////////////////////////////////////////////////////////////////
         BTNReport.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Connecting to report", Toast.LENGTH_SHORT).show();
+            reportMedia(media.getMediaId());
         });
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // zw
+    private void reportPost(String postId) {
+    }
+
+    private void reportMedia(String mediaId) {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
