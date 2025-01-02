@@ -60,26 +60,6 @@ public class ConsultFragment extends Fragment {
 //                .set(counselorData, SetOptions.merge()) // Ensures it updates or adds missing fields
 //                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Document updated successfully!"))
 //                .addOnFailureListener(e -> Log.e("Firestore", "Error updating document", e));
-        isCounselor(new FirebaseUtil.SimpleCallback() {
-            @Override
-            public void onResult(boolean isCounselor) {
-                String role = isCounselor ? "Counselor" : "User"; // Update role based on result
-
-                if (isCounselor) {
-                    binding.chatbotMessage.setText("Good day Counselor. What is your plan today?");
-
-                } else {
-                    Log.e("Counselor checking","not a counselor");
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.e("Error", "Failed to check if user is counselor", e);
-                // Handle error (e.g., disable button or show an error message)
-            }
-        });
-
 
         binding.btnViewAppointmentHistory.setVisibility(View.GONE);
 
@@ -212,9 +192,7 @@ public class ConsultFragment extends Fragment {
                     }
                 });
     }
-    private void isCounselor(FirebaseUtil.SimpleCallback callback) {
-        FirebaseUtil.isCounselor(callback, getActivity());
-    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

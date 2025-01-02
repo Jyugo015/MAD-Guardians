@@ -17,30 +17,25 @@
 
         <TextView
             android:id="@+id/chatbot_message"
-            android:layout_width="278dp"
-            android:layout_height="103dp"
-            android:background="@drawable/cute_bubble_background"
-            android:fontFamily="sans-serif-light"
-            android:lineSpacingExtra="4dp"
-            android:padding="16dp"
+            android:layout_width="304dp"
+            android:layout_height="98dp"
+            android:background="#E0E0E0"
+            android:padding="8dp"
             android:text="Hello, I’m ChatBot! 👋 I’m your personal mental health assistant. How can I help you?"
-            android:textColor="#FF4081"
-            android:textSize="18sp"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.493"
+            app:layout_constraintHorizontal_bias="0.263"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.082" />
+            app:layout_constraintVertical_bias="0.054" />
 
         <Button
             android:id="@+id/btn_seek_advice"
             android:layout_width="247dp"
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
-            android:background="@drawable/cute_button_shape"
             android:text="Seek advice from counselor"
-
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.636"
             app:layout_constraintStart_toStartOf="parent"
@@ -52,7 +47,6 @@
             android:layout_height="48dp"
             android:layout_marginTop="4dp"
             android:text="Make an appointment"
-            android:background="@drawable/cute_button_shape"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.63"
             app:layout_constraintStart_toStartOf="parent"
@@ -65,7 +59,6 @@
             android:layout_height="48dp"
             android:layout_marginTop="56dp"
             android:text="View appointment history"
-            android:background="@drawable/cute_button_shape"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.625"
@@ -74,14 +67,10 @@
 
         <TextView
             android:id="@+id/chat_response"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="249dp"
+            android:layout_height="48dp"
             android:layout_marginTop="60dp"
-            android:background="@drawable/replying_bot_shape"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:background="#E0E0E0"
             android:text="Show user choice"
             android:textSize="18sp"
             android:visibility="gone"
@@ -90,17 +79,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btn_make_appointment" />
 
-
         <TextView
             android:id="@+id/directing_response"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="267dp"
+            android:layout_height="61dp"
             android:layout_marginTop="124dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:background="@drawable/cute_bubble_background"
+            android:background="#E0E0E0"
             android:text="Directing user to appointment page..."
             android:textSize="18sp"
             android:visibility="gone"
