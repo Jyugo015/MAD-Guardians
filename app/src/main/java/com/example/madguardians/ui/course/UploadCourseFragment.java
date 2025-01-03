@@ -23,9 +23,14 @@ import androidx.work.Configuration;
 
 import com.example.madguardians.R;
 import com.example.madguardians.firebase.CourseFB;
+import com.example.madguardians.ui.staff.VerPost;
 import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.MediasHandler;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -276,5 +281,71 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
     //////////////////////////////////////////////////////////////////
     // zw
     private void sendForVerification(String courseId) {
+        ArrayList<PostViewModel> posts = PostViewModel.selectedMedias;
+
+        if (posts.isEmpty()) {
+            Log.d(TAG, "sendForVerification: No posts to verify");
+            return;
+        }
+
+        for (PostViewModel post : posts) {
+            generateNextVerPostId("VerPosts", new OnIdGeneratedListener() {
+                @Override
+                public void onIdGenerated(String newVerPostId) {
+                    if (newVerPostId == null) {
+                        Log.e(TAG, "sendForVerification: Failed to generate VerPost ID");
+                        return;
+                    }
+
+                    String postId = post.getPostId();
+                    String staffId = null; // Replace with the actual staff ID responsible for verification
+                    String verifiedStatus = "Pending";
+                    Timestamp timestamp = new Timestamp(new Date());
+
+                    VerPost verPost = new VerPost(newVerPostId, postId, staffId, verifiedStatus, timestamp);
+
+                    // Prepare data for Firestore
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    db.collection("verPost")
+                            .document(newVerPostId) // Use the generated VerPost ID as the document ID
+                            .set(verPost) // Save the VerPost object directly
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d(TAG, "sendForVerification: VerPost created successfully for postId: " + postId);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "sendForVerification: Failed to create VerPost for postId: " + postId, e);
+                            });
+                }
+            });
+        }
+    }
+
+
+    public void generateNextVerPostId(String tableName, UploadCourseFragment.OnIdGeneratedListener callback) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection(tableName)
+                .orderBy(FieldPath.documentId(), Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    String newVerPostId = "VP00000"; // Default ID if no documents exist
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        String lastDocumentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                        // Extract numeric part and increment
+                        int numericPart = Integer.parseInt(lastDocumentId.substring(1));
+                        numericPart++;
+                        newVerPostId = String.format("VP%05d", numericPart); // Format with leading zeros
+                    }
+                    callback.onIdGenerated(newVerPostId);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("generateNextVerPost", "Error fetching last document ID", e);
+                    callback.onIdGenerated(null); // Notify failure
+                });
+    }
+
+    // Callback Interface
+    public interface OnIdGeneratedListener {
+        void onIdGenerated(String newId);
     }
 }
