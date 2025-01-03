@@ -17,6 +17,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -33,6 +34,8 @@ import android.widget.Toast;
 import com.example.madguardians.database.CloudinaryUploadWorker;
 import com.example.madguardians.database.Domain;
 import com.example.madguardians.utilities.MediaHandler;
+import com.example.madguardians.utilities.MediasHandler;
+import com.example.madguardians.utilities.UploadCallback;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -42,16 +45,16 @@ import java.util.List;
 import java.util.Map;
 
 public class EducationQualificationFragment extends Fragment implements MediaHandler.MediaHandleCallback {
-    private Button uploadButton,selectDomainButton;
+    private Button uploadButton,selectDomainButton, saveChangesButton;
     private WebView webView;
     private MediaHandler pdfHandler;
     private static final int PICK_PDF_REQUEST = 1;
     private Uri pdfUri;
-    private String pdfUrl;  // To store the PDF URL after upload
     private List<String> selectedDomainIds = new ArrayList<>();
     private FirebaseFirestore firestore;
     SharedPreferences sharedPreferences;
     String userId;
+    private static final String TAG = "EducationQualificationFragment";
 
     public EducationQualificationFragment() {
         // Required empty public constructor
@@ -64,6 +67,7 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
 
         uploadButton = view.findViewById(R.id.upload);
         selectDomainButton = view.findViewById(R.id.selectDomainButton);
+        saveChangesButton = view.findViewById(R.id.save_change);
         webView = view.findViewById(R.id.displayPdf);
         firestore = FirebaseFirestore.getInstance();  // Initialize Firestore instance
         // Get SharedPreferences
@@ -86,6 +90,7 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
         uploadButton.setOnClickListener(v -> pdfHandler.selectPDF());
         // Handle the select domain button click
         selectDomainButton.setOnClickListener(v -> showApproveDialog());
+        saveChangesButton.setOnClickListener(v-> {uploadPdfAndSaveData();});
 
         return view;
     }
@@ -96,8 +101,8 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
         // Handle the file path returned by the MediaHandler
         Toast.makeText(getContext(), "Selected " + fileType + " path: " + filePath, Toast.LENGTH_LONG).show();
         if (fileType.equalsIgnoreCase("pdf")) {
-            // Upload the PDF and get its URL
-            pdfHandler.uploadPdfInBackground(filePath, "YOUR_DATABASE", webView);
+            Log.d(TAG, "onMediaSelected: PDF is uploaded");
+            uploadButton.setText("Uploaded");
         }
     }
     /////////////////////////////////////////////////xy//////////////////////////////////////////////
@@ -105,18 +110,26 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
     // Call this method when the user selects domains and clicks Confirm in the dialog
     public void onDomainSelectionConfirmed(List<String> selectedDomainIds) {
         this.selectedDomainIds = selectedDomainIds;  // Update the selected domain IDs
-        if (pdfUri != null) {
-            uploadPdfAndSaveData();  // Proceed with saving data if PDF is uploaded
-        } else {
+        if (pdfUri == null) {
             Toast.makeText(getContext(), "Please upload a PDF first.", Toast.LENGTH_SHORT).show();
         }
     }
     /////////////////////////////////////////////////xy//////////////////////////////////////////////
     private void uploadPdfAndSaveData() {
-       saveDataToFirestore();
+        // Upload the PDF and get its URL
+        pdfHandler.uploadPdfInBackground(pdfUri, webView, new UploadCallback<String>() {
+            @Override
+            public void onSuccess(String pdfUrl) {
+                saveDataToFirestore(pdfUrl);  // Save data
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(getContext(), "Failed to upload PDF.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     /////////////////////////////////////////////////xy//////////////////////////////////////////////
-    private void saveDataToFirestore() {
+    private void saveDataToFirestore(String pdfUrl) {
         String staffId = null; // Set to null by default
 
         // Prepare the data to save
