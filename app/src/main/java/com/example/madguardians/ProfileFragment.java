@@ -152,6 +152,13 @@ public class ProfileFragment extends Fragment {
             NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
             navController.navigate(R.id.action_nav_profile_to_viewAllAchievementsFragment);
         });
+
+        ImageView commentImageView = rootView.findViewById(R.id.comment);
+        commentImageView.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
+
+            navController.navigate(R.id.action_nav_profile_to_Edu_CommentFragment);
+        });
         return rootView;
     }
 

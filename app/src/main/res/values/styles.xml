@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="EllipseShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerRadius">50dp</item>
+    </style>
+
+    <style name="DialogTheme" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowSoftInputMode">stateVisible|adjustPan</item>\
+        <item name="android:windowBackground">@drawable/comment_item_background</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item> <!-- Adjust dim intensity (0.0 to 1.0) -->
+        <item name="android:windowNoTitle">true</item> <!-- Disable the title -->
+        <item name="android:textColorHint">#8E8D80</item>
+    </style>
+
+    <style name="ReportDialogTheme" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowSoftInputMode">stateVisible|adjustPan</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item> <!-- Adjust dim intensity (0.0 to 1.0) -->
+        <item name="android:windowNoTitle">true</item> <!-- Disable the title -->
+    </style>
+</resources>

@@ -5,13 +5,14 @@ import android.util.Log;
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class PostFB {
+public class PostFB implements Serializable{
     private static final String TABLE_NAME = FirebaseController.POST;
     private String postId;
     private String userId;
@@ -42,6 +43,8 @@ public class PostFB {
         this.folderId = folderId;
         this.date = date;
     }
+
+    public PostFB(){}
 
     public static void getPost(String postId, UploadCallback<PostFB> callback) {
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), postId, new UploadCallback<List<HashMap<String, Object>>>(){
