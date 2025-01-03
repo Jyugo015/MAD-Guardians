@@ -23,6 +23,8 @@ public class Comments implements Serializable{
     private String rootComment;
     @Nullable
     private String replyUserId;
+    @Nullable
+    private String replyText;
     @NonNull
     @ColumnInfo(defaultValue = "0")
     private boolean isRead;
@@ -33,14 +35,15 @@ public class Comments implements Serializable{
 
     // Constructor
     public Comments(@NonNull String commentId, @Nullable String userId, @NonNull String postId,
-                   @NonNull String comment, @Nullable String rootComment, @Nullable String replyUserId,
-                   boolean isRead, String authorId, @NonNull Timestamp timestamp) {
+                    @NonNull String comment, @Nullable String rootComment, @Nullable String replyUserId,
+                    @Nullable String replyText, boolean isRead, String authorId, @NonNull Timestamp timestamp) {
         this.commentId = commentId;
         this.userId = userId;
         this.postId = postId;
         this.comment = comment;
         this.rootComment = rootComment;
         this.replyUserId = replyUserId;
+        this.replyText = replyText;
         this.isRead = isRead;
         this.authorId = authorId;
         this.timestamp = timestamp;
@@ -106,6 +109,15 @@ public class Comments implements Serializable{
 
     public void setReplyUserId(@Nullable String replyUserId) {
         this.replyUserId = replyUserId;
+    }
+
+    @Nullable
+    public String getReplyText() {
+        return replyText;
+    }
+
+    public void setReplyText(@Nullable String replyText) {
+        this.replyText = replyText;
     }
 
     // Getter and Setter for isRead

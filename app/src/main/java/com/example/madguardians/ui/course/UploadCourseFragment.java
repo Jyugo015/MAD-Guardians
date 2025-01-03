@@ -168,6 +168,10 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
                 Toast.makeText(getContext(), "Please upload at least one media for post " + p.getLevel(), Toast.LENGTH_SHORT).show();
                 return false;
             }
+            if (p.isUploading()) {
+                Toast.makeText(getContext(), "Please wait for the post " + p.getLevel() + " to be uploaded.", Toast.LENGTH_SHORT).show();
+                return false;
+            }
             if (p.getLevel() == 1) isPost1Set = true;
             else if (p.getLevel() == 2) isPost2Set = true;
             else if (p.getLevel() == 3) isPost3Set = true;

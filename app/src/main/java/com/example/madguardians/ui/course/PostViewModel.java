@@ -18,11 +18,22 @@ public class PostViewModel{
     private boolean isImageUploaded = false;
     private boolean isVideosUploaded = false;
     private boolean isPdfsUploaded = false;
-    private boolean isQuizUploaded = true;
+    private boolean isQuizUploaded = false;
+    private boolean isUploading = false;
+
+    public boolean isUploading() {
+        return isUploading;
+    }
+
+    public void setUploading(boolean uploading) {
+        isUploading = uploading;
+    }
+
     private String title = "";
     private String description = "";
     private int level = 0;
     private String postId = null;
+
 
     public String getPostId() {
         return postId;
@@ -134,6 +145,7 @@ public class PostViewModel{
         this.isPdfsUploaded = false;
         this.isVideosUploaded = false;
         this.isQuizUploaded = true; // need to chang to false
+        this.isUploading = false;
         this.description = "";
         this.title = "";
         this.level = 0;

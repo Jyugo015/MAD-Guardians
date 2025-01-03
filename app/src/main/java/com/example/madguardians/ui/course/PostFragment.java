@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.madguardians.R;
@@ -158,7 +159,7 @@ public class PostFragment extends Fragment {
         }
 
         BTNComment.setOnClickListener(v -> {
-            connectToComment(post.getPostId());
+            connectToComment();
         });
         BTNReport.setOnClickListener(v -> {
             reportPost(post.getPostId());
@@ -511,7 +512,11 @@ public class PostFragment extends Fragment {
 
     //////////////////////////////////////////////////////////////////////////////////////
     // jiaqi
-    private void connectToComment(String postId) {
+    private void connectToComment() {
+        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("post", post);
+        navController.navigate(R.id.nav_user_comment, bundle);
     }
 
 }
