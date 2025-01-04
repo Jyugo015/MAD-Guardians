@@ -1,6 +1,7 @@
 package com.example.madguardians.ui.staff;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -197,6 +200,11 @@ public class RecycleViewReportedCommentAdapter extends RecyclerView.Adapter<Recy
                 }
             });
         }
+//        holder.tvDescription.setOnClickListener(v -> navigateToFragment(v, "pdf", verEducator.getMediaId()));
+//        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostsFragmentStaff);
+//        Bundle bundle = new Bundle();
+//        bundle.putSerializable("post", post);
+//        navController.navigate(R.id.nav_user_comment, bundle);
     }
 
     @Override
