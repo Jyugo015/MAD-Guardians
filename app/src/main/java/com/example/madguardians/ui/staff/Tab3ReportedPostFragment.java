@@ -5,9 +5,15 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.madguardians.R;
 import com.example.madguardians.database.*;
+import com.example.madguardians.firebase.PostFB;
 import com.example.madguardians.notification.NotificationUtils;
+import com.example.madguardians.utilities.UploadCallback;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -22,6 +28,8 @@ public class Tab3ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
     private NotificationUtils notificationUtils;
     private List<Helpdesk> helpdeskList = new ArrayList<>();
     private String staffId;
+
+    private PostFB post;
     public Tab3ReportedPostFragment() {
 
     }
@@ -36,6 +44,16 @@ public class Tab3ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
             System.out.println(staffId);
             System.out.println("Hi "+staffId);
             fetchData(); // Use staffId as needed
+//            PostFB.getPost(getArguments().getString("postId"), new UploadCallback<PostFB>(){
+//                @Override
+//                public void onSuccess(PostFB result) {
+//                    post = result;
+//                }
+//                @Override
+//                public void onFailure(Exception e) {
+//                    Log.e("TAG", "onFailure: ", e);
+//                }
+//            });
         }
     }
     protected void fetchData() {
@@ -350,4 +368,11 @@ public class Tab3ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
     private void logMessage(String message) {
         Log.d("Tab1PostFragment", message);
     }
+//    @Override
+//    public void onPostTitleClicked(Helpdesk helpdesk, int position){
+//        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostsFragmentStaff);
+//        Bundle bundle = new Bundle();
+//        bundle.putSerializable("post", post);
+//        navController.navigate(R.id.nav_user_comment, bundle);
+//    }
 }
