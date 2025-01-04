@@ -64,15 +64,12 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.IssueViewH
                                 getNumericPart(lastHelpdeskId)>99999?"H"+ String.valueOf(getNumericPart(lastHelpdeskId)):"H" + String.format("%05d", getNumericPart(lastHelpdeskId)),
                                 issue.getIssueId(),
                                 userId,
-                                null,
-                                null,
                                 commentId,
                                 null,
                                 null,
                                 null,
                                 "pending",
-                                Timestamp.now()
-                        );
+                                Timestamp.now());
                         firestoreManager.insertHelpdesk(helpdesk);
                         Log.d("Firestore Write", "Comment successfully added");
                         helpdeskListener.helpdeskAdded();
