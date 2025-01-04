@@ -1,6 +1,7 @@
 package com.example.madguardians.ui.staff;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -150,6 +152,17 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
                 System.out.println(message);
             }
         });
+        holder.tvViewProof.setOnClickListener(v -> navigateToFragment(v, "pdf", verEducator.getMediaId()));
+    }
+
+    private void navigateToFragment(View view, String typeMedia, String mediaId) {
+        Bundle bundle = new Bundle();
+        bundle.putString("mediaId", mediaId);
+        System.out.println("test1:"+mediaId);
+        if ("pdf".equalsIgnoreCase(typeMedia)) {
+            Navigation.findNavController(view).navigate(R.id.nav_pdf, bundle);
+            System.out.println("test2");
+        }
     }
     @Override
     public int getItemCount() {

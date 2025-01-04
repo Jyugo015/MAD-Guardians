@@ -142,10 +142,8 @@ public class Helpdesk {
     private String helpdeskId;
     private String issueId;
     private String userId;
-    private String postId;
-    private String courseId;
     private String commentId;
-    private String quizId;
+    private String reportedItemId;
     private String staffId;
     private String reason;
     private String helpdeskStatus;
@@ -156,16 +154,13 @@ public class Helpdesk {
 
     // Constructor
     public Helpdesk( String helpdeskId,  String issueId,  String userId,
-                     String postId,  String courseId,  String commentId,
-                     String quizId,  String staffId,  String reason,
-                     String helpdeskStatus, Timestamp timestamp) {
+                     String commentId, String reportedItemId, String staffId,
+                     String reason, String helpdeskStatus, Timestamp timestamp) {
         this.helpdeskId = helpdeskId;
         this.issueId = issueId;
         this.userId = userId;
-        this.postId = postId;
-        this.courseId = courseId;
         this.commentId = commentId;
-        this.quizId = quizId;
+        this.reportedItemId = reportedItemId;
         this.staffId = staffId;
         this.reason = reason;
         this.helpdeskStatus = helpdeskStatus;
@@ -197,22 +192,6 @@ public class Helpdesk {
         this.userId = userId;
     }
 
-    public String getPostId() {
-        return postId;
-    }
-
-    public void setPostId(String postId) {
-        this.postId = postId;
-    }
-
-    public String getCourseId() {
-        return courseId;
-    }
-
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
-
     public String getCommentId() {
         return commentId;
     }
@@ -221,12 +200,12 @@ public class Helpdesk {
         this.commentId = commentId;
     }
 
-    public String getQuizId() {
-        return quizId;
+    public String getReportedItemId() {
+        return reportedItemId;
     }
 
-    public void setQuizId(String quizId) {
-        this.quizId = quizId;
+    public void setReportedItemId(String reportedItemId) {
+        this.reportedItemId = reportedItemId;
     }
 
     public String getStaffId() {

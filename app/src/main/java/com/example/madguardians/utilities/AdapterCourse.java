@@ -21,10 +21,12 @@ import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
 import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.firebase.DomainFB;
+import com.example.madguardians.ui.staff.VerPost;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +92,87 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
 
     ////////////////////////////////////////////////////////////////////////////////////
     // zw
-    private boolean isVerified(CourseFB courseFB) {
-        return true;
+    private boolean isVerified(CourseFB courseFB) {return true;}
+    // check each post one by one (post1, post2, post3)
+    public void isVerified(CourseFB courseFB, UploadCallback<Boolean> callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("verPosts")
+                .whereEqualTo("postId", courseFB.getPost1())
+                .limit(1) // Assuming only one VerPost per post
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        // Extract the VerPost data
+                        Map<String, Object> data = queryDocumentSnapshots.getDocuments().get(0).getData();
+                        if (data != null && "approved".equalsIgnoreCase((String) data.get("verifiedStatus"))) {
+                            callback.onSuccess(true); // Post is verified
+                        } else {
+                            callback.onSuccess(false); // Post is not verified
+                        }
+                    } else {
+                        callback.onSuccess(false); // No VerPost found, consider it not verified
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("isVerified", "Failed to check verification status: " + e.getMessage(), e);
+                    callback.onFailure(e); // Handle failure case
+                });
+    }
+
+    // check all post
+    public void arePostsVerified(CourseFB courseFB, UploadCallback<Map<String, Boolean>> callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Map<String, Boolean> verificationResults = new HashMap<>();
+
+        // Get the IDs of the posts to verify
+        List<String> postIds = new ArrayList<>();
+        if (courseFB.getPost1() != null && !courseFB.getPost1().isEmpty()) postIds.add(courseFB.getPost1());
+        if (courseFB.getPost2() != null && !courseFB.getPost2().isEmpty()) postIds.add(courseFB.getPost2());
+        if (courseFB.getPost3() != null && !courseFB.getPost3().isEmpty()) postIds.add(courseFB.getPost3());
+
+        // If no posts are present, return an empty map
+        if (postIds.isEmpty()) {
+            callback.onSuccess(verificationResults);
+            return;
+        }
+
+        // Use a counter to track completed checks
+        final int[] checksCompleted = {0};
+
+        for (String postId : postIds) {
+            db.collection("verPosts")
+                    .whereEqualTo("postId", postId)
+                    .limit(1) // Assuming only one VerPost per post
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        boolean isVerified = false;
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            Map<String, Object> data = queryDocumentSnapshots.getDocuments().get(0).getData();
+                            if (data != null && "approved".equalsIgnoreCase((String) data.get("verifiedStatus"))) {
+                                isVerified = true;
+                            }
+                        }
+                        // Store the result for this post ID
+                        verificationResults.put(postId, isVerified);
+
+                        // Check if all posts have been processed
+                        checksCompleted[0]++;
+                        if (checksCompleted[0] == postIds.size()) {
+                            callback.onSuccess(verificationResults);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("arePostsVerified", "Failed to check post: " + postId, e);
+                        verificationResults.put(postId, false); // Default to false on failure
+
+                        // Check if all posts have been processed
+                        checksCompleted[0]++;
+                        if (checksCompleted[0] == postIds.size()) {
+                            callback.onFailure(e);
+                        }
+                    });
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////

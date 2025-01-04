@@ -64,7 +64,7 @@
         android:layout_height="48dp"
         android:background="@drawable/hzw_green_button_shape"
         android:fontFamily="@font/inter"
-        android:text="Reject"
+        android:text="Keep"
         android:textColor="@color/bg_white_color"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/TVCourseTitle"
