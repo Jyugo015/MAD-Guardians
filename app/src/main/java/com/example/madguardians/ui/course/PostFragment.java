@@ -51,6 +51,7 @@ public class PostFragment extends Fragment {
     FirebaseFirestore firestore;
     SharedPreferences sharedPreferences;
     String userId;
+    String staffId;
 
     public PostFragment() {
         // Required empty public constructor
@@ -66,6 +67,10 @@ public class PostFragment extends Fragment {
         super.onCreate(savedInstanceState);
         sharedPreferences = getContext().getSharedPreferences("user_preferences", MODE_PRIVATE);
         userId = sharedPreferences.getString("user_id", null);
+        //staff -zw
+        sharedPreferences = getContext().getSharedPreferences("staff_preferences", MODE_PRIVATE);
+        staffId = sharedPreferences.getString("staff_id", null);
+        //////
         firestore = FirebaseFirestore.getInstance();
         if (getArguments() != null) {
             PostFB.getPost(getArguments().getString("postId"), new UploadCallback<PostFB>(){
@@ -513,11 +518,20 @@ public class PostFragment extends Fragment {
     //////////////////////////////////////////////////////////////////////////////////////
     // jiaqi
     private void connectToComment() {
-        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("post", post);
-        navController.navigate(R.id.nav_user_comment, bundle);
+        //add staff view - zw
+        if(staffId!=null){
+            System.out.println("userId:"+userId);
+            System.out.println("staffId:"+staffId);
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostsFragmentStaff);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("post", post);
+            navController.navigate(R.id.nav_user_comment, bundle);
+        }else{
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("post", post);
+            navController.navigate(R.id.nav_user_comment, bundle);
+        }
     }
 
 }
-
