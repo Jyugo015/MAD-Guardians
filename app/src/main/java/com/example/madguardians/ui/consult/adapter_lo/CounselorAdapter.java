@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.madguardians.R;
+import com.example.madguardians.notification.NotificationUtils;
 import com.example.madguardians.ui.consult.model_lo.CounselorModel;
 import com.example.madguardians.ui.consult.utils_lo.FirebaseUtil;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -30,6 +31,7 @@ public class CounselorAdapter extends RecyclerView.Adapter<CounselorAdapter.Coun
     List<CounselorModel> counselors;
     private String userName ;
     private String selectedDate;
+    private String counselorID;
 
     public CounselorAdapter(Context context, List<CounselorModel> counselors, String selectedDate) {
         this.context = context;
@@ -73,6 +75,21 @@ public class CounselorAdapter extends RecyclerView.Adapter<CounselorAdapter.Coun
                 String counselorName = counselors.get(position).getName();
 
                 FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+                firestore.collection("user")
+                        .whereEqualTo("name",counselorName)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if(task.isSuccessful()){
+                                if(task.getResult().isEmpty()){
+                                    for(DocumentSnapshot document: task.getResult()){
+                                        counselorID = document.getId();
+                                    }
+                                } else { Log.d("Firestore", "No user found with the name: " + counselorName);}
+                            } else {  Log.e("Firestore", "Error fetching documents: ", task.getException());}
+                        });
+
+
                 firestore.collection("appointments")
                         .document(selectedDate)
                         .collection(counselorName)
@@ -186,6 +203,11 @@ public class CounselorAdapter extends RecyclerView.Adapter<CounselorAdapter.Coun
                                     .addOnFailureListener(e -> {
                                         Log.e("Firestore", "Booking failed: " + e.getMessage());
                                     });
+
+                            NotificationUtils notificationUtils = new NotificationUtils();
+                            notificationUtils.createTestNotification(counselorID,"Appointment slot on "+selectedTimeSlot+" is booked");
+
+
                         } else {
                             Log.d("Firestore", "Slot already booked by someone else.");
                         }

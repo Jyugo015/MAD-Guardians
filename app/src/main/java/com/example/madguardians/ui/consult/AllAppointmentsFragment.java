@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.madguardians.R;
+import com.example.madguardians.notification.NotificationUtils;
 import com.example.madguardians.ui.consult.adapter_lo.AppointmentScheduleAdapter;
 import com.example.madguardians.ui.consult.model_lo.AppointmentModel;
 import com.example.madguardians.ui.consult.utils_lo.FirebaseUtil;
@@ -162,10 +163,20 @@ public class AllAppointmentsFragment extends Fragment {
                                 appointmentAdapter.notifyDataSetChanged();
                             }
                         }
+
+                        // Check if today is the appointment date
+                        String todayDate = getFormattedDate(new Date());
+                        if (date.equals(todayDate)) {
+                            // Notify user about today's appointment
+                            NotificationUtils notificationUtils = new NotificationUtils();
+                            String message = "You have an appointment with " + counselorName + " today at " + document.getString("time") + ".";
+                            notificationUtils.createTestNotification(userDoc.getId(), message);
+                        }
                     }
                 })
                 .addOnFailureListener(e -> Log.e("Error", "Failed to fetch user details: " + e.getMessage()));
     }
+
 
     private String getFormattedDate(Date date) {
         return new SimpleDateFormat("yyyy-MM-dd").format(date);
