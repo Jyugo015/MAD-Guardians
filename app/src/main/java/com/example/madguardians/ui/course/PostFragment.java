@@ -30,12 +30,15 @@ import com.example.madguardians.utilities.AdapterCourse;
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +57,7 @@ public class PostFragment extends Fragment{
     FirebaseFirestore firestore;
     SharedPreferences sharedPreferences;
     String userId;
+    String staffId;
 
     public PostFragment() {
         // Required empty public constructor
@@ -69,6 +73,10 @@ public class PostFragment extends Fragment{
         super.onCreate(savedInstanceState);
         sharedPreferences = getContext().getSharedPreferences("user_preferences", MODE_PRIVATE);
         userId = sharedPreferences.getString("user_id", null);
+        //staff -zw
+        sharedPreferences = getContext().getSharedPreferences("staff_preferences", MODE_PRIVATE);
+        staffId = sharedPreferences.getString("staff_id", null);
+        //////
         firestore = FirebaseFirestore.getInstance();
         if (getArguments() != null) {
             PostFB.getPost(getArguments().getString("postId"), new UploadCallback<PostFB>(){
@@ -241,9 +249,107 @@ public class PostFragment extends Fragment{
     ///////////////////////////////////////////////////////////////////////////////////
     // zw
     private void reportPost(String postId) {
+        // Call generateNextHelpdeskId to fetch the next available ID
+        generateNextHelpdeskId("helpdesk", new OnIdGeneratedListener() {
+            @Override
+            public void onIdGenerated(String helpdeskId) {
+                if (helpdeskId != null) {
+                    // Once the ID is generated, proceed with creating the helpdesk data
+                    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+                    // Create a HashMap to store data
+                    Map<String, Object> helpdeskData = new HashMap<>();
+                    helpdeskData.put("commentId", null); // Left as null
+                    helpdeskData.put("helpdeskId", helpdeskId);
+                    helpdeskData.put("helpdeskStatus", "pending");
+                    helpdeskData.put("issueId", null); // what should put?
+                    helpdeskData.put("reason", null); // Left as null
+                    helpdeskData.put("reportedItemId", postId);
+                    helpdeskData.put("staffId", null); // Left as null
+                    helpdeskData.put("timestamp", new Timestamp(new Date())); // Current timestamp
+                    helpdeskData.put("userId", userId); // Left as null
+
+                    // Add the data to Firestore
+                    firestore.collection("helpdesk")
+                            .document(helpdeskId)
+                            .set(helpdeskData)
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d("reportPost", "Post reported successfully!");
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("reportPost", "Error reporting post", e);
+                            });
+                } else {
+                    Log.e("reportPost", "Failed to generate helpdesk ID");
+                }
+            }
+        });
     }
 
     private void reportMedia(String mediaId) {
+        // Call generateNextHelpdeskId to fetch the next available ID
+        generateNextHelpdeskId("helpdesk", new OnIdGeneratedListener() {
+            @Override
+            public void onIdGenerated(String helpdeskId) {
+                if (helpdeskId != null) {
+                    // Once the ID is generated, proceed with creating the helpdesk data
+                    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+                    // Create a HashMap to store data
+                    Map<String, Object> helpdeskData = new HashMap<>();
+                    helpdeskData.put("commentId", null); // Left as null
+                    helpdeskData.put("helpdeskId", helpdeskId);
+                    helpdeskData.put("helpdeskStatus", "pending");
+                    helpdeskData.put("issueId", null); // Left as null
+                    helpdeskData.put("reason", null); // Left as null
+                    helpdeskData.put("reportedItemId", mediaId);
+                    helpdeskData.put("staffId", null); // Left as null
+                    helpdeskData.put("timestamp", new Timestamp(new Date())); // Current timestamp
+                    helpdeskData.put("userId", null); // Left as null
+
+                    // Add the data to Firestore
+                    firestore.collection("helpdesk")
+                            .document(helpdeskId)
+                            .set(helpdeskData)
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d("reportMedia", "Media reported successfully!");
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("reportMedia", "Error reporting media", e);
+                            });
+                } else {
+                    Log.e("reportMedia", "Failed to generate helpdesk ID");
+                }
+            }
+        });
+    }
+
+    public void generateNextHelpdeskId(String tableName, OnIdGeneratedListener callback) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection(tableName)
+                .orderBy(FieldPath.documentId(), Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    String newHelpdeskId = "H00000"; // Default ID if no documents exist
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        String lastDocumentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                        // Extract numeric part and increment
+                        int numericPart = Integer.parseInt(lastDocumentId.substring(1));
+                        numericPart++;
+                        newHelpdeskId = String.format("H%05d", numericPart); // Format with leading zeros
+                    }
+                    callback.onIdGenerated(newHelpdeskId);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("generateNextHelpdeskId", "Error fetching last document ID", e);
+                    callback.onIdGenerated(null); // Notify failure
+                });
+    }
+
+    // Callback Interface
+    public interface OnIdGeneratedListener {
+        void onIdGenerated(String newId);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -419,11 +525,20 @@ public class PostFragment extends Fragment{
     //////////////////////////////////////////////////////////////////////////////////////
     // jiaqi
     private void connectToComment() {
-        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("post", post);
-        navController.navigate(R.id.nav_user_comment, bundle);
+        //add staff view - zw
+        if(staffId!=null){
+            System.out.println("userId:"+userId);
+            System.out.println("staffId:"+staffId);
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostsFragmentStaff);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("post", post);
+            navController.navigate(R.id.nav_user_comment, bundle);
+        }else{
+            NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostFragment);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("post", post);
+            navController.navigate(R.id.nav_user_comment, bundle);
+        }
     }
 
 }
-

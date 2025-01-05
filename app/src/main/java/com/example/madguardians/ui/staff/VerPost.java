@@ -1,6 +1,10 @@
 package com.example.madguardians.ui.staff;
 
+import com.example.madguardians.utilities.UploadCallback;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 public class VerPost {
     private String verPostId;

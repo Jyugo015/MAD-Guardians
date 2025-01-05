@@ -1,6 +1,8 @@
 package com.example.madguardians.ui.staff;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,24 +11,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
-import com.example.madguardians.database.AppDatabase;
-import com.example.madguardians.database.Course;
-import com.example.madguardians.database.CourseDao;
 import com.example.madguardians.database.Media;
+import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.ui.staff.Helpdesk;
 import com.example.madguardians.database.Issue;
 import com.example.madguardians.database.IssueDao;
 import com.example.madguardians.database.Post;
-import com.example.madguardians.database.PostDao;
-import com.example.madguardians.database.User;
-import com.example.madguardians.database.UserDao;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.madguardians.firebase.PostFB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,12 +65,34 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
         this.helpdeskList = newData; // Assuming postList is the list in your adapter
         notifyDataSetChanged(); // Notify the adapter about data changes
     }
+
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
         return new PostViewHolder(view);
     }
+
+    public String getTableName(String reportedItemId) {
+        if (reportedItemId == null || reportedItemId.isEmpty()) {
+            throw new IllegalArgumentException("Reported item ID cannot be null or empty.");
+        }
+
+        // Check for media types first
+        if (reportedItemId.startsWith("IMG") ||
+                reportedItemId.startsWith("PDF") ||
+                reportedItemId.startsWith("VID")) {
+            return "media";
+        }
+
+        // Check for post
+        if (reportedItemId.startsWith("P") && !reportedItemId.startsWith("PDF")) {
+            return "post";
+        }
+
+        throw new IllegalArgumentException("Invalid reported item ID format.");
+    }
+
 
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
@@ -80,8 +101,9 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
         // Reset ViewHolder to avoid stale data
         holder.tvCourseTitle.setText("Loading...");
         holder.tvAuthorName.setText("Loading...");
-        holder.tvReason.setText("");
+        holder.tvReason.setText("Loading...");
         holder.tvStatus.setText(helpdesk.getHelpdeskStatus());
+        holder.ivPost.setImageResource(R.drawable.placeholder_image); // Reset image
 
         // Fetch Issue details using issueId
         if (helpdesk.getIssueId() != null) {
@@ -89,11 +111,7 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
                     .addOnSuccessListener(issueSnapshot -> {
                         if (issueSnapshot.exists()) {
                             Issue issue = issueSnapshot.toObject(Issue.class);
-                            if (issue != null) {
-                                holder.tvReason.setText(issue.getType() != null ? issue.getType() : "No Reason");
-                            } else {
-                                holder.tvReason.setText("No Reason");
-                            }
+                            holder.tvReason.setText(issue != null && issue.getType() != null ? issue.getType() : "No Reason");
                         } else {
                             holder.tvReason.setText("Issue Not Found");
                         }
@@ -101,103 +119,68 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
                     .addOnFailureListener(e -> holder.tvReason.setText("Error fetching issue"));
         }
 
-        // Fetch related details (Post, Course, or Quiz) based on available IDs
-        if (helpdesk.getPostId() != null) {
-            postRef.document(helpdesk.getPostId()).get()
-                    .addOnSuccessListener(postSnapshot -> {
-                        if (postSnapshot.exists()) {
-                            Post post = postSnapshot.toObject(Post.class);
-                            if (post != null) {
-                                // Set Title
-                                holder.tvCourseTitle.setText(post.getTitle() != null ? post.getTitle() : "No Title");
+        // Fetch details based on reportedItemId
+        if (helpdesk.getReportedItemId() != null) {
+            String tableName = getTableName(helpdesk.getReportedItemId());
+            if ("post".equals(tableName)) {
+                // Fetch Post details
+                postRef.document(helpdesk.getReportedItemId()).get()
+                        .addOnSuccessListener(postSnapshot -> {
+                            if (postSnapshot.exists()) {
+                                Post post = postSnapshot.toObject(Post.class);
+                                if (post != null) {
+                                    // Set Title
+                                    System.out.println("Reported post check:"+post.getPostId());
+                                    holder.tvCourseTitle.setText(post.getTitle() != null ? post.getTitle() : "No Title");
+//                                    holder.tvCourseTitle.setOnClickListener(v -> navigateToFragment(v, "post", post.getPostId()));
 
-                                // Set Image if available
-                                if (post.getImageSetId() != null) {
-                                    firestore.collection("media")
-                                            .whereEqualTo("mediaSetId", post.getImageSetId())
-                                            .get()
-                                            .addOnSuccessListener(mediaSnapshot -> {
-                                                if (!mediaSnapshot.isEmpty()) {
-                                                    DocumentSnapshot mediaDoc = mediaSnapshot.getDocuments().get(0);
-                                                    Media media = mediaDoc.toObject(Media.class);
-                                                    if (media != null && media.getUrl() != null) {
+                                    // Set Image if available
+                                    if (post.getImageSetId() != null) {
+                                        firestore.collection("media")
+                                                .whereEqualTo("mediaSetId", post.getImageSetId())
+                                                .get()
+                                                .addOnSuccessListener(mediaSnapshot -> {
+                                                    if (!mediaSnapshot.isEmpty()) {
+                                                        Media media = mediaSnapshot.getDocuments().get(0).toObject(Media.class);
                                                         Glide.with(context)
-                                                                .load(media.getUrl())
-                                                                .placeholder(R.drawable.placeholder_image) // Placeholder while loading
-                                                                .error(R.drawable.error_image)            // Fallback in case of error
+                                                                .load(media != null ? media.getUrl() : null)
+                                                                .placeholder(R.drawable.placeholder_image)
+                                                                .error(R.drawable.error_image)
                                                                 .into(holder.ivPost);
                                                     } else {
                                                         holder.ivPost.setImageResource(R.drawable.placeholder_image);
                                                     }
-                                                } else {
-                                                    holder.ivPost.setImageResource(R.drawable.placeholder_image);
-                                                }
-                                            })
-                                            .addOnFailureListener(e -> holder.ivPost.setImageResource(R.drawable.error_image));
-                                } else {
-                                    holder.ivPost.setImageResource(R.drawable.placeholder_image);
+                                                })
+                                                .addOnFailureListener(e -> holder.ivPost.setImageResource(R.drawable.error_image));
+                                    }
                                 }
-
-                                // Fetch User details for post author
-                                userRef.document(post.getUserId()).get()
-                                        .addOnSuccessListener(userSnapshot -> {
-                                            if (userSnapshot.exists()) {
-                                                User author = userSnapshot.toObject(User.class);
-                                                holder.tvAuthorName.setText(author != null && author.getName() != null
-                                                        ? author.getName()
-                                                        : "Unknown Author");
-                                            } else {
-                                                holder.tvAuthorName.setText("Unknown Author");
-                                            }
-                                        })
-                                        .addOnFailureListener(e -> holder.tvAuthorName.setText("Error fetching author"));
+                            } else {
+                                holder.tvCourseTitle.setText("Post Not Found");
                             }
-                        } else {
-                            holder.tvCourseTitle.setText("Post Not Found");
-                            holder.ivPost.setImageResource(R.drawable.placeholder_image);
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        holder.tvCourseTitle.setText("Error fetching post");
-                        holder.ivPost.setImageResource(R.drawable.error_image);
-                    });
-
-        } else if (helpdesk.getCourseId() != null) {
-            courseRef.document(helpdesk.getCourseId()).get()
-                    .addOnSuccessListener(courseSnapshot -> {
-                        if (courseSnapshot.exists()) {
-                            Course course = courseSnapshot.toObject(Course.class);
-                            if (course != null) {
-                                holder.tvCourseTitle.setText(course.getTitle() != null ? course.getTitle() : "No Title");
-
-                                // Fetch Post details related to the course
-                                if (course.getPost1() != null) {
-                                    postRef.document(course.getPost1()).get()
-                                            .addOnSuccessListener(postSnapshot -> {
-                                                if (postSnapshot.exists()) {
-                                                    Post post = postSnapshot.toObject(Post.class);
-                                                    if (post != null) {
-                                                        userRef.document(post.getUserId()).get()
-                                                                .addOnSuccessListener(userSnapshot -> {
-                                                                    if (userSnapshot.exists()) {
-                                                                        User author = userSnapshot.toObject(User.class);
-                                                                        holder.tvAuthorName.setText(author != null && author.getName() != null
-                                                                                ? author.getName()
-                                                                                : "Unknown Author");
-                                                                    } else {
-                                                                        holder.tvAuthorName.setText("Unknown Author");
-                                                                    }
-                                                                })
-                                                                .addOnFailureListener(e -> holder.tvAuthorName.setText("Error fetching author"));
-                                                    }
-                                                }
-                                            })
-                                            .addOnFailureListener(e -> holder.tvAuthorName.setText("Error fetching course post"));
-                                }
-                            }
-                        }
-                    })
-                    .addOnFailureListener(e -> holder.tvCourseTitle.setText("Error fetching course"));
+                        })
+                        .addOnFailureListener(e -> holder.tvCourseTitle.setText("Error fetching post"));
+            } else if ("media".equals(tableName)) {
+                // Handle Media Types
+                if (helpdesk.getReportedItemId().startsWith("IMG")) {
+                    holder.tvCourseTitle.setText("Reported Image");
+                    holder.tvAuthorName.setText("Please Check");
+                    holder.ivPost.setImageResource(R.drawable.ic_image);
+                    // Set click event for Image
+                    holder.ivPost.setOnClickListener(v -> navigateToFragment(v, "image", helpdesk.getReportedItemId()));
+                } else if (helpdesk.getReportedItemId().startsWith("PDF")) {
+                    holder.tvCourseTitle.setText("Reported Document");
+                    holder.tvAuthorName.setText("Please Check");
+                    holder.ivPost.setImageResource(R.drawable.ic_pdf);
+                    // Set click event for PDF
+                    holder.ivPost.setOnClickListener(v -> navigateToFragment(v, "pdf", helpdesk.getReportedItemId()));
+                } else if (helpdesk.getReportedItemId().startsWith("VID")) {
+                    holder.tvCourseTitle.setText("Reported Video");
+                    holder.tvAuthorName.setText("Please Check");
+                    holder.ivPost.setImageResource(R.drawable.ic_video);
+                    // Set click event for Video
+                    holder.ivPost.setOnClickListener(v -> navigateToFragment(v, "video", helpdesk.getReportedItemId()));
+                }
+            }
         }
 
         // Set Helpdesk status
@@ -226,8 +209,65 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
                 }
             });
         }
+//        holder.tvCourseTitle.setOnClickListener(v -> {
+//            if (onReportedPostActionListener != null) {
+//                onReportedPostActionListener.onPostTitleClicked(helpdesk, position);
+//            }
+//        });
     }
 
+    private void navigateToFragment(View view, String type, String mediaId) {
+        Bundle bundle = new Bundle();
+        bundle.putString("mediaId", mediaId);
+
+        if ("image".equalsIgnoreCase(type)) {
+            Navigation.findNavController(view).navigate(R.id.nav_img, bundle);
+        } else if ("video".equalsIgnoreCase(type)) {
+            Navigation.findNavController(view).navigate(R.id.nav_vid, bundle);
+        } else if ("pdf".equalsIgnoreCase(type)) {
+            Navigation.findNavController(view).navigate(R.id.nav_pdf, bundle);
+        } else if("post".equalsIgnoreCase(type)){
+            Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
+            System.out.println();
+        }
+    }
+//private void navigateToFragment(View view, String type, Object media) {
+//    Bundle bundle = new Bundle();
+//
+//    if ("image".equalsIgnoreCase(type) || "video".equalsIgnoreCase(type) || "pdf".equalsIgnoreCase(type)) {
+//        // media is expected to be a String mediaId
+//        if (media instanceof String) {
+//            bundle.putString("mediaId", (String) media);
+//            int destinationId = getDestinationIdForType(type);
+//            Navigation.findNavController(view).navigate(destinationId, bundle);
+//        } else {
+//            Log.e("navigateToFragment", "Expected String for mediaId, got: " + media.getClass().getName());
+//        }
+//    } else if ("post".equalsIgnoreCase(type)) {
+//        // media is expected to be a PostFB object
+//        if (media instanceof PostFB) {
+//            bundle.putSerializable("post", post); // Use putSerializable for Serializable objects
+//            Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
+//        } else {
+//            Log.e("navigateToFragment", "Expected PostFB for post, got: " + media.getClass().getName());
+//        }
+//    }
+//    else {
+//        Log.e("navigateToFragment", "Invalid type provided: " + type);
+//    }
+//}
+//    private int getDestinationIdForType(String type) {
+//        switch (type.toLowerCase()) {
+//            case "image":
+//                return R.id.nav_img;
+//            case "video":
+//                return R.id.nav_vid;
+//            case "pdf":
+//                return R.id.nav_pdf;
+//            default:
+//                throw new IllegalArgumentException("Unsupported type: " + type);
+//        }
+//    }
 
     @Override
     public int getItemCount() {
@@ -256,7 +296,8 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
         }
     }
     public interface OnReportedPostActionListener {
-        void onKeepClicked(Helpdesk post, int position);
-        void onDeleteClicked(Helpdesk post, int position);
+        void onKeepClicked(Helpdesk helpdesk, int position);
+        void onDeleteClicked(Helpdesk helpdesk, int position);
+//        void onPostTitleClicked(Helpdesk helpdesk,int position);
     }
 }

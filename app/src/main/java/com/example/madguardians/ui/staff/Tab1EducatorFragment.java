@@ -16,6 +16,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,19 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
                         List<VerEducator> tempList = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             VerEducator verEducator = document.toObject(VerEducator.class);
+
+                            // Handle the domainId field
+                            Object domainId = document.get("domainId");
+                            if (domainId instanceof String) {
+                                // Convert single String to List<String>
+                                List<String> domainIdList = Collections.singletonList((String) domainId);
+                                verEducator.setDomainId(domainIdList);  // Set it to the VerEducator object
+                            } else if (domainId instanceof List) {
+                                // If it's already a List, do nothing
+                                List<String> domainIdList = (List<String>) domainId;
+                                verEducator.setDomainId(domainIdList);
+                            }
+
                             verEducator.setVerEducatorId(document.getId());
                             tempList.add(verEducator);
                         }
@@ -196,9 +210,9 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
     }
     @Override
     public void onViewProofClicked(VerEducator educator, int position) {
-        ViewProofDialogFragment dialog = ViewProofDialogFragment.newInstance();
-        dialog.show(getChildFragmentManager(), "ViewProofDialogFragment");
-        showToast("view proof clicked");
+//        ViewProofDialogFragment dialog = ViewProofDialogFragment.newInstance();
+//        dialog.show(getChildFragmentManager(), "ViewProofDialogFragment");
+//        showToast("view proof clicked");
     }
     private void handleEducatorAction(VerEducator verEducator, String verifiedStatus, String actionName) {
         if (verEducator == null || getContext() == null) {
