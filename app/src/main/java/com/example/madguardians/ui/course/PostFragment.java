@@ -2,7 +2,9 @@ package com.example.madguardians.ui.course;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -20,12 +23,16 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.madguardians.R;
+import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.firebase.PostFB;
+import com.example.madguardians.utilities.AdapterCourse;
 import com.example.madguardians.utilities.FirebaseController;
+import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.UploadCallback;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -38,7 +45,7 @@ import java.util.Map;
  * Use the {@link PostFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PostFragment extends Fragment {
+public class PostFragment extends Fragment{
 
     private PostFB post;
     private View view;
@@ -295,6 +302,7 @@ public class PostFragment extends Fragment {
         void onSuccess(String courseId);
         void onFailure(Exception e);
     }
+
     private void checkAndUpdateReadStatus(MediaFB pdfMedia, FirestoreCallback callback) {
         String postId = post.getPostId(); // Get PostId
 

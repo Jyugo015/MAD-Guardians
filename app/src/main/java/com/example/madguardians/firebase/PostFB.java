@@ -152,19 +152,19 @@ public class PostFB implements Serializable{
         }
     }
 
-    public static void updatePost(HashMap<String, Object> hashMap) {
-        String postId = (String) hashMap.get("postId");
-        FirebaseController.updateFirebase(TABLE_NAME, hashMap, new UploadCallback<HashMap<String, Object>>(){
-            @Override
-            public void onSuccess(HashMap<String, Object> result) {
-                Log.e(TAG, "onSuccess: updatePost " + postId);
-            }
-            @Override
-            public void onFailure(Exception e) {
-                Log.e(TAG, "onFailure: updatePost", e);
-            }
-        });
-    }
+//    public static void updatePost(HashMap<String, Object> hashMap) {
+//        String postId = (String) hashMap.get("postId");
+//        FirebaseController.updateFirebase(TABLE_NAME, hashMap, new UploadCallback<HashMap<String, Object>>(){
+//            @Override
+//            public void onSuccess(HashMap<String, Object> result) {
+//                Log.e(TAG, "onSuccess: updatePost " + postId);
+//            }
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.e(TAG, "onFailure: updatePost", e);
+//            }
+//        });
+//    }
 
     public static HashMap<String, Object> createPostData(String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String quizId, String folderId, String date) {
         HashMap<String, Object> data = new HashMap<>();

@@ -1,12 +1,16 @@
 package com.example.madguardians.ui.course;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.fragment.app.Fragment;
@@ -15,9 +19,15 @@ import androidx.navigation.Navigation;
 import com.example.madguardians.R;
 import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.firebase.DomainFB;
+import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,7 +38,6 @@ public class CourseOverviewFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private CourseFB courseFB;
-    private List<CourseFB> cours;
     private View view;
 
     public CourseOverviewFragment() {
@@ -78,15 +87,13 @@ public class CourseOverviewFragment extends Fragment {
     }
 
     private void setView() {
-        this.courseFB = courseFB;
         if (view != null && courseFB != null) {
             TextView TVTitle = view.findViewById(R.id.TVTitle);
             TextView TVDomain = view.findViewById(R.id.TVDomain);
             TextView TVDate = view.findViewById(R.id.TVDate);
-            TextView TVView = view.findViewById(R.id.TVView);
-            TextView TVComment = view.findViewById(R.id.TVComment);
             TextView TVAuthor = view.findViewById(R.id.TVAuthor);
             TextView TVDescription = view.findViewById(R.id.TVDescription);
+            ImageView IVCover = view.findViewById(R.id.IVCover);
 
             TVTitle.setText(courseFB.getTitle());
             DomainFB.getDomain(courseFB.getDomainId(), new UploadCallback<DomainFB>() {
@@ -100,6 +107,7 @@ public class CourseOverviewFragment extends Fragment {
             TVDate.setText("Date: " + courseFB.getDate());
             TVAuthor.setText(courseFB.getAuthor());
             TVDescription.setText(courseFB.getDescription());
+            MediaHandler.displayImage(getContext(), courseFB.getCoverImage(), IVCover);
 
             androidx.constraintlayout.widget.ConstraintLayout LYLevel1 = view.findViewById(R.id.LYPost1);
             androidx.constraintlayout.widget.ConstraintLayout LYLevel2 = view.findViewById(R.id.LYPost2);
@@ -136,11 +144,9 @@ public class CourseOverviewFragment extends Fragment {
             }
 
             ToggleButton TBCollection = view.findViewById(R.id.TBCollection);
-            setIsChecked(courseFB, isCollected(courseFB));
-            TBCollection.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) setIsChecked(courseFB, true);
-                else setIsChecked(courseFB, false);
-            });
+//            toggleCollection(courseFB, TBCollection);
+//            checkCollectionStatus(courseFB, TBCollection, getContext());
+
             Button btnReport = view.findViewById(R.id.BTNReport);
             btnReport.setOnClickListener(v-> {
                 reportCourse(courseFB.getCourseId());
@@ -153,28 +159,115 @@ public class CourseOverviewFragment extends Fragment {
     private Bundle getPassingBundle (String post) {
         Bundle bundle = new Bundle();
         bundle.putString("courseId", courseFB.getCourseId());
-//        bundle.putString("domainId", course.getDomainId());
-//        bundle.putString("date", course.getDate());
-//        bundle.putString("folderId", course.getFolderId());
         bundle.putString("postId", post);
         return bundle;
     }
 
-    /////////////////////////////////////////////////////////////////////
-    private void setIsChecked(CourseFB courseFB, boolean isChecked) {
-        TextView TVCollection = view.findViewById(R.id.TVCollection);
-        ToggleButton TBCollection = view.findViewById(R.id.TBCollection);
-        TBCollection.setChecked(isChecked);
-        TVCollection.setText((isChecked) ? "Added to collection" : "Add to collection");
-
-        // change database
-    }
-
     ////////////////////////////////////////////////////////
     // yewoon
-    private boolean isCollected(CourseFB courseFB) {
-        return true;
-    }
+//    private void checkCollectionStatus(CourseFB courseFB, ToggleButton button_collection, Context context) {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        String userId = getUserId(context);
+//
+//        db.collection("collection")
+//                .whereEqualTo("userId", userId)
+//                .whereEqualTo("courseId", courseFB.getCourseId())
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful()) {
+//                        if (!task.getResult().isEmpty()) {
+//                            // collected
+//                            button_collection.setChecked(true);
+//                        } else {
+//                            // uncollected
+//                            button_collection.setChecked(false);
+//                        }
+//                    } else {
+//                        // search fail, set as false
+//                        button_collection.setChecked(false);
+//                    }
+//                });
+//    }
+//    private void toggleCollection(CourseFB courseFB, ToggleButton button_collection) {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        String userId = getUserId(button_collection.getContext());
+//
+//        if (button_collection.isChecked()) {
+//            generateCollectionId(db, userId, courseFB.getCourseId(), new OnCollectionIdGeneratedListener() {
+//                @Override
+//                public void onCollectionIdGenerated(String collectionId) {
+//                    Map<String, Object> collection = new HashMap<>();
+//                    collection.put("collectionId", collectionId);
+//                    collection.put("userId", userId);
+//                    collection.put("courseId", courseFB.getCourseId());
+//
+//                    db.collection("collection").document(collectionId)
+//                            .set(collection)
+//                            .addOnSuccessListener(aVoid -> {
+//                                Toast.makeText(button_collection.getContext(), "Collected", Toast.LENGTH_SHORT).show();
+//                            })
+//                            .addOnFailureListener(e -> {
+//                                Toast.makeText(button_collection.getContext(), "Collect Fail", Toast.LENGTH_SHORT).show();
+//                                button_collection.setChecked(false); // reset to false
+//                            });
+//                }
+//            });
+//        } else {
+//            // Remove collection
+//            db.collection("collection")
+//                    .whereEqualTo("userId", userId)
+//                    .whereEqualTo("courseId", courseFB.getCourseId())
+//                    .get()
+//                    .addOnCompleteListener(task -> {
+//                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                db.collection("collection").document(document.getId())
+//                                        .delete()
+//                                        .addOnSuccessListener(aVoid -> {
+//                                            Toast.makeText(button_collection.getContext(), "Remove collection", Toast.LENGTH_SHORT).show();
+//                                        })
+//                                        .addOnFailureListener(e -> {
+//                                            Toast.makeText(button_collection.getContext(), "Remove collection fail", Toast.LENGTH_SHORT).show();
+//                                            button_collection.setChecked(true); // reset to true
+//                                        });
+//                            }
+//                        }
+//                    });
+//        }
+//    }
+//
+//    interface OnCollectionIdGeneratedListener {
+//        void onCollectionIdGenerated(String collectionId);
+//    }
+//
+//    private void generateCollectionId(FirebaseFirestore db, String userId, String courseId, OnCollectionIdGeneratedListener listener) {
+//        db.collection("collection")
+//                .orderBy("collectionId", Query.Direction.DESCENDING)
+//                .limit(1)
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful()) {
+//                        if (!task.getResult().isEmpty()) {
+//                            String latestCollectionId = task.getResult().getDocuments().get(0).getString("collectionId");
+//                            int latestNumber = Integer.parseInt(latestCollectionId.substring(3));
+//                            int newNumber = latestNumber + 1;
+//                            String newCollectionId = String.format("COL%06d", newNumber);
+//                            listener.onCollectionIdGenerated(newCollectionId);
+//                        } else {
+//                            // if null set as COL000001
+//                            listener.onCollectionIdGenerated("COL000001");
+//                        }
+//                    } else {
+//                        Log.e("FirestoreError", "Failed to get the latest collectionId", task.getException());
+//                        Toast.makeText(db.getApp().getApplicationContext(), "Failed to generate collectionId", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//    }
+//
+//    private String getUserId(Context context) {
+//        SharedPreferences sharedPreferences = context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE);
+//        return sharedPreferences.getString("user_id", null);
+//    }
 
     ////////////////////////////////////////////////////////
     // zw

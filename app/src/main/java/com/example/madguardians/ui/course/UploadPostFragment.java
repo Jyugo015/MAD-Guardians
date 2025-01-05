@@ -49,7 +49,6 @@ public class UploadPostFragment extends Fragment{
     private View view;
     private static final String TAG = "UploadPostFragment";
     private String userId;
-    private String domainId;
     private String folderId;
     private Queue<List<Uri>> uriQueue = new LinkedList<>();
     private Queue<String> mediaTypeQueue = new LinkedList<>();
@@ -333,10 +332,6 @@ public class UploadPostFragment extends Fragment{
     private void uploadMedia() {
         if (uriQueue.isEmpty()) {
             Log.d(TAG, "uploadMedia: done uploading");
-//            uploadPostIfAvailable();
-//            postViewModel.setImageUploaded(true);
-//            postViewModel.setVideosUploaded(true);
-//            postViewModel.setPdfsUploaded(true);
             return;
         }
         Log.d(TAG, "uploadMedia: here1");

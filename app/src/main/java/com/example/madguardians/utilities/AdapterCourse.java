@@ -1,7 +1,5 @@
 package com.example.madguardians.utilities;
 
-import static java.security.AccessController.getContext;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -66,8 +64,6 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
             }
         });
         holder.date.setText(courseFB.getDate());
-//        holder.views.setText(course.getViews());
-//        holder.comments.setText(course.getComments());
         showImage(holder, courseFB);
         // check if it is verified
         if (isVerified(courseFB)) {
@@ -75,13 +71,9 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
         } else {
             holder.verifyStatus.setImageResource(R.drawable.ic_verifying);
         }
-        // check if it id collected
-//        if (isCollected(courseFB)) {
-//            holder.button_collection.setChecked(true);
-//        }
+
         checkCollectionStatus(courseFB, holder.button_collection, holder.itemView.getContext());
         holder.button_collection.setOnClickListener(v -> toggleCollection(courseFB, holder.button_collection));
-
 
         // Handle button clicks
         holder.button_start.setOnClickListener(v -> listener.onStartClick(courseFB));
@@ -201,8 +193,6 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
         void onCollectionIdGenerated(String collectionId);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
-
     private void showImage(CourseViewHolder holder, CourseFB courseFB) {
         Glide.with(holder.itemView.getContext()).load(courseFB.getCoverImage()).placeholder(R.drawable.placeholder_image).error(R.drawable.error_image).into(holder.image_cover);
     }
@@ -234,7 +224,7 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
     }
 
     public class CourseViewHolder extends RecyclerView.ViewHolder {
-        TextView title, author, date, views, comments;
+        TextView title, author, date;
         ImageView image_cover, verifyStatus;
         Button button_start;
         ToggleButton button_collection;
@@ -244,8 +234,6 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
             title = itemView.findViewById(R.id.TVTitle);
             author = itemView.findViewById(R.id.TVAuthor);
             date = itemView.findViewById(R.id.TVDate);
-            views = itemView.findViewById(R.id.TVView);
-            comments = itemView.findViewById(R.id.TVComment);
             image_cover = itemView.findViewById(R.id.IVCover);
             verifyStatus = itemView.findViewById(R.id.IVVerify);
             button_start = itemView.findViewById(R.id.BTNStart);

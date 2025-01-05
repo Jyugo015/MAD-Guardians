@@ -85,7 +85,7 @@ public class UploadDomainsFragment extends Fragment {
                     @Override
                     public void onFailure(Exception e) {Log.e("TAG", "onFailure: ", e);}
                 });
-//                TVDomain.setText(folder.getName());
+
                 GLFolders.addView(folderView);
                 folderView.setOnClickListener(v-> {
                     Bundle bundle = new Bundle();
