@@ -57,6 +57,9 @@
         <action
             android:id="@+id/action_nav_profile_to_Edu_CommentFragment"
             app:destination="@id/Edu_CommentFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_viewAllLearningHistoryFragment"
+            app:destination="@id/viewAllLearningHistoryFragment" />
     </fragment>
 
     <fragment
@@ -234,5 +237,9 @@
             app:argType="com.example.madguardians.database.Comments"/>
 
     </fragment>
+    <fragment
+        android:id="@+id/viewAllLearningHistoryFragment"
+        android:name="com.example.madguardians.viewAllLearningHistoryFragment"
+        android:label="viewAllLearningHistoryFragment" />
 
 </navigation>
