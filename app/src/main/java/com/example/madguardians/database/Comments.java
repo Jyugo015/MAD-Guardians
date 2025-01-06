@@ -26,8 +26,11 @@ public class Comments implements Serializable{
     @Nullable
     private String replyText;
     @NonNull
+    private boolean authorRead;
+
+    @NonNull
     @ColumnInfo(defaultValue = "0")
-    private boolean isRead;
+    private boolean repliedUserRead;
     @NonNull
     private String authorId;
     @NonNull
@@ -36,7 +39,8 @@ public class Comments implements Serializable{
     // Constructor
     public Comments(@NonNull String commentId, @Nullable String userId, @NonNull String postId,
                     @NonNull String comment, @Nullable String rootComment, @Nullable String replyUserId,
-                    @Nullable String replyText, boolean isRead, String authorId, @NonNull Timestamp timestamp) {
+                    @Nullable String replyText, boolean authorRead, boolean repliedUserRead,
+                    String authorId, @NonNull Timestamp timestamp) {
         this.commentId = commentId;
         this.userId = userId;
         this.postId = postId;
@@ -44,7 +48,8 @@ public class Comments implements Serializable{
         this.rootComment = rootComment;
         this.replyUserId = replyUserId;
         this.replyText = replyText;
-        this.isRead = isRead;
+        this.authorRead = authorRead;
+        this.repliedUserRead = repliedUserRead;
         this.authorId = authorId;
         this.timestamp = timestamp;
     }
@@ -120,14 +125,20 @@ public class Comments implements Serializable{
         this.replyText = replyText;
     }
 
-    // Getter and Setter for isRead
-    public boolean isRead() {
-        return isRead;
+    public boolean isAuthorRead() {
+        return authorRead;
     }
 
+    public void setAuthorRead(boolean authorRead) {
+        this.authorRead = authorRead;
+    }
 
-    public void setRead(boolean read) {
-        isRead = read;
+    public boolean isRepliedUserRead() {
+        return repliedUserRead;
+    }
+
+    public void setRepliedUserRead(boolean repliedUserRead) {
+        this.repliedUserRead = repliedUserRead;
     }
 
     @NonNull

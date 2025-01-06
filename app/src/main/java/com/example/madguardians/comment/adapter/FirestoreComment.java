@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class FirestoreComment {
 
@@ -105,15 +106,14 @@ public class FirestoreComment {
         // Ensure the task runs on a background thread
         Executor.executeTask(() -> {
             com.google.firebase.firestore.Query query = firestore.collection("comment")
-                    .whereEqualTo("authorId", userId)
                     .whereNotEqualTo("userId", userId)
                     .orderBy("timestamp", Query.Direction.DESCENDING);
 
             // Apply filter for read/unread status if necessary
-            if (readStatus != null && !readStatus.equalsIgnoreCase("All")) {
-                boolean isRead = readStatus.equalsIgnoreCase("Read");
-                query = query.whereEqualTo("read", isRead);
-            }
+//            if (readStatus != null && !readStatus.equalsIgnoreCase("All")) {
+//                boolean isRead = readStatus.equalsIgnoreCase("Read");
+//                query = query.whereEqualTo("read", isRead);
+//            }
 
             // Add a listener to the query
             query.addSnapshotListener((querySnapshot, e) -> {
@@ -125,10 +125,25 @@ public class FirestoreComment {
                 if (querySnapshot != null && !querySnapshot.isEmpty()) {
                     // Convert querySnapshot to a list of Comments objects
                     List<Comments> dataList = querySnapshot.toObjects(Comments.class);
-                    liveData.postValue(dataList); // Update LiveData for UI
+
+                    if (readStatus != null && !readStatus.equalsIgnoreCase("All")) {
+                        boolean isRead = readStatus.equalsIgnoreCase("Read");
+                        dataList  = dataList.stream()
+                                .filter(comment -> comment.getAuthorId().equals(userId)&&comment.isAuthorRead()==isRead||
+                                                    comment.getReplyUserId()!=null&&comment.getReplyUserId().equals(userId)&&
+                                                    comment.isRepliedUserRead()==isRead)
+                                .collect(Collectors.toList());
+                    }
+
+                    liveData.postValue(dataList.stream()
+                            .filter(comment -> comment.getAuthorId().equals(userId)||comment.getReplyUserId()!=null&&
+                                                comment.getReplyUserId().equals(userId))
+                            .collect(Collectors.toList()));
+
+                    Log.w("Sync Comment", "Found " + dataList.size() + " comments.");
                 } else {
                     Log.w("Sync Comment", "No comments found.");
-                    liveData.postValue(new ArrayList<>()); // Ensure LiveData gets an empty list
+                    liveData.postValue(new ArrayList<>());
                 }
             });
         });
@@ -172,7 +187,7 @@ public class FirestoreComment {
         Executor.executeTask(() -> {
             firestore.collection("comment")
                     .whereEqualTo("rootComment", rootCommentId)
-                    .orderBy("timestamp", Query.Direction.DESCENDING)
+                    .orderBy("timestamp", Query.Direction.ASCENDING)
                     .addSnapshotListener((querySnapshot, e) -> {
                         if (e != null) {
                             Log.e("Sync Child Comment", "Listen failed", e);
@@ -293,42 +308,42 @@ public class FirestoreComment {
         return liveData;
     }
 
-    public void updateReadStatus(PostFB post){
-        Executor.executeTask(()->{
-            firestore.collection("comment")
-                    .whereEqualTo("postId", post.getPostId()) // Optional query condition
-                    .get()
-                    .addOnSuccessListener(querySnapshot -> {
-                        // Create a WriteBatch instance
-                        WriteBatch batch = firestore.batch();
-
-                        // Iterate through the QuerySnapshot to add update operations to the batch
-                        for (DocumentSnapshot document : querySnapshot) {
-                            DocumentReference docRef = document.getReference();
-
-                            // Define the update data
-                            Map<String, Object> updates = new HashMap<>();
-                            updates.put("read", true);
-
-                            // Add the update operation to the batch
-                            batch.update(docRef, updates);
-                        }
-
-                        // Commit the batch write
-                        batch.commit()
-                                .addOnSuccessListener(aVoid -> {
-                                    // Handle successful batch update
-                                    Log.d("Firestore", "Batch update successful.");
-                                })
-                                .addOnFailureListener(e -> {
-                                    // Handle errors
-                                    Log.e("Firestore", "Batch update failed", e);
-                                });
-                    })
-                    .addOnFailureListener(e -> {
-                        // Handle query failure
-                        Log.e("Firestore", "Query failed", e);
-                    });
-        });
-    }
+//    public void updateReadStatus(PostFB post){
+//        Executor.executeTask(()->{
+//            firestore.collection("comment")
+//                    .whereEqualTo("postId", post.getPostId()) // Optional query condition
+//                    .get()
+//                    .addOnSuccessListener(querySnapshot -> {
+//                        // Create a WriteBatch instance
+//                        WriteBatch batch = firestore.batch();
+//
+//                        // Iterate through the QuerySnapshot to add update operations to the batch
+//                        for (DocumentSnapshot document : querySnapshot) {
+//                            DocumentReference docRef = document.getReference();
+//
+//                            // Define the update data
+//                            Map<String, Object> updates = new HashMap<>();
+//                            updates.put("read", true);
+//
+//                            // Add the update operation to the batch
+//                            batch.update(docRef, updates);
+//                        }
+//
+//                        // Commit the batch write
+//                        batch.commit()
+//                                .addOnSuccessListener(aVoid -> {
+//                                    // Handle successful batch update
+//                                    Log.d("Firestore", "Batch update successful.");
+//                                })
+//                                .addOnFailureListener(e -> {
+//                                    // Handle errors
+//                                    Log.e("Firestore", "Batch update failed", e);
+//                                });
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        // Handle query failure
+//                        Log.e("Firestore", "Query failed", e);
+//                    });
+//        });
+//    }
 }
