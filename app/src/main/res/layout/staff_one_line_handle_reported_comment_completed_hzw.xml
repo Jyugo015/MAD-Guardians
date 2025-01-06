@@ -106,6 +106,7 @@
         android:text="Report Reason"
         android:textColor="@android:color/black"
         android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/CardView"
         app:layout_constraintTop_toTopOf="@id/CardView" />
 
