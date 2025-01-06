@@ -50,11 +50,16 @@ public class Tab2PostFragment extends BaseTab2Fragment<VerPost> implements Recyc
 
         db.collection("verPost")
                 .orderBy("timestamp", Query.Direction.DESCENDING) // Order by timestamp
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        logError("Error fetching VerPosts", e);
+                        showToast("Error fetching VerPosts: " + e.getMessage());
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                         List<VerPost> tempList = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             VerPost verPost = document.toObject(VerPost.class);
                             verPost.setVerPostId(document.getId());
 
@@ -64,21 +69,52 @@ public class Tab2PostFragment extends BaseTab2Fragment<VerPost> implements Recyc
                             }
                         }
 
-                        // Update adapter with filtered list
                         if (tempList.isEmpty()) {
                             showToast("No pending VerPosts found.");
                         } else {
                             updateRecyclerViewAdapter(tempList);
                         }
                     } else {
-                        showToast("Failed to retrieve VerPosts.");
+                        showToast("No VerPosts found.");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    logError("Error fetching VerPosts", e);
-                    showToast("Error fetching VerPosts: " + e.getMessage());
                 });
     }
+
+//    @Override
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("verPost")
+//                .orderBy("timestamp", Query.Direction.DESCENDING) // Order by timestamp
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<VerPost> tempList = new ArrayList<>();
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            VerPost verPost = document.toObject(VerPost.class);
+//                            verPost.setVerPostId(document.getId());
+//
+//                            // Client-side filtering: check if status is "pending"
+//                            if ("pending".equals(verPost.getVerifiedStatus())) {
+//                                tempList.add(verPost);
+//                            }
+//                        }
+//
+//                        // Update adapter with filtered list
+//                        if (tempList.isEmpty()) {
+//                            showToast("No pending VerPosts found.");
+//                        } else {
+//                            updateRecyclerViewAdapter(tempList);
+//                        }
+//                    } else {
+//                        showToast("Failed to retrieve VerPosts.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    logError("Error fetching VerPosts", e);
+//                    showToast("Error fetching VerPosts: " + e.getMessage());
+//                });
+//    }
 
 //    @Override
 //    protected void fetchData() {

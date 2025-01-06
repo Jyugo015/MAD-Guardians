@@ -48,6 +48,8 @@ public class Tab1ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
             System.out.println("Hi "+staffId);
 
             fetchData(); // Use staffId as needed
+
+            //link to post
 //            PostFB.getPost(getArguments().getString("postId"), new UploadCallback<PostFB>(){
 //                @Override
 //                public void onSuccess(PostFB result) {
@@ -123,19 +125,26 @@ public class Tab1ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
                     callback.onIdGenerated(null); // Notify failure
                 });
     }
+    @Override
     protected void fetchData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("helpdesk")
-                .whereGreaterThan("reportedItemId", "")
-                .get() // Fetch all documents without sorting in Firestore
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        List<Helpdesk> helpdeskList = new ArrayList<>();
-                        System.out.println("Documents found: " + task.getResult().size());
-                        Log.d("Firestore", "Documents found: " + task.getResult().size());
+                .whereGreaterThan("reportedItemId", "") // Filter documents with reportedItemId > ""
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        System.out.println("Error fetching Helpdesk data: " + e.getMessage());
+                        Log.d("Firestore", "Error fetching Helpdesk data: " + e.getMessage());
+                        showToast("Error fetching Helpdesk data: " + e.getMessage());
+                        return;
+                    }
 
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                        List<Helpdesk> helpdeskList = new ArrayList<>();
+                        System.out.println("Documents found: " + queryDocumentSnapshots.size());
+                        Log.d("Firestore", "Documents found: " + queryDocumentSnapshots.size());
+
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             System.out.println("Document ID: " + document.getId() + ", Data: " + document.getData());
                             Log.d("Firestore", "Document ID: " + document.getId() + ", Data: " + document.getData());
 
@@ -159,17 +168,60 @@ public class Tab1ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
                             updateRecyclerViewAdapter(helpdeskList);
                         }
                     } else {
-                        System.out.println("Failed to retrieve Helpdesk records.");
-                        Log.d("Firestore", "Task unsuccessful or no result: " + task.getException());
-                        showToast("Failed to retrieve Helpdesk records.");
+                        System.out.println("No Helpdesk records found.");
+                        Log.d("Firestore", "No Helpdesk records found.");
+                        showToast("No Helpdesk records found.");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    System.out.println("Error fetching Helpdesk data: " + e.getMessage());
-                    Log.d("Firestore", "Error fetching Helpdesk data: " + e.getMessage());
-                    showToast("Error fetching Helpdesk data: " + e.getMessage());
                 });
     }
+
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("helpdesk")
+//                .whereGreaterThan("reportedItemId", "")
+//                .get() // Fetch all documents without sorting in Firestore
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<Helpdesk> helpdeskList = new ArrayList<>();
+//                        System.out.println("Documents found: " + task.getResult().size());
+//                        Log.d("Firestore", "Documents found: " + task.getResult().size());
+//
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            System.out.println("Document ID: " + document.getId() + ", Data: " + document.getData());
+//                            Log.d("Firestore", "Document ID: " + document.getId() + ", Data: " + document.getData());
+//
+//                            Helpdesk helpdesk = document.toObject(Helpdesk.class);
+//                            helpdeskList.add(helpdesk);
+//                        }
+//
+//                        // Sort the list by Timestamp locally
+//                        helpdeskList.sort((o1, o2) -> {
+//                            if (o1.getTimestamp() == null || o2.getTimestamp() == null) return 0;
+//                            return o2.getTimestamp().compareTo(o1.getTimestamp()); // Descending order
+//                        });
+//
+//                        if (helpdeskList.isEmpty()) {
+//                            System.out.println("No reported comments available.");
+//                            Log.d("Firestore", "No reported comments available.");
+//                            showToast("No reported comments available.");
+//                        } else {
+//                            System.out.println("Updating adapter with " + helpdeskList.size() + " items.");
+//                            Log.d("Firestore", "Updating adapter with " + helpdeskList.size() + " items.");
+//                            updateRecyclerViewAdapter(helpdeskList);
+//                        }
+//                    } else {
+//                        System.out.println("Failed to retrieve Helpdesk records.");
+//                        Log.d("Firestore", "Task unsuccessful or no result: " + task.getException());
+//                        showToast("Failed to retrieve Helpdesk records.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    System.out.println("Error fetching Helpdesk data: " + e.getMessage());
+//                    Log.d("Firestore", "Error fetching Helpdesk data: " + e.getMessage());
+//                    showToast("Error fetching Helpdesk data: " + e.getMessage());
+//                });
+//    }
 ////fetch course or post?
 //    protected void fetchData() {
 //        FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -604,11 +656,11 @@ public class Tab1ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
     private void logMessage(String message) {
         Log.d("Tab1PostFragment", message);
     }
-//    @Override
-//    public void onPostTitleClicked(Helpdesk helpdesk, int position){
-//        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostsFragmentStaff);
-//        Bundle bundle = new Bundle();
-//        bundle.putSerializable("post", post);
-//        navController.navigate(R.id.nav_user_comment, bundle);
-//    }
+    @Override
+    public void onPostTitleClicked(Helpdesk helpdesk, int position){
+        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostsFragmentStaff);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("post", post);
+        navController.navigate(R.id.nav_post, bundle);
+    }
 }

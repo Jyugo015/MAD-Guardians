@@ -56,25 +56,35 @@ public class Tab2ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
 //            });
         }
     }
+
+    @Override
     protected void fetchData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("helpdesk")
                 .whereEqualTo("helpdeskStatus", "pending") // Filter by 'pending' status
-                .get() // Fetch all matching documents
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        List<Helpdesk> pendingHelpdeskList = new ArrayList<>();
-                        System.out.println("Pending Documents found: " + task.getResult().size());
-                        Log.d("Firestore", "Pending Documents found: " + task.getResult().size());
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        System.out.println("Error fetching pending Helpdesk data: " + e.getMessage());
+                        Log.d("Firestore", "Error fetching pending Helpdesk data: " + e.getMessage());
+                        showToast("Error fetching pending Helpdesk data: " + e.getMessage());
+                        return;
+                    }
 
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                        List<Helpdesk> pendingHelpdeskList = new ArrayList<>();
+                        System.out.println("Pending Documents found: " + queryDocumentSnapshots.size());
+                        Log.d("Firestore", "Pending Documents found: " + queryDocumentSnapshots.size());
+
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             Helpdesk helpdesk = document.toObject(Helpdesk.class);
-                            // Additional local filter for commentId > ""
+
+                            // Additional local filter for reportedItemId
                             if (helpdesk.getReportedItemId() != null && !helpdesk.getReportedItemId().isEmpty()) {
                                 pendingHelpdeskList.add(helpdesk);
-                                System.out.println("Comment: "+helpdesk.getReportedItemId());
+                                System.out.println("Comment: " + helpdesk.getReportedItemId());
                             }
+
                             System.out.println("Document ID: " + document.getId() + ", Reported Item ID: " + helpdesk.getReportedItemId());
                             Log.d("Firestore", "Document ID: " + document.getId() + ", Data: " + document.getData());
                         }
@@ -95,17 +105,63 @@ public class Tab2ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
                             updateRecyclerViewAdapter(pendingHelpdeskList);
                         }
                     } else {
-                        System.out.println("Failed to retrieve pending Helpdesk records.");
-                        Log.d("Firestore", "Task unsuccessful or no result: " + task.getException());
-                        showToast("Failed to retrieve pending Helpdesk records.");
+                        System.out.println("No pending Helpdesk records found.");
+                        Log.d("Firestore", "No pending Helpdesk records found.");
+                        showToast("No pending Helpdesk records found.");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    System.out.println("Error fetching pending Helpdesk data: " + e.getMessage());
-                    Log.d("Firestore", "Error fetching pending Helpdesk data: " + e.getMessage());
-                    showToast("Error fetching pending Helpdesk data: " + e.getMessage());
                 });
     }
+
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("helpdesk")
+//                .whereEqualTo("helpdeskStatus", "pending") // Filter by 'pending' status
+//                .get() // Fetch all matching documents
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<Helpdesk> pendingHelpdeskList = new ArrayList<>();
+//                        System.out.println("Pending Documents found: " + task.getResult().size());
+//                        Log.d("Firestore", "Pending Documents found: " + task.getResult().size());
+//
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            Helpdesk helpdesk = document.toObject(Helpdesk.class);
+//                            // Additional local filter for commentId > ""
+//                            if (helpdesk.getReportedItemId() != null && !helpdesk.getReportedItemId().isEmpty()) {
+//                                pendingHelpdeskList.add(helpdesk);
+//                                System.out.println("Comment: "+helpdesk.getReportedItemId());
+//                            }
+//                            System.out.println("Document ID: " + document.getId() + ", Reported Item ID: " + helpdesk.getReportedItemId());
+//                            Log.d("Firestore", "Document ID: " + document.getId() + ", Data: " + document.getData());
+//                        }
+//
+//                        // Sort the list by Timestamp locally
+//                        pendingHelpdeskList.sort((o1, o2) -> {
+//                            if (o1.getTimestamp() == null || o2.getTimestamp() == null) return 0;
+//                            return o2.getTimestamp().compareTo(o1.getTimestamp()); // Descending order
+//                        });
+//
+//                        if (pendingHelpdeskList.isEmpty()) {
+//                            System.out.println("No pending reported comments available.");
+//                            Log.d("Firestore", "No pending reported comments available.");
+//                            showToast("No pending reported comments available.");
+//                        } else {
+//                            System.out.println("Updating adapter with " + pendingHelpdeskList.size() + " items.");
+//                            Log.d("Firestore", "Updating adapter with " + pendingHelpdeskList.size() + " items.");
+//                            updateRecyclerViewAdapter(pendingHelpdeskList);
+//                        }
+//                    } else {
+//                        System.out.println("Failed to retrieve pending Helpdesk records.");
+//                        Log.d("Firestore", "Task unsuccessful or no result: " + task.getException());
+//                        showToast("Failed to retrieve pending Helpdesk records.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    System.out.println("Error fetching pending Helpdesk data: " + e.getMessage());
+//                    Log.d("Firestore", "Error fetching pending Helpdesk data: " + e.getMessage());
+//                    showToast("Error fetching pending Helpdesk data: " + e.getMessage());
+//                });
+//    }
 
     @Override
     protected void updateRecyclerViewAdapter(List<Helpdesk> data) {
@@ -369,11 +425,11 @@ public class Tab2ReportedPostFragment extends BaseTab1Fragment<Helpdesk> impleme
     private void logMessage(String message) {
         Log.d("Tab1PostFragment", message);
     }
-//    @Override
-//    public void onPostTitleClicked(Helpdesk helpdesk, int position){
-//        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostsFragmentStaff);
-//        Bundle bundle = new Bundle();
-//        bundle.putSerializable("post", post);
-//        navController.navigate(R.id.nav_user_comment, bundle);
-//    }
+    @Override
+    public void onPostTitleClicked(Helpdesk helpdesk, int position){
+        NavController navController = Navigation.findNavController(requireActivity(), R.id.NavHostsFragmentStaff);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("post", post);
+        navController.navigate(R.id.nav_post, bundle);
+    }
 }
