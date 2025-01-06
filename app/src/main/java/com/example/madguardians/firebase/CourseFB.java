@@ -174,11 +174,20 @@ public class CourseFB {
     public static void initializeCourseList() {
         Log.d(TAG, "initializeCourseList: here1");
         ArrayList<HashMap<String, Object>> courseHashMapList = new ArrayList<>();
-        courseHashMapList.add(createCourseData("Python","U0001", "This is Java", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00001", "F00001", generateDate()));
-        courseHashMapList.add(createCourseData("Java", "U0002", "This is Python", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00004", "P00002","P00003", "D00001", "F00002", generateDate()));
-        courseHashMapList.add(createCourseData("C++", "U0003", "This is C++", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00002", "F00003", generateDate()));
-        courseHashMapList.add(createCourseData("JavaScript", "U0004", "This is JavaScript", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00004", generateDate()));
-        courseHashMapList.add(createCourseData("PHP", "U0005", "This is PHP", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Germany Basic","U0001", "Welcome to Germany lessons!", "https://res.cloudinary.com/dmgpozfee/image/upload/cover_deo762.png","P00001", "P00002","P00003", "D00001", "F00001", generateDate()));
+        courseHashMapList.add(createCourseData("French", "U0001", "Let's learn French", "https://res.cloudinary.com/dmgpozfee/image/upload/cover_ileep9.jpg","P00004", "P00005","P00006", "D00001", "F00001", generateDate()));
+        courseHashMapList.add(createCourseData("Java", "U0002", "This is Java", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00007", "P00008","P00009", "D00002", "F00003", generateDate()));
+        courseHashMapList.add(createCourseData("Python", "U0002", "Python is fun!", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00010", "P00011","P00012", "D00002", "F00004", generateDate()));
+        courseHashMapList.add(createCourseData("Light", "U0003", "Do you really know light?", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Gravity", "U0003", "Mystery force", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Chemical Equilibrium", "U0004", "Let's get chanted by the chemistry", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Nuclear", "U0004", "Don't be afraid", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Plant", "U0005", "What gives you inner peace", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Cellular Biology", "U0005", "Uncover the cell", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Algebra", "U0006", "Let's find the unknowns", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Statistics", "U0006", "What secrets do digits hold?", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Piano", "U0007", "Makes melody as remedy", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Guitar", "U0007", "Strumming and picking the strings", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
         Log.d(TAG, "initializeCourseList: here2");
         for (HashMap<String, Object> dataHashMap:courseHashMapList) {
             insertCourse(dataHashMap, new UploadCallback<String>() {

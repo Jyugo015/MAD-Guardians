@@ -71,14 +71,6 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         courseAdapter = new AdapterCourse(courseFBList, HomeFragment.this);
-
-        Log.d("TAG", "onCreate: start1");
-//        CourseFB.initializeCourseList();
-//        DomainFB.initialiseDomains();
-//        PostFB.intializePosts();
-//        MediaFB.initialiseMedia();
-//        FolderFB.initialiseFolders();
-        Log.d("TAG", "onCreate: start2");
     }
 
     @Override

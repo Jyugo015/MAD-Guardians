@@ -314,7 +314,7 @@ public class UploadPostFragment extends Fragment{
         if (postViewModel.isImageUploaded() && postViewModel.isVideosUploaded() && postViewModel.isPdfsUploaded()) {
             Log.d(TAG, "uploadPostIfAvailable: All media uploaded for post " + postViewModel.getLevel() + " level " + level);
             Queue<HashMap<String, Object>> queue = new LinkedList<>();
-            HashMap<String, Object> hashMap = PostFB.createPostData(userId, postViewModel.getTitle(), postViewModel.getDescription(), postViewModel.getImageSetId(), postViewModel.getVideoSetId(), postViewModel.getPdfSetId(), postViewModel.getQuizSetId(), folderId, generateDate());
+            HashMap<String, Object> hashMap = PostFB.createPostData(userId, postViewModel.getTitle(), postViewModel.getDescription(), postViewModel.getImageSetId(), postViewModel.getVideoSetId(), postViewModel.getPdfSetId(), folderId, generateDate());
 
             if (postViewModel.getPostId() != null) {
                 hashMap.put("postId", postViewModel.getPostId());
@@ -434,9 +434,9 @@ public class UploadPostFragment extends Fragment{
     }
 
     private void insertMedia(HashMap<String, Object> hashMap, String mediaSetId, UploadCallback<String> callback) {
-        MediaFB.insertMedia(hashMap, new UploadCallback<Boolean>(){
+        MediaFB.insertMedia(hashMap, new UploadCallback<String>(){
             @Override
-            public void onSuccess(Boolean result) {
+            public void onSuccess(String result) {
                 Log.d(TAG, "onSuccess: upload into media");
                 callback.onSuccess(mediaSetId);
             }

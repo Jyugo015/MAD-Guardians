@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.example.madguardians.database.CloudinaryUploadWorker;
 import com.example.madguardians.database.Domain;
+import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.MediasHandler;
 import com.example.madguardians.utilities.UploadCallback;
@@ -144,42 +145,55 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
         });
     }
     /////////////////////////////////////////////////xy//////////////////////////////////////////////
-    private void saveDataToFirestore(String mediaId) {
+    private void saveDataToFirestore(String pdfUrl) {
         String staffId = null; // Set to null by default
-        String verifiedStatus = null;
+        String verifiedStatus = "pending";
 
-        // Fetch the current highest verEducatorId
-        firestore.collection("verEducator")
-                .orderBy("verEducatorId", Query.Direction.DESCENDING)
-                .limit(1)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    String newVerEducatorId = generateNewId(queryDocumentSnapshots);
-                    Log.d(TAG, "Saving data with domainIds: " + selectedDomainIds);
+        HashMap<String, Object> mediaHashMap = new HashMap<>();
+        mediaHashMap.put("url", pdfUrl);
+        mediaHashMap.put("isLast", true); // to get the mediaId callback
+        MediaFB.insertMedia(mediaHashMap, new UploadCallback<String>() {
+            @Override
+            public void onSuccess(String mediaId) {
+                // Fetch the current highest verEducatorId
+                firestore.collection("verEducator")
+                        .orderBy("verEducatorId", Query.Direction.DESCENDING)
+                        .limit(1)
+                        .get()
+                        .addOnSuccessListener(queryDocumentSnapshots -> {
+                            String newVerEducatorId = generateNewId(queryDocumentSnapshots);
+                            Log.d(TAG, "Saving data with domainIds: " + selectedDomainIds);
 
-                    // Prepare the data to save
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("userId", userId);
-                    data.put("mediaId", mediaId);
-                    data.put("domainId", selectedDomainIds);  // Store only domainIds
-                    data.put("staffId", staffId);
-                    data.put("timestamp", FieldValue.serverTimestamp());
-                    data.put("verifiedStatus", verifiedStatus);
-                    data.put("verEducatorId", newVerEducatorId); // Add the new verEducatorId
+                            // Prepare the data to save
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("userId", userId);
+                            data.put("mediaId", mediaId);
+                            data.put("domainId", selectedDomainIds);  // Store only domainIds
+                            data.put("staffId", staffId);
+                            data.put("timestamp", FieldValue.serverTimestamp());
+                            data.put("verifiedStatus", verifiedStatus);
+                            data.put("verEducatorId", newVerEducatorId); // Add the new verEducatorId
 
-                    // Save the data to Firestore
-                    firestore.collection("verEducator").document(newVerEducatorId)
-                            .set(data)
-                            .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(getContext(), "Data saved successfully.", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(getContext(), "Failed to save data.", Toast.LENGTH_SHORT).show();
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to fetch current verEducatorId.", Toast.LENGTH_SHORT).show();
-                });
+                            // Save the data to Firestore
+                            firestore.collection("verEducator").document(newVerEducatorId)
+                                    .set(data)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(getContext(), "Data saved successfully.", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(getContext(), "Failed to save data.", Toast.LENGTH_SHORT).show();
+                                    });
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(getContext(), "Failed to fetch current verEducatorId.", Toast.LENGTH_SHORT).show();
+                        });
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, "onFailure: ", e);
+            }
+        });
+
     }
 
     private String generateNewId(QuerySnapshot queryDocumentSnapshots) {
