@@ -101,6 +101,7 @@ public class RootCommentFragment extends DialogFragment {
                                     null,
                                     null,
                                     false,
+                                    false,
                                     post.getUserId(),
                                     Timestamp.now());
                             firestoreManager.insertComment(comment);

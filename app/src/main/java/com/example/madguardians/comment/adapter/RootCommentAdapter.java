@@ -6,17 +6,20 @@ import static com.example.madguardians.comment.adapter.FirestoreComment.getDateT
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
@@ -25,15 +28,23 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.madguardians.R;
 import com.example.madguardians.comment.ReportFragment;
 import com.example.madguardians.database.Comments;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.CommentViewHolder>
-                                implements Listener.OnAdapterItemUpdateListener{
+                                implements Listener.OnAdapterItemUpdateListener, Listener.ScrollListener{
     private static List<Comments> commentList = List.of();
     private FirestoreComment firestoreManager;
     private ChildCommentAdapter adapter;
@@ -51,6 +62,7 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
     LinearLayout viewMore;
     Comments findMatchedComment;
     boolean findMatched = false;
+
 
     public void setCommentList(List<Comments> comments) {
         this.commentList = comments;
@@ -73,13 +85,27 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
 
     @Override
     public void onBindViewHolder(CommentViewHolder holder, int position) {
+//        if ()
+//        commentLiveData.removeObservers(lifecycleOwner);
+
         Log.w("Root Comment", "Synced");
         Comments comment = commentList.get(position);
+        holder.itemView.setVisibility(View.GONE);
+
 
         this.viewMore = holder.viewMore;
+        holder.viewMore.setVisibility(View.GONE);
 
         firestoreManager = new FirestoreComment();
         holder.commentTime.setText(getDateTimestamp(comment.getTimestamp()));
+
+        int sizeInPixels = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                45,
+                context.getResources().getDisplayMetrics()
+        );
+        AtomicInteger loadingCounter = new AtomicInteger(2); // Adjust based on the number of async tasks (e.g., images to load)
+
 
         // Fetch user profile and set username
         firestoreManager.getUser(comment.getUserId(), user -> {
@@ -89,6 +115,8 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
                         .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
                         .circleCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(sizeInPixels, sizeInPixels)
                         .into(holder.userProfile);
             }
             else{
@@ -97,25 +125,30 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
                         .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
                         .circleCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(sizeInPixels, sizeInPixels)
                         .into(holder.userProfile);
             }
-                holder.username.setText(user.getName());
-
+            holder.username.setText(user.getName());
+            if (loadingCounter.decrementAndGet() == 0) {
+                holder.itemView.setVisibility(View.VISIBLE); // Show item when all tasks complete
+            }
         });
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
         holder.commentRecyclerView.setLayoutManager(layoutManager);
 
-        adapter = new ChildCommentAdapter();
+        adapter = new ChildCommentAdapter(context);
         adapter.setParentClassInstance(this);
 
         viewModel = new ViewModelProvider(parentFragment).get(CommentViewModel.class);
-        sharedPreferences = context.getSharedPreferences("user_preferences", MODE_PRIVATE);
-        userId = sharedPreferences.getString("user_id", null);
+            sharedPreferences = context.getSharedPreferences("user_preferences", MODE_PRIVATE);
+            userId = sharedPreferences.getString("user_id", null);
         adapter.setUserId(userId);
         adapter.setOnItemPressedListener(listener);
         adapter.setOnReportListener(reportListener);
         adapter.setAdapterUpdateListener(RootCommentAdapter.this);
+        adapter.setHasStableIds(true);
         commentLiveData = viewModel.getChildComment(comment.getCommentId());
 
         commentLiveData.observe(lifecycleOwner, comments -> {
@@ -123,6 +156,11 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
             if (comments != null && !comments.isEmpty()) {
                 holder.commentRecyclerView.setVisibility(View.VISIBLE);
                 adapter.setCommentList(comments);
+                if(findMatched) {
+                    holder.commentRecyclerView.scrollToPosition(adapter.findItemPosition(findMatchedComment));
+                    findMatched=false;
+                }
+                else holder.commentRecyclerView.smoothScrollToPosition(0);
             }
             else {
                 holder.commentRecyclerView.setVisibility(View.GONE);
@@ -130,6 +168,80 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
         });
 
         holder.commentRecyclerView.setAdapter(adapter);
+
+        Handler scrollHandler = new Handler();
+        final Runnable[] scrollRunnable = {null};
+
+        holder.commentRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (scrollRunnable[0] != null) {
+                    scrollHandler.removeCallbacks(scrollRunnable[0]);
+                }
+
+                FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+                scrollRunnable[0] = () -> {
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    if (layoutManager != null) {
+                        int firstVisible = layoutManager.findFirstVisibleItemPosition();
+                        int lastVisible = layoutManager.findLastVisibleItemPosition();
+
+                        if (firstVisible >= 0 && lastVisible >= 0) {
+                            List<WriteBatch> batches = new ArrayList<>();
+                            WriteBatch currentBatch = firestore.batch();
+                            int batchOperationCount = 0;
+
+                            for (int i = firstVisible; i <= lastVisible; i++) {
+                                if (i < adapter.getCommentList().size()) {
+                                    Comments comment = adapter.getItemAtPosition(i);
+                                    DocumentReference docRef = firestore.collection("comment").document(comment.getCommentId());
+                                    Map<String, Object> updates = new HashMap<>();
+
+                                    if (!comment.isAuthorRead() && comment.getAuthorId().equals(userId)) {
+                                        updates.put("authorRead", true);
+                                    }
+                                    if (!comment.isRepliedUserRead() && comment.getReplyUserId()!=null &&comment.getReplyUserId().equals(userId)) {
+                                        updates.put("repliedUserRead", true);
+                                    }
+
+                                    if (!updates.isEmpty()) { // Only add updates if there are changes
+                                        currentBatch.update(docRef, updates);
+                                        batchOperationCount++;
+
+                                        // If batch reaches 500 operations, store it and create a new batch
+                                        if (batchOperationCount == 500) {
+                                            batches.add(currentBatch);
+                                            currentBatch = firestore.batch();
+                                            batchOperationCount = 0;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Add any remaining operations in the last batch
+                            if (batchOperationCount > 0) {
+                                batches.add(currentBatch);
+                            }
+
+                            // Commit each batch sequentially
+                            for (WriteBatch batch : batches) {
+                                batch.commit().addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        Log.d("Firestore", "Batch update successful");
+                                    } else {
+                                        Log.e("Firestore", "Batch update failed", task.getException());
+                                    }
+                                });
+                            }
+                        }
+                    }
+                };
+
+                scrollHandler.postDelayed(scrollRunnable[0], 200); // Adjust debounce delay
+            }
+        });
 
         firestoreManager.isUserEducator(comment.getUserId(), isEducator -> {
             if (isEducator) {
@@ -144,13 +256,10 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
             }else {
                 holder.educatorLabel.setVisibility(View.GONE);
             }
+            if (loadingCounter.decrementAndGet() == 0) {
+                holder.itemView.setVisibility(View.VISIBLE); // Show item when all tasks complete
+            }
         });
-
-//        if(findMatched) {
-//            holder.commentRecyclerView.smoothScrollToPosition(adapter.findItemPosition(findMatchedComment));
-//            findMatched=false;
-//        }
-//        else holder.commentRecyclerView.smoothScrollToPosition(0);
 
         String fullText = comment.getComment();
 
@@ -193,10 +302,10 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
             reportListener.onReport(comment);
         });
 
-        holder.viewMore.setOnClickListener(v->{
-            viewMoreListener.onViewMorePressed();
-            Log.w("view more", comment.getCommentId());
-        });
+//        holder.viewMore.setOnClickListener(v->{
+//            viewMoreListener.onViewMorePressed();
+//            Log.w("view more", comment.getCommentId());
+//        });
 
         holder.rootCommentBody.setOnClickListener(v -> {
             listener.onItemPressed(comment);
@@ -242,13 +351,42 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
 
     @Override
     public void onAdapterItemUpdate(boolean showViewMore) {
-        if (showViewMore){
-            viewMore.setVisibility(View.VISIBLE);
-            Log.w("viewMore visibility", "Visible");
-        }
-        else{
-            viewMore.setVisibility(View.GONE);
-            Log.w("viewMore visibility", "Gone");
+//        if (showViewMore){
+//            viewMore.setVisibility(View.VISIBLE);
+//            Log.w("viewMore visibility", "Visible");
+//        }
+//        else{
+//            viewMore.setVisibility(View.GONE);
+//            Log.w("viewMore visibility", "Gone");
+//        }
+    }
+
+    @Override
+    public void onScrollChild(Comments comment) {
+        for (int i = 0; i < commentList.size(); i++) {
+            Comments rootComment = commentList.get(i);
+
+            if (rootComment.getCommentId().equals(comment.getRootComment())) {
+                int position = i;
+
+                RecyclerView recyclerView = parentFragment.getView().findViewById(R.id.recyclerViewComments); // Adjust the ID
+
+                CommentViewHolder holder = (CommentViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+
+                if (holder != null) {
+                    RecyclerView childRecyclerView = holder.commentRecyclerView;
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) childRecyclerView.getLayoutManager();
+
+                    if (layoutManager != null) {
+                        int position1 = adapter.findItemPosition(comment);
+                        if (position1 >= 0 && position1 < adapter.getItemCount()) {
+                            // Scroll to the matched comment position within the child RecyclerView
+                            layoutManager.scrollToPositionWithOffset(position, 0);
+                        }
+                    }
+                }
+                break;
+            }
         }
     }
 
@@ -293,12 +431,33 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
         return -1;
     }
 
-    public void setFindMatchedComment(Comments comment){{
-        this.findMatchedComment = comment;
-    }}
+//    public void performActionOnVisibleItem(int position) {
+//        if (position >= 0 && position < commentList.size()) {
+//            Comments comment = commentList.get(position);
+//            if (!comment.isAuthorRead()) {
+//                if (comment.getAuthorId().equals(userId)) comment.setAuthorRead(true);
+////                notifyItemChanged(position); // Refresh the specific item
+//            }
+//            if (!comment.isRepliedUserRead()) {
+//                if (comment.getReplyUserId().equals(userId)) comment.setRepliedUserRead(true);
+//            }
+//            firestoreManager.updateReadStatus(comment);
+//            notifyDataSetChanged();
+//        }
+//    }
 
-    public void findMatchedComment(boolean findMatched){
-        this.findMatched = findMatched;
+    public Comments getItemAtPosition(int i){
+        return commentList.get(i);
     }
+
+    public List<Comments> getCommentList(){
+        return commentList;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return commentList.get(position).getCommentId().hashCode();
+    }
+
 }
 

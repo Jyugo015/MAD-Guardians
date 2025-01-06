@@ -5,11 +5,14 @@ import static android.content.Context.MODE_PRIVATE;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -21,9 +24,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.madguardians.R;
 import com.example.madguardians.comment.adapter.CommentViewModel;
 import com.example.madguardians.comment.adapter.EduCommentAdapter;
+import com.example.madguardians.comment.adapter.FirestoreComment;
 import com.example.madguardians.database.Comments;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EduChildCommentFragment extends Fragment {
     RecyclerView commentRecyclerView;
@@ -89,12 +99,14 @@ public class EduChildCommentFragment extends Fragment {
                 adapter.setCommentList(comments);
                 adapter.setUserId(userId);
                 adapter.setParentActivity(this.parentActivity);
+                adapter.setContext(getContext());
             }
             else {
                 commentRecyclerView.setVisibility(View.GONE);
                 empty_comment.setVisibility(View.VISIBLE);
             }
         });
+
 //        replyBox.setOnClickListener(new View.OnClickListener(){
 //            @Override
 //            public void onClick(View v) {
