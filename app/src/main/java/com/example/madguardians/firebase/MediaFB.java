@@ -47,13 +47,71 @@ public class MediaFB {
         hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001", "https://res.cloudinary.com/dmgpozfee/image/upload/german-grammar-3_la1wxo.jpg"));
         hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002", "https://res.cloudinary.com/dmgpozfee/video/upload/videogerman_lvyllv.mp4"));
         hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003", "https://res.cloudinary.com/dmgpozfee/image/upload/basics-of-german-a-brief-introduction-to-the-german-a1-level_bmqpku.pdf"));
+
         hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00004", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
         hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00004", "https://res.cloudinary.com/dmgpozfee/image/upload/Examples-German-Verbs_n4t7wa.webp"));
         hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00005", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman2_gl00ik.mp4"));
         hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00006", "https://res.cloudinary.com/dmgpozfee/image/upload/FSI-German-Basic-Course_sdbnhi.pdf"));
+
         hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00007", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
         hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00008", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
         hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00009", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00010", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00011", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00012", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00013", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00014", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00015", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00016", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00017", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00018", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00019", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00020", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00021", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00022", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00023", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00024", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00025", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00026", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00027", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00028", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00029", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00030", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00031", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00032", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00033", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00034", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00035", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00036", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00037", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00038", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00039", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00040", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00041", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00042", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00043", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00044", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00045", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00046", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00047", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00048", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
+
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00049", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00050", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00051", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
         for (HashMap<String, Object> dataHashMap:hashMapList) {
             insertMedia(dataHashMap, new UploadCallback<String>() {
                 @Override
