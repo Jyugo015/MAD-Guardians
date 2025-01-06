@@ -129,10 +129,24 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
                             if (postSnapshot.exists()) {
                                 Post post = postSnapshot.toObject(Post.class);
                                 if (post != null) {
-                                    // Set Title
-                                    System.out.println("Reported post check:"+post.getPostId());
-                                    holder.tvCourseTitle.setText(post.getTitle() != null ? post.getTitle() : "No Title");
-//                                    holder.tvCourseTitle.setOnClickListener(v -> navigateToFragment(v, "post", post.getPostId()));
+                                    // Fetch User details using userId
+                                    if (post.getUserId() != null) {
+                                        userRef.document(post.getUserId()).get()
+                                                .addOnSuccessListener(userSnapshot -> {
+                                                    if (userSnapshot.exists()) {
+                                                        String userName = userSnapshot.getString("name");
+                                                        holder.tvAuthorName.setText(userName != null ? userName : "Unknown Author");
+                                                    } else {
+                                                        holder.tvAuthorName.setText("User Not Found");
+                                                    }
+                                                })
+                                                .addOnFailureListener(e -> holder.tvAuthorName.setText("Error fetching user"));
+                                    } else {
+                                        holder.tvAuthorName.setText("User Not Associated");
+                                    }
+                                    // link to post
+                                    System.out.println("PostID:"+post.getPostId());
+                                    holder.tvCourseTitle.setOnClickListener(v -> navigateToFragment(v, "post", post.getPostId()));
 
                                     // Set Image if available
                                     if (post.getImageSetId() != null) {
@@ -153,6 +167,12 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
                                                 })
                                                 .addOnFailureListener(e -> holder.ivPost.setImageResource(R.drawable.error_image));
                                     }
+                                    // Set click listener to navigate to the fragment with the Post object
+                                    holder.tvCourseTitle.setOnClickListener(v -> {
+                                        Bundle bundle = new Bundle();
+                                        bundle.putSerializable("post", post); // Ensure Post implements Serializable or Parcelable
+                                        Navigation.findNavController(v).navigate(R.id.nav_post, bundle);
+                                    });
                                 }
                             } else {
                                 holder.tvCourseTitle.setText("Post Not Found");
@@ -216,58 +236,61 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
 //        });
     }
 
-    private void navigateToFragment(View view, String type, String mediaId) {
-        Bundle bundle = new Bundle();
-        bundle.putString("mediaId", mediaId);
+    //link to post option1
+//    private void navigateToFragment(View view, String type, String mediaId) {
+//        Bundle bundle = new Bundle();
+//        bundle.putString("mediaId", mediaId);
+//
+//        if ("image".equalsIgnoreCase(type)) {
+//            Navigation.findNavController(view).navigate(R.id.nav_img, bundle);
+//        } else if ("video".equalsIgnoreCase(type)) {
+//            Navigation.findNavController(view).navigate(R.id.nav_vid, bundle);
+//        } else if ("pdf".equalsIgnoreCase(type)) {
+//            Navigation.findNavController(view).navigate(R.id.nav_pdf, bundle);
+//        } else if("post".equalsIgnoreCase(type)){
+//            Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
+//            System.out.println();
+//        }
+//    }
 
-        if ("image".equalsIgnoreCase(type)) {
-            Navigation.findNavController(view).navigate(R.id.nav_img, bundle);
-        } else if ("video".equalsIgnoreCase(type)) {
-            Navigation.findNavController(view).navigate(R.id.nav_vid, bundle);
-        } else if ("pdf".equalsIgnoreCase(type)) {
-            Navigation.findNavController(view).navigate(R.id.nav_pdf, bundle);
-        } else if("post".equalsIgnoreCase(type)){
+    //link to post, option2, still error
+private void navigateToFragment(View view, String type, Object media) {
+    Bundle bundle = new Bundle();
+
+    if ("image".equalsIgnoreCase(type) || "video".equalsIgnoreCase(type) || "pdf".equalsIgnoreCase(type)) {
+        // media is expected to be a String mediaId
+        if (media instanceof String) {
+            bundle.putString("mediaId", (String) media);
+            int destinationId = getDestinationIdForType(type);
+            Navigation.findNavController(view).navigate(destinationId, bundle);
+        } else {
+            Log.e("navigateToFragment", "Expected String for mediaId, got: " + media.getClass().getName());
+        }
+    } else if ("post".equalsIgnoreCase(type)) {
+        // media is expected to be a PostFB object
+        if (media instanceof PostFB) {
+            bundle.putSerializable("post", (PostFB)media); // Use putSerializable for Serializable objects
             Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
-            System.out.println();
+        } else {
+            Log.e("navigateToFragment", "Expected PostFB for post, got: " + media.getClass().getName());
         }
     }
-//private void navigateToFragment(View view, String type, Object media) {
-//    Bundle bundle = new Bundle();
-//
-//    if ("image".equalsIgnoreCase(type) || "video".equalsIgnoreCase(type) || "pdf".equalsIgnoreCase(type)) {
-//        // media is expected to be a String mediaId
-//        if (media instanceof String) {
-//            bundle.putString("mediaId", (String) media);
-//            int destinationId = getDestinationIdForType(type);
-//            Navigation.findNavController(view).navigate(destinationId, bundle);
-//        } else {
-//            Log.e("navigateToFragment", "Expected String for mediaId, got: " + media.getClass().getName());
-//        }
-//    } else if ("post".equalsIgnoreCase(type)) {
-//        // media is expected to be a PostFB object
-//        if (media instanceof PostFB) {
-//            bundle.putSerializable("post", post); // Use putSerializable for Serializable objects
-//            Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
-//        } else {
-//            Log.e("navigateToFragment", "Expected PostFB for post, got: " + media.getClass().getName());
-//        }
-//    }
-//    else {
-//        Log.e("navigateToFragment", "Invalid type provided: " + type);
-//    }
-//}
-//    private int getDestinationIdForType(String type) {
-//        switch (type.toLowerCase()) {
-//            case "image":
-//                return R.id.nav_img;
-//            case "video":
-//                return R.id.nav_vid;
-//            case "pdf":
-//                return R.id.nav_pdf;
-//            default:
-//                throw new IllegalArgumentException("Unsupported type: " + type);
-//        }
-//    }
+    else {
+        Log.e("navigateToFragment", "Invalid type provided: " + type);
+    }
+}
+    private int getDestinationIdForType(String type) {
+        switch (type.toLowerCase()) {
+            case "image":
+                return R.id.nav_img;
+            case "video":
+                return R.id.nav_vid;
+            case "pdf":
+                return R.id.nav_pdf;
+            default:
+                throw new IllegalArgumentException("Unsupported type: " + type);
+        }
+    }
 
     @Override
     public int getItemCount() {
@@ -298,6 +321,6 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
     public interface OnReportedPostActionListener {
         void onKeepClicked(Helpdesk helpdesk, int position);
         void onDeleteClicked(Helpdesk helpdesk, int position);
-//        void onPostTitleClicked(Helpdesk helpdesk,int position);
+        void onPostTitleClicked(Helpdesk helpdesk,int position);
     }
 }

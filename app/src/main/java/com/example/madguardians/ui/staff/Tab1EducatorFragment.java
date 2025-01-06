@@ -51,11 +51,16 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
 
         db.collection("verEducator")
                 .orderBy("timestamp", Query.Direction.DESCENDING) // Fetch data sorted by timestamp
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        logError("Error fetching VerEducators", e);
+                        showToast("Error fetching VerEducators: " + e.getMessage());
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                         List<VerEducator> tempList = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             VerEducator verEducator = document.toObject(VerEducator.class);
 
                             // Handle the domainId field
@@ -73,16 +78,54 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
                             verEducator.setVerEducatorId(document.getId());
                             tempList.add(verEducator);
                         }
+
+                        // Update RecyclerView with new data
                         updateRecyclerViewAdapter(tempList);
                     } else {
-                        showToast("Failed to retrieve VerEducators.");
+                        System.out.println("No VerEducators found.");
+                        showToast("No VerEducators found.");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    logError("Error fetching VerEducators", e);
-                    showToast("Error fetching VerEducators: " + e.getMessage());
                 });
     }
+
+//    @Override
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("verEducator")
+//                .orderBy("timestamp", Query.Direction.DESCENDING) // Fetch data sorted by timestamp
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<VerEducator> tempList = new ArrayList<>();
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            VerEducator verEducator = document.toObject(VerEducator.class);
+//
+//                            // Handle the domainId field
+//                            Object domainId = document.get("domainId");
+//                            if (domainId instanceof String) {
+//                                // Convert single String to List<String>
+//                                List<String> domainIdList = Collections.singletonList((String) domainId);
+//                                verEducator.setDomainId(domainIdList);  // Set it to the VerEducator object
+//                            } else if (domainId instanceof List) {
+//                                // If it's already a List, do nothing
+//                                List<String> domainIdList = (List<String>) domainId;
+//                                verEducator.setDomainId(domainIdList);
+//                            }
+//
+//                            verEducator.setVerEducatorId(document.getId());
+//                            tempList.add(verEducator);
+//                        }
+//                        updateRecyclerViewAdapter(tempList);
+//                    } else {
+//                        showToast("Failed to retrieve VerEducators.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    logError("Error fetching VerEducators", e);
+//                    showToast("Error fetching VerEducators: " + e.getMessage());
+//                });
+//    }
 
 //    @Override
 //    protected void fetchData() {
@@ -220,7 +263,7 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
             return;
         }
 
-        Timestamp currentTimestamp = Timestamp.now();
+//        Timestamp currentTimestamp = Timestamp.now();
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
         firestore.collection("verEducator")

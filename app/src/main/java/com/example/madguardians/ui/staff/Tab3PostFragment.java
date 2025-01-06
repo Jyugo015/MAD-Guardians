@@ -43,35 +43,67 @@ public class Tab3PostFragment extends BaseTab3Fragment<VerPost> implements Recyc
         notificationUtils = new NotificationUtils();
         fetchData();
     }
-
     @Override
     protected void fetchData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         db.collection("verPost")
                 .orderBy("timestamp", Query.Direction.DESCENDING) // Sort by timestamp
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        logError("Error fetching VerPosts in real-time", e);
+                        showToast("Error fetching VerPosts: " + e.getMessage());
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                         List<VerPost> tempList = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             VerPost verPost = document.toObject(VerPost.class);
                             if (!"pending".equals(verPost.getVerifiedStatus())) { // Exclude pending entries
                                 verPost.setVerPostId(document.getId());
                                 tempList.add(verPost);
                             }
                         }
+
+                        // Update the adapter with the new list
                         updateRecyclerViewAdapter(tempList);
                     } else {
+                        // Handle empty collection or no matching documents
                         showToast("No completed VerPosts.");
                         System.out.println("No completed VerPosts.");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    logError("No completed VerPosts.", e);
-                    showToast("No completed VerPosts.");
-                    System.out.println("No completed VerPosts.");
                 });
     }
+
+//    @Override
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        db.collection("verPost")
+//                .orderBy("timestamp", Query.Direction.DESCENDING) // Sort by timestamp
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<VerPost> tempList = new ArrayList<>();
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            VerPost verPost = document.toObject(VerPost.class);
+//                            if (!"pending".equals(verPost.getVerifiedStatus())) { // Exclude pending entries
+//                                verPost.setVerPostId(document.getId());
+//                                tempList.add(verPost);
+//                            }
+//                        }
+//                        updateRecyclerViewAdapter(tempList);
+//                    } else {
+//                        showToast("No completed VerPosts.");
+//                        System.out.println("No completed VerPosts.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    logError("No completed VerPosts.", e);
+//                    showToast("No completed VerPosts.");
+//                    System.out.println("No completed VerPosts.");
+//                });
+//    }
 
     @Override
     protected void updateRecyclerViewAdapter(List<VerPost> data) {

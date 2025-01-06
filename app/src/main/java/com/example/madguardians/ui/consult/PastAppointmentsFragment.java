@@ -169,6 +169,6 @@ public class PastAppointmentsFragment extends Fragment {
     }
 
     private String getFormattedDate(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+        return new SimpleDateFormat("yyyy-M-d").format(date);
     }
 }

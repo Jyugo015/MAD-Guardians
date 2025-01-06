@@ -45,19 +45,26 @@ public class Tab2EducatorFragment extends BaseTab2Fragment<VerEducator>
             fetchData(); // Use staffId as needed
         }
     }
+
     @Override
     protected void fetchData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("verEducator")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        logError("Error fetching VerEducators", e);
+                        showToast("Error fetching VerEducators: " + e.getMessage());
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                         List<VerEducator> tempList = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             VerEducator verEducator = document.toObject(VerEducator.class);
 
+                            // Filter for "pending" verified status
                             if ("pending".equals(verEducator.getVerifiedStatus())) {
                                 // Handle the domainId field
                                 Object domainId = document.get("domainId");
@@ -70,21 +77,61 @@ public class Tab2EducatorFragment extends BaseTab2Fragment<VerEducator>
                                     List<String> domainIdList = (List<String>) domainId;
                                     verEducator.setDomainId(domainIdList);
                                 }
+
                                 verEducator.setVerEducatorId(document.getId());
                                 tempList.add(verEducator);
                             }
                         }
+
                         Log.d("FetchData", "Total pending VerEducators: " + tempList.size());
                         updateRecyclerViewAdapter(tempList);
                     } else {
-                        showToast("Failed to retrieve VerEducators.");
+                        Log.d("FetchData", "No pending VerEducators found.");
+                        showToast("No pending VerEducators found.");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    logError("Error fetching VerEducators", e);
-                    showToast("Error fetching VerEducators: " + e.getMessage());
                 });
     }
+
+//    @Override
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("verEducator")
+//                .orderBy("timestamp", Query.Direction.DESCENDING)
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<VerEducator> tempList = new ArrayList<>();
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            VerEducator verEducator = document.toObject(VerEducator.class);
+//
+//                            if ("pending".equals(verEducator.getVerifiedStatus())) {
+//                                // Handle the domainId field
+//                                Object domainId = document.get("domainId");
+//                                if (domainId instanceof String) {
+//                                    // Convert single String to List<String>
+//                                    List<String> domainIdList = Collections.singletonList((String) domainId);
+//                                    verEducator.setDomainId(domainIdList);  // Set it to the VerEducator object
+//                                } else if (domainId instanceof List) {
+//                                    // If it's already a List, do nothing
+//                                    List<String> domainIdList = (List<String>) domainId;
+//                                    verEducator.setDomainId(domainIdList);
+//                                }
+//                                verEducator.setVerEducatorId(document.getId());
+//                                tempList.add(verEducator);
+//                            }
+//                        }
+//                        Log.d("FetchData", "Total pending VerEducators: " + tempList.size());
+//                        updateRecyclerViewAdapter(tempList);
+//                    } else {
+//                        showToast("Failed to retrieve VerEducators.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    logError("Error fetching VerEducators", e);
+//                    showToast("Error fetching VerEducators: " + e.getMessage());
+//                });
+//    }
 
     @Override
     protected void updateRecyclerViewAdapter(List<VerEducator> data) {
