@@ -53,8 +53,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 public class EditProfileFragment extends Fragment {
@@ -315,16 +317,18 @@ public class EditProfileFragment extends Fragment {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        List<String> domainIds = new ArrayList<>();
+                        Set<String> uniqueDomainIds = new HashSet<>();
+//                        List<String> domainIds = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String verifiedStatus = document.getString("verifiedStatus");
                             if ("approved".equalsIgnoreCase(verifiedStatus)) {
-                                String domainId = document.getString("domainId");
-                                if (domainId != null) {
-                                    domainIds.add(domainId);
+                                List<String> documentDomainIds = (List<String>) document.get("domainId");
+                                if (documentDomainIds != null) {
+                                    uniqueDomainIds.addAll(documentDomainIds);
                                 }
                             }
                         }
+                        List<String> domainIds = new ArrayList<>(uniqueDomainIds);
 
                         // Update UI with verified domains
                         loadDomainNames(domainIds);
@@ -334,14 +338,15 @@ public class EditProfileFragment extends Fragment {
                 });
     }
     private void loadDomainNames(List<String> domainIds) {
+        // If no domainID，show nothing
+        if (domainIds.isEmpty()) {
+            updateVerifiedContainer(new ArrayList<>());
+            return;
+        }
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         List<String> domainNames = new ArrayList<>();
 
-        // If no domainID，show nothing
-        if (domainIds.isEmpty()) {
-            updateVerifiedContainer(domainNames);
-            return;
-        }
 
         // Chenk domainName in domain table
         db.collection("domain")
@@ -371,6 +376,7 @@ public class EditProfileFragment extends Fragment {
                 TextView noRecordTextView = new TextView(getContext());
                 noRecordTextView.setText("No Verification Records");
                 noRecordTextView.setTextSize(16);
+                noRecordTextView.setPadding(10, 10, 10, 10);
                 verifiedContainer.addView(noRecordTextView);
             } else {
                 for (String domainName : domainNames) {
@@ -378,6 +384,7 @@ public class EditProfileFragment extends Fragment {
                     verifiedTextView.setText(domainName);
                     verifiedTextView.setTextSize(16);
                     verifiedTextView.setPadding(10, 10, 10, 10);
+                    verifiedTextView.setTextColor(getResources().getColor(android.R.color.black));
                     verifiedContainer.addView(verifiedTextView);
                 }
             }

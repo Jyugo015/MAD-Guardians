@@ -34,6 +34,7 @@ import android.widget.Toast;
 import com.example.madguardians.database.CloudinaryUploadWorker;
 import com.example.madguardians.database.Domain;
 import com.example.madguardians.firebase.MediaFB;
+import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.MediasHandler;
 import com.example.madguardians.utilities.UploadCallback;
@@ -118,9 +119,7 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
             return;
         }
         this.selectedDomainIds = selectedDomainIds;  // Update the selected domain IDs
-        if (pdfUri == null) {
-            Toast.makeText(getContext(), "Please upload a PDF first.", Toast.LENGTH_SHORT).show();
-        }
+        updateSelectDomainButtonText(); // Update button text after selection
     }
     /////////////////////////////////////////////////xy//////////////////////////////////////////////
     private void uploadPdfAndSaveData() {
@@ -151,6 +150,7 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
 
         HashMap<String, Object> mediaHashMap = new HashMap<>();
         mediaHashMap.put("url", pdfUrl);
+        mediaHashMap.put("tableName", FirebaseController.PDF);
         mediaHashMap.put("isLast", true); // to get the mediaId callback
         MediaFB.insertMedia(mediaHashMap, new UploadCallback<String>() {
             @Override
