@@ -434,9 +434,9 @@ public class UploadPostFragment extends Fragment{
     }
 
     private void insertMedia(HashMap<String, Object> hashMap, String mediaSetId, UploadCallback<String> callback) {
-        MediaFB.insertMedia(hashMap, new UploadCallback<Boolean>(){
+        MediaFB.insertMedia(hashMap, new UploadCallback<String>(){
             @Override
-            public void onSuccess(Boolean result) {
+            public void onSuccess(String result) {
                 Log.d(TAG, "onSuccess: upload into media");
                 callback.onSuccess(mediaSetId);
             }
