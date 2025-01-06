@@ -75,16 +75,17 @@ public class AllAppointmentsFragment extends Fragment {
         }
 
         // counselor list
-        String[] counselors = {"Test Counselor 1", "Mr. John Lee", "Ms. Aisha Rahim", "Dr. Emily Wong", "Mr. Michael Tan"};
+        String[] counselors = { "Mr. John Lee","Test Counselor 1", "Ms. Aisha Rahim", "Dr. Emily Wong", "Mr. Michael Tan"};
 
         isCounselor(new FirebaseUtil.SimpleCallback() {
             @Override
             public void onResult(boolean isCounselor) {
                 for (String date : dateList) {
                     if (isCounselor) {
-                            fetchAppointmentsSchedule(date);
+                        fetchAppointmentsSchedule(date);
                     } else {
                         for (String counselor : counselors) {
+
                             fetchUserAppointments(date, counselor);
                         }
                     }
@@ -100,6 +101,9 @@ public class AllAppointmentsFragment extends Fragment {
 
     private void fetchAppointmentsSchedule(String date) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+        Log.d("FetchUserAppointments", "Date: " + date + ", User: " + userName);
+
 
         firestore.collection("appointments")
                 .document(date)
@@ -122,20 +126,27 @@ public class AllAppointmentsFragment extends Fragment {
 
     private void fetchUserAppointments(String date, String counselorName) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        Log.d("FetchUserAppointments", "Date: " + date + ", Counselor: " + counselorName + ", User: " + userName);
+
 
         firestore.collection("appointments")
                 .document(date)
                 .collection(counselorName)
                 .whereEqualTo("userName", userName)
+                .whereEqualTo("bookStatus", true)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
+                        Log.d("Debug", "Appointments found: " + task.getResult().size());
                         for (DocumentSnapshot document : task.getResult()) {
                             AppointmentModel appointment = document.toObject(AppointmentModel.class);
                             if (appointment != null) {
                                 populateAppointmentDetails(appointment, document, date, counselorName);
+                            }else{Log.e("Error user Appointment","no appointment is found");
                             }
                         }
+                    } else {
+                        Log.d("Debug", "No appointments found for date: " + date + ", counselor: " + counselorName);
                     }
                 })
                 .addOnFailureListener(e -> Log.e("Error", "Failed to fetch user appointments: " + e.getMessage()));
@@ -163,6 +174,7 @@ public class AllAppointmentsFragment extends Fragment {
                                 appointmentAdapter.notifyDataSetChanged();
                             }
                         }
+                        Log.d("PopulateDetails", "Appointment populated for user: " + appointment.getUserName());
 
                         // Check if today is the appointment date
                         String todayDate = getFormattedDate(new Date());
@@ -171,6 +183,7 @@ public class AllAppointmentsFragment extends Fragment {
                             NotificationUtils notificationUtils = new NotificationUtils();
                             String message = "You have an appointment with " + counselorName + " today at " + document.getString("time") + ".";
                             notificationUtils.createTestNotification(userDoc.getId(), message);
+
                         }
                     }
                 })
@@ -179,6 +192,6 @@ public class AllAppointmentsFragment extends Fragment {
 
 
     private String getFormattedDate(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+        return new SimpleDateFormat("yyyy-M-d").format(date);
     }
 }
