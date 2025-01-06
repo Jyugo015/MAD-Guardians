@@ -30,6 +30,7 @@ public class FirebaseController {
     public static final String QUIZ = "quiz";
     public static final String FOLDER = "folder";
     public static final String HELPDESK = "helpdesk";
+    public static final String VER_EDUCATOR = "verEducator";
     public static final String TAG = "FirebaseController";
 
     public static void insertFirebase(String tableName, String id, HashMap<String, Object> dataHashMap, UploadCallback callback) {
@@ -226,6 +227,7 @@ public class FirebaseController {
         else if (tableName.equals(USER)) return "U";
         else if (tableName.equals(QUIZ)) return "Q";
         else if (tableName.equals(HELPDESK)) return "H";
+        else if (tableName.equals(VER_EDUCATOR)) return "VE";
         else return "";
     }
 
