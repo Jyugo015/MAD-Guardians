@@ -28,12 +28,13 @@ import com.example.madguardians.comment.User_CommentFragment;
 import com.example.madguardians.database.Comments;
 import com.google.android.material.imageview.ShapeableImageView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapter.CommentViewHolder>
                                  implements Listener.OnViewMorePressedListener{
-    private static List<Comments> commentList = List.of();
+    private List<Comments> commentList= new ArrayList<>();
     private FirestoreComment firestoreManager;
     private String userId;
     private int visibleItemCount = 2; // Initially show 2 items
@@ -189,7 +190,7 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
             reportListener.onReport(comment);
         });
 
-        holder.bind(position, listener);
+        holder.bind(position, commentList, listener);
     }
 
     private void applyClickableSpans(CommentViewHolder holder, String fullText, String truncatedText) {
@@ -264,7 +265,7 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
             role = itemView.findViewById(R.id.role);
         }
 
-        public void bind(int position, Listener.OnItemPressedListener listener) {
+        public void bind(int position, List<Comments> commentList, Listener.OnItemPressedListener listener) {
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onItemPressed(commentList.get(position));

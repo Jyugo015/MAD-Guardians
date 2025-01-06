@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.CommentViewHolder>
                                 implements Listener.OnAdapterItemUpdateListener, Listener.ScrollListener{
-    private static List<Comments> commentList = List.of();
+    private List<Comments> commentList = new ArrayList<>();
     private FirestoreComment firestoreManager;
     private ChildCommentAdapter adapter;
     SharedPreferences sharedPreferences;
@@ -142,8 +142,8 @@ public class RootCommentAdapter extends RecyclerView.Adapter<RootCommentAdapter.
         adapter.setParentClassInstance(this);
 
         viewModel = new ViewModelProvider(parentFragment).get(CommentViewModel.class);
-            sharedPreferences = context.getSharedPreferences("user_preferences", MODE_PRIVATE);
-            userId = sharedPreferences.getString("user_id", null);
+        sharedPreferences = context.getSharedPreferences("user_preferences", MODE_PRIVATE);
+        userId = sharedPreferences.getString("user_id", null);
         adapter.setUserId(userId);
         adapter.setOnItemPressedListener(listener);
         adapter.setOnReportListener(reportListener);
