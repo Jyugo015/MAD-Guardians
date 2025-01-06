@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class CourseFB {
     private String folderId;
     private String domainId;
     private String date;
+    private boolean isVerified = false;
     private static final String TAG = "Course";
 
     private static Queue<HashMap<String, Object>> insertCourseQueue = new LinkedList<>();
@@ -35,6 +38,7 @@ public class CourseFB {
     private CourseFB(){
         // Default constructor required for Firebase
     }
+
     private CourseFB(String courseId, String title, @Nullable String author, @Nullable String description, @Nullable String coverImage, @Nullable String post1, @Nullable String post2, @Nullable String post3, @Nullable String domainId, @Nullable String folderId, @Nullable String date) {
         this.courseId = courseId;
         this.title = title;
@@ -48,6 +52,7 @@ public class CourseFB {
         this.folderId = folderId;
         this.date = date;
     }
+
     public static void insertCourse(HashMap<String, Object> data, UploadCallback<String> callback) {
         Log.d(TAG, "insertCourse: ");
         insertCourseQueue.add(data);
@@ -56,6 +61,7 @@ public class CourseFB {
             processQueue(callback);
         }
     }
+
     private static void processQueue(UploadCallback<String> callback) {
         if (!insertCourseQueue.isEmpty()) {
             Log.d(TAG, "insertCourse: start ");
@@ -149,12 +155,13 @@ public class CourseFB {
         ArrayList<CourseFB> courseFBList = new ArrayList<>();
         FirebaseController.getAllCollection(TABLE_NAME, null, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
-            public void onSuccess(List<HashMap<String, Object>> result) {
-                for (HashMap<String, Object> data : result) {
-                    courseFBList.add(mapHashMapToCourse(data));
+            public void onSuccess(List<HashMap<String, Object>> fullCourses) {
+                if (fullCourses != null && ! fullCourses.isEmpty()) {
+                    for (HashMap<String, Object> course : fullCourses) {
+                        courseFBList.add(mapHashMapToCourse(course));
+                    }
+                    callback.onSuccess(courseFBList);
                 }
-                Log.d(TAG, "onSuccess: size = " + courseFBList.size());
-                callback.onSuccess(courseFBList);
             }
             @Override
             public void onFailure(Exception e) {
@@ -187,7 +194,6 @@ public class CourseFB {
         }
     }
 
-
     private static CourseFB mapHashMapToCourse(HashMap<String, Object> data) {
         CourseFB courseFB = new CourseFB();
         courseFB.title = ((String) data.get("title"));
@@ -201,32 +207,7 @@ public class CourseFB {
         courseFB.folderId = ((String) data.get("folderId"));
         courseFB.date = ((String) data.get("date"));
         courseFB.courseId = ((String) data.get("courseId"));
-//        Log.d("mapHashMapToCourse", "title: " + course.title);
-//        Log.d("mapHashMapToCourse", "author: " + course.author);
-//        Log.d("mapHashMapToCourse", "description: " + course.description);
-//        Log.d("mapHashMapToCourse", "coverImage: " + course.coverImage);
-//        Log.d("mapHashMapToCourse", "post1: " + course.post1);
-//        Log.d("mapHashMapToCourse", "post2: " + course.post2);
-//        Log.d("mapHashMapToCourse", "post3: " + course.post3);
-//        Log.d("mapHashMapToCourse", "folderId: " + course.folderId);
-//        Log.d("mapHashMapToCourse", "date: " + course.date);
-//        Log.d("mapHashMapToCourse", "courseId: " + course.courseId);
         return courseFB;
-    }
-    private static HashMap<String, Object> mapCourseToHashMap(CourseFB courseFB) {
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("title", courseFB.getTitle());
-        data.put("author", courseFB.getCourseId());
-        data.put("description", courseFB.getCourseId());
-        data.put("coverImage", courseFB.getCourseId());
-        data.put("post1", courseFB.getCourseId());
-        data.put("post2", courseFB.getCourseId());
-        data.put("post3", courseFB.getCourseId());
-        data.put("domainId", courseFB.getDomainId());
-        data.put("folderId", courseFB.getCourseId());
-        data.put("date", courseFB.getCourseId());
-        data.put("courseId", courseFB.getCourseId());
-        return data;
     }
 
     public static HashMap<String, Object> createCourseData(String title, String author,
@@ -296,5 +277,14 @@ public class CourseFB {
         String date = dateFormat.format(new Date());
         Log.d(TAG, "generateDate: " + date);
         return date;
+    }
+
+    public boolean isVerified() {
+        Log.d(TAG, "isVerified: " + isVerified);
+        return isVerified;
+    }
+
+    public void setVerified(boolean verified) {
+        isVerified = verified;
     }
 }

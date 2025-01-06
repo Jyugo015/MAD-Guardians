@@ -17,6 +17,9 @@ public class MediaFB {
     private String mediaSetId;
     private String url;
     private static Queue<HashMap<String, Object>> insertQueue = new LinkedList<>();
+    private static Queue<UploadCallback<Boolean>> callbackQueue = new LinkedList<>();
+
+    private static UploadCallback<Boolean> isUploadedCallback = null;
 
     private MediaFB(String mediaId, String mediaSetId, String url) {
         this.mediaId = mediaId;
@@ -63,15 +66,17 @@ public class MediaFB {
 
     public static void insertMedia(HashMap<String, Object> data, UploadCallback<Boolean> isUploadedCallback) {
         insertQueue.add(data);
+        callbackQueue.add(isUploadedCallback);
         // start for the first, after that the method will call by itself, making sure no repetitive calling
         if (insertQueue.size() == 1) {
-            processQueue(isUploadedCallback);
+            processQueue();
         }
     }
 
-    private static void processQueue(UploadCallback<Boolean> isUploadedCallback) {
+    private static void processQueue() {
         if (!insertQueue.isEmpty()) {
             HashMap<String, Object> dataHashMap = insertQueue.peek();
+            isUploadedCallback = callbackQueue.peek();
             String tableName = (String) dataHashMap.remove("tableName");
             Log.d(TABLE_NAME, "processQueue: tableName: "+ tableName);
             FirebaseController.generateDocumentId(tableName, new UploadCallback<String>() {
@@ -83,13 +88,16 @@ public class MediaFB {
                         public void onSuccess(HashMap<String, Object> result) {
                             Log.d("processQueue media", "onSuccess");
                             insertQueue.poll();
-                            processQueue(isUploadedCallback);
+                            callbackQueue.poll();
+                            if((Boolean) dataHashMap.get("isLast")) isUploadedCallback.onSuccess(true);
+                            processQueue();
                         }
                         @Override
                         public void onFailure(Exception e) {
                             Log.e("processQueue media", "onFailure", e);
                             insertQueue.poll();
-                            processQueue(isUploadedCallback);
+                            callbackQueue.poll();
+                            processQueue();
                         }
                     });
                 }

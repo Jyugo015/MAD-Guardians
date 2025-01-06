@@ -84,14 +84,9 @@ public class UploadDomainFragment extends Fragment implements AdapterCourse.OnIt
 
     @Override
     public void onStartClick(CourseFB courseFB) {
-        Log.w("Home Fragment", "onStartClick" );
+        Log.w("Home Fragment", "onStartClick");
         Bundle bundle = new Bundle();
         bundle.putString("courseId", courseFB.getCourseId());
         Navigation.findNavController(this.getView()).navigate(R.id.nav_course_overview, bundle);
-    }
-
-    @Override
-    public void onCollectionClick(CourseFB courseFB) {
-
     }
 }

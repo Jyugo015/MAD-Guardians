@@ -59,42 +59,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/TVAuthor" />
 
-    <TextView
-        android:id="@+id/TVViews"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/standard_margin"
-        android:layout_marginEnd="@dimen/standard_margin"
-        android:text="@string/view"
-        android:textSize="@dimen/small_text"
-        android:textColor="@color/grey"
-        app:layout_constraintEnd_toStartOf="@+id/TVComments"
-        app:layout_constraintTop_toBottomOf="@+id/TVDate" />
-
-    <TextView
-        android:id="@+id/TVComments"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/standard_margin"
-        android:layout_marginEnd="@dimen/standard_margin"
-        android:text="@string/comment"
-        android:textSize="@dimen/small_text"
-        android:textColor="@color/grey"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/TVDate" />
-
     <ToggleButton
         android:id="@+id/TBCollection"
         android:layout_width="25dp"
         android:layout_height="35dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="@dimen/standard_margin"
+        android:layout_marginEnd="@dimen/standard_margin"
         android:background="@drawable/toggle_collection"
-        android:paddingTop="10dp"
         android:textOff=""
         android:textOn=""
-        app:layout_constraintStart_toEndOf="@+id/IVCover"
-        app:layout_constraintTop_toBottomOf="@+id/TVComments" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/BTNStart" />
 
     <Button
         android:id="@+id/BTNStart"
@@ -104,5 +78,5 @@
         android:layout_marginEnd="@dimen/standard_margin"
         android:text="Start"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/TVComments" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

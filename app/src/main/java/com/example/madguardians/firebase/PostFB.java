@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -50,8 +52,12 @@ public class PostFB implements Serializable{
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), postId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> result) {
-                Log.d("TAG", "onSuccess: size " + result.size());
-                callback.onSuccess(mapHashMapToPost(result.get(0)));
+                if (result != null && ! result.isEmpty()) {
+                    Log.d("TAG", "onSuccess: size " + result.size());
+                    callback.onSuccess(mapHashMapToPost(result.get(0)));
+                } else {
+                    callback.onFailure(new NullPointerException("No post is found for this id"));
+                }
             }
             @Override
             public void onFailure(Exception e) {
@@ -112,6 +118,7 @@ public class PostFB implements Serializable{
                             public void onSuccess(HashMap<String, Object> result) {
                                 Log.d("initializeDomainList", "onSuccess");
                                 insertQueue.poll();
+                                postIdCallbackQueue.poll();
                                 postIdCallback.onSuccess((String) result.get(FirebaseController.getIdName(TABLE_NAME)));
                                 processQueue();
                             }
@@ -152,19 +159,19 @@ public class PostFB implements Serializable{
         }
     }
 
-    public static void updatePost(HashMap<String, Object> hashMap) {
-        String postId = (String) hashMap.get("postId");
-        FirebaseController.updateFirebase(TABLE_NAME, hashMap, new UploadCallback<HashMap<String, Object>>(){
-            @Override
-            public void onSuccess(HashMap<String, Object> result) {
-                Log.e(TAG, "onSuccess: updatePost " + postId);
-            }
-            @Override
-            public void onFailure(Exception e) {
-                Log.e(TAG, "onFailure: updatePost", e);
-            }
-        });
-    }
+//    public static void updatePost(HashMap<String, Object> hashMap) {
+//        String postId = (String) hashMap.get("postId");
+//        FirebaseController.updateFirebase(TABLE_NAME, hashMap, new UploadCallback<HashMap<String, Object>>(){
+//            @Override
+//            public void onSuccess(HashMap<String, Object> result) {
+//                Log.e(TAG, "onSuccess: updatePost " + postId);
+//            }
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.e(TAG, "onFailure: updatePost", e);
+//            }
+//        });
+//    }
 
     public static HashMap<String, Object> createPostData(String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String quizId, String folderId, String date) {
         HashMap<String, Object> data = new HashMap<>();

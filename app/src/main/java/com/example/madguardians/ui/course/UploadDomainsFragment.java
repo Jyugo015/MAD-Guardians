@@ -1,5 +1,7 @@
 package com.example.madguardians.ui.course;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,7 +48,7 @@ public class UploadDomainsFragment extends Fragment {
         if (getArguments() != null) {
         }
         //////////////////////////////////////////////////////////////////////////////////
-        userId = "U00001";
+        userId = getUserId();
         FolderFB.getFolders(userId, new UploadCallback<List<FolderFB>>() {
             @Override
             public void onSuccess(List<FolderFB> result) {
@@ -59,6 +61,11 @@ public class UploadDomainsFragment extends Fragment {
                 Log.e("TAG", "onFailure: ", e);
             }
         });
+    }
+
+    private String getUserId() {
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("user_preferences", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("user_id", null);
     }
 
     @Override
@@ -85,7 +92,7 @@ public class UploadDomainsFragment extends Fragment {
                     @Override
                     public void onFailure(Exception e) {Log.e("TAG", "onFailure: ", e);}
                 });
-//                TVDomain.setText(folder.getName());
+
                 GLFolders.addView(folderView);
                 folderView.setOnClickListener(v-> {
                     Bundle bundle = new Bundle();

@@ -17,15 +17,13 @@ public class FolderFB {
     private String name;
     private String domainId;
     private String userId;
-    private String rootFolder = null;
     private static Queue<HashMap<String, Object>> insertQueue = new LinkedList<>();
 
-    public FolderFB(String folderId, String name, String userId, String domainId, String rootFolder) {
+    public FolderFB(String folderId, String name, String userId, String domainId) {
         this.folderId = folderId;
         this.name = name;
         this.userId = userId;
         this.domainId = domainId;
-        this.rootFolder = rootFolder;
     }
 
     public static void insertFolder(HashMap<String, Object> data) {
@@ -101,32 +99,30 @@ public class FolderFB {
         String name = (String) folderHashMap.get("name");
         String userId = (String) folderHashMap.get("userId");
         String domainId = (String) folderHashMap.get("domainId");
-        String rootFolder = (String) folderHashMap.get("rootFolder");
-        return new FolderFB(folderId, name, userId, domainId, rootFolder);
+        return new FolderFB(folderId, name, userId, domainId);
     }
 
     public static void initialiseFolders() {
         Log.d("TAG", "initialiseFolders: here1");
         ArrayList<HashMap<String, Object>> hashMapList = new ArrayList<>();
         String userId = "U0001";
-        hashMapList.add(createFolderData(userId, "Language", "D00001", null));
-        hashMapList.add(createFolderData(userId, "Computer Science", "D00002", null));
-        hashMapList.add(createFolderData(userId, "Physics", "D00003", null));
-        hashMapList.add(createFolderData(userId, "Chemistry", "D00004", null));
-        hashMapList.add(createFolderData(userId, "Biology", "D00005", null));
-        hashMapList.add(createFolderData(userId, "Mathematics", "D00006", null));
-        hashMapList.add(createFolderData(userId, "Music", "D00007", null));
+        hashMapList.add(createFolderData(userId, "Language", "D00001"));
+        hashMapList.add(createFolderData(userId, "Computer Science", "D00002"));
+        hashMapList.add(createFolderData(userId, "Physics", "D00003"));
+        hashMapList.add(createFolderData(userId, "Chemistry", "D00004"));
+        hashMapList.add(createFolderData(userId, "Biology", "D00005"));
+        hashMapList.add(createFolderData(userId, "Mathematics", "D00006"));
+        hashMapList.add(createFolderData(userId, "Music", "D00007"));
         for (HashMap<String, Object> dataHashMap:hashMapList) {
             insertFolder(dataHashMap);
         }
     }
 
-    public static HashMap<String, Object> createFolderData(String userId, String name, String domainId, String rootFolder) {
+    public static HashMap<String, Object> createFolderData(String userId, String name, String domainId) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("userId", userId);
         data.put("name", name);
         data.put("domainId", domainId);
-        data.put("rootFolder", rootFolder);
         return data;
     }
 
@@ -140,9 +136,5 @@ public class FolderFB {
 
     public String getDomainId() {
         return domainId;
-    }
-
-    public String getRootFolder() {
-        return rootFolder;
     }
 }

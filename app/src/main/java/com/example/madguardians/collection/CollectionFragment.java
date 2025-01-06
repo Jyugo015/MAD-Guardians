@@ -62,10 +62,6 @@ public class CollectionFragment extends Fragment {
                 Navigation.findNavController(requireView()).navigate(R.id.nav_course_overview, bundle);
             }
 
-            @Override
-            public void onCollectionClick(CourseFB courseFB) {
-
-            }
         });
         RVCourse = view.findViewById(R.id.RVCourse);
         RVCourse.setLayoutManager(new LinearLayoutManager(getContext()));
