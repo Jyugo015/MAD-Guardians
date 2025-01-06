@@ -17,6 +17,7 @@ public class MediaFB {
     private String mediaSetId;
     private String url;
     private static Queue<HashMap<String, Object>> insertQueue = new LinkedList<>();
+    private static Queue<HashMap<String, Object>> insertMediaSetQueue = new LinkedList<>();
     private static Queue<UploadCallback<Boolean>> callbackQueue = new LinkedList<>();
 
     private static UploadCallback<Boolean> isUploadedCallback = null;
@@ -39,17 +40,20 @@ public class MediaFB {
         return url;
     }
 
+
     public static void initialiseMedia() {
         ArrayList<HashMap<String, Object>> hashMapList = new ArrayList<>();
-        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001", "https://res.cloudinary.com/dmgpozfee/image/upload/v1730788530/cld-sample-5.jpg"));
-        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg"));
-        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001", "https://res.cloudinary.com/dmgpozfee/image/upload/v1730788530/cld-sample-5.jpg"));
-        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002", "https://res.cloudinary.com/dmgpozfee/raw/upload/v1732898566/yzre4gxv3weijurjt0rn"));
-        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002", "https://res.cloudinary.com/dmgpozfee/raw/upload/v1732898566/yzre4gxv3weijurjt0rn"));
-        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002", "https://res.cloudinary.com/dmgpozfee/raw/upload/v1732898566/yzre4gxv3weijurjt0rn"));
-        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003", "https://res.cloudinary.com/dmgpozfee/video/upload/v1734399444/ku2zmz8wrd67bbcup1o4.mp4"));
-        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003", "https://res.cloudinary.com/dmgpozfee/video/upload/v1734399444/ku2zmz8wrd67bbcup1o4.mp4"));
-        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003", "https://res.cloudinary.com/dmgpozfee/video/upload/v1734399444/ku2zmz8wrd67bbcup1o4.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001", "https://res.cloudinary.com/dmgpozfee/image/upload/a1-german-online-course_image_hzllo1.jpg"));
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001", "https://res.cloudinary.com/dmgpozfee/image/upload/german-grammar-3_la1wxo.jpg"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002", "https://res.cloudinary.com/dmgpozfee/video/upload/videogerman_lvyllv.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003", "https://res.cloudinary.com/dmgpozfee/image/upload/basics-of-german-a-brief-introduction-to-the-german-a1-level_bmqpku.pdf"));
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00004", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00004", "https://res.cloudinary.com/dmgpozfee/image/upload/Examples-German-Verbs_n4t7wa.webp"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00005", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman2_gl00ik.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00006", "https://res.cloudinary.com/dmgpozfee/image/upload/FSI-German-Basic-Course_sdbnhi.pdf"));
+        hashMapList.add(createMediaData(FirebaseController.IMAGE, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00007", "https://res.cloudinary.com/dmgpozfee/image/upload/images_1_aq5u45.png"));
+        hashMapList.add(createMediaData(FirebaseController.VIDEO, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00008", "https://res.cloudinary.com/dmgpozfee/video/upload/videoGerman_op8ndh.mp4"));
+        hashMapList.add(createMediaData(FirebaseController.PDF, FirebaseController.findStarting(FirebaseController.MEDIASET) + "00009", "https://res.cloudinary.com/dmgpozfee/image/upload/A-Foundation-Course-in-Reading-German-1652727646_kuklju.pdf"));
         for (HashMap<String, Object> dataHashMap:hashMapList) {
             insertMedia(dataHashMap, new UploadCallback<Boolean>() {
                 @Override
@@ -89,7 +93,7 @@ public class MediaFB {
                             Log.d("processQueue media", "onSuccess");
                             insertQueue.poll();
                             callbackQueue.poll();
-                            if((Boolean) dataHashMap.get("isLast")) isUploadedCallback.onSuccess(true);
+                            if((Boolean) dataHashMap.get("isLast") != null && (Boolean) dataHashMap.get("isLast")) isUploadedCallback.onSuccess(true);
                             processQueue();
                         }
                         @Override
@@ -115,6 +119,32 @@ public class MediaFB {
         data.put("mediaSetId", mediaSetId);
         data.put("url", url);
         return data;
+    }
+
+    public static void initialiseMediaSetId() {
+        for (int i = 1; i <= 15; i++) {
+            insertMediaSet();
+        }
+    }
+
+    public static void insertMediaSet() {
+        insertMediaSetQueue.add(new HashMap<String, Object>());
+        // start for the first, after that the method will call by itself, making sure no repetitive calling
+        if (insertQueue.size() == 1) {
+            processMediaSetQueue();
+        }
+    }
+
+    private static void processMediaSetQueue() {
+        if (!insertQueue.isEmpty()) {
+            HashMap<String, Object> dataHashMap = insertQueue.peek();
+            FirebaseController.generateDocumentId(FirebaseController.MEDIASET, new UploadCallback<String>() {
+                @Override
+                public void onSuccess(String id) {}
+                @Override
+                public void onFailure(Exception e) {}
+            });
+        }
     }
 
     public static void getMedias(String mediaSetId, UploadCallback<List<MediaFB>> callback) {
