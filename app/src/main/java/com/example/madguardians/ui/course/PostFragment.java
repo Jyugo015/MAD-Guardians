@@ -2,6 +2,8 @@ package com.example.madguardians.ui.course;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import static com.example.madguardians.comment.ReportFragment.newReport;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +22,10 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.madguardians.R;
+import com.example.madguardians.comment.ReportFragment;
+import com.example.madguardians.comment.User_CommentFragment;
+import com.example.madguardians.comment.adapter.Listener;
+import com.example.madguardians.database.Comments;
 import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.firebase.PostFB;
 import com.example.madguardians.utilities.FirebaseController;
@@ -42,7 +48,7 @@ import java.util.Map;
  * Use the {@link PostFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PostFragment extends Fragment {
+public class PostFragment extends Fragment implements Listener.onHelpdeskListener{
 
     private PostFB post;
     private View view;
@@ -167,7 +173,8 @@ public class PostFragment extends Fragment {
             connectToComment();
         });
         BTNReport.setOnClickListener(v -> {
-            reportPost(post.getPostId());
+//            reportPost(post.getPostId());
+            onReport(post);
         });
     }
 
@@ -236,12 +243,21 @@ public class PostFragment extends Fragment {
 
         ////////////////////////////////////////////////////////////////////////////////
         BTNReport.setOnClickListener(v -> {
-            reportMedia(media.getMediaId());
+//            reportMedia(media.getMediaId());
+            onReport(post);
         });
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
     // zw
+
+    public void onReport(PostFB postFB) {
+//        ReportDialogFragment reportDialogFragment = newReport(postFB);
+        ReportDialogFragment reportDialogFragment=ReportDialogFragment.newReport(postFB);
+        reportDialogFragment.show(getParentFragmentManager(), "ReportDialogFragment");
+        reportDialogFragment.setHelpedeskListener(PostFragment.this);
+    }
+
     private void reportPost(String postId) {
         // Call generateNextHelpdeskId to fetch the next available ID
         generateNextHelpdeskId("helpdesk", new OnIdGeneratedListener() {
@@ -339,6 +355,11 @@ public class PostFragment extends Fragment {
                     Log.e("generateNextHelpdeskId", "Error fetching last document ID", e);
                     callback.onIdGenerated(null); // Notify failure
                 });
+    }
+
+    @Override
+    public void helpdeskAdded() {
+        Toast.makeText(getContext(), "Post/Media Reported", Toast.LENGTH_SHORT).show();
     }
 
     // Callback Interface
