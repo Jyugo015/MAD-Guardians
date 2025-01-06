@@ -3,7 +3,9 @@ package com.example.madguardians.comment.adapter;
 import static com.example.madguardians.comment.adapter.FirestoreComment.getDateTimestamp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +17,14 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.madguardians.R;
 import com.example.madguardians.database.Comments;
 import com.example.madguardians.firebase.PostFB;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.CommentViewHolder> {
     private List<Comments> commentList = List.of();
@@ -29,6 +33,7 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
     private String userId;
     private PostFB post;
     private Activity parentActivity;
+    private Context context;
 
 //    // Define an interface for the item click listener
 //    public interface OnItemClickListener {
@@ -60,6 +65,8 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
 
         firestoreManager = new FirestoreComment();
 
+        holder.itemView.setVisibility(View.GONE);
+
         // Bind data to the views
         holder.commentText.setText(comment.getComment());
         holder.commentTime.setText(getDateTimestamp(comment.getTimestamp()));
@@ -78,6 +85,8 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
         }
         else holder.commentReply.setText("comments on your course");
 
+        AtomicInteger loadingCounter = new AtomicInteger(3); // Adjust based on the number of async tasks (e.g., images to load)
+
         // Fetch post title
         firestoreManager.getPost(comment.getPostId(), post -> {
             this.post = post;
@@ -86,7 +95,17 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
             } else {
                 holder.postTitle.setText("Unknown Post");
             }
+
+            if (loadingCounter.decrementAndGet() == 0) {
+                holder.itemView.setVisibility(View.VISIBLE); // Show item when all tasks complete
+            }
         });
+
+        int sizeInPixels = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                20,
+                context.getResources().getDisplayMetrics()
+        );
 
         // Fetch course details
         firestoreManager.getCourse(comment.getPostId(), course -> {
@@ -97,6 +116,8 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
                         .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
                         .circleCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(sizeInPixels, sizeInPixels)
                         .into(holder.courseCover);
             } else {
                 holder.courseTitle.setText("Unknown Course");
@@ -105,9 +126,21 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
                         .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
                         .circleCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(sizeInPixels, sizeInPixels)
                         .into(holder.courseCover);
             }
+
+            if (loadingCounter.decrementAndGet() == 0) {
+                holder.itemView.setVisibility(View.VISIBLE); // Show item when all tasks complete
+            }
         });
+
+        int sizeInPixel = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                45,
+                context.getResources().getDisplayMetrics()
+        );
 
         // Fetch user profile picture
         firestoreManager.getUser(comment.getUserId(), user -> {
@@ -117,6 +150,8 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
                         .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
                         .circleCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(sizeInPixel, sizeInPixel)
                         .into(holder.userProfile);
             }
             else {
@@ -125,22 +160,24 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
                         .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
                         .circleCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(sizeInPixel, sizeInPixel)
                         .into(holder.userProfile);
             }
             holder.username.setText(user.getName());
+            if (loadingCounter.decrementAndGet() == 0) {
+                holder.itemView.setVisibility(View.VISIBLE); // Show item when all tasks complete
+            }
         });
 
-        // Set the onClickListener for the item view
+//         Set the onClickListener for the item view
         holder.itemView.setOnClickListener(v -> {
-            firestoreManager.updateReadStatus(post);
             NavController navController = Navigation.findNavController(parentActivity, R.id.NavHostFragment);
             Bundle bundle = new Bundle();
             bundle.putSerializable("post", post);
             bundle.putSerializable("comment", comment);
             navController.navigate(R.id.nav_edu_user_comment, bundle);
         });
-
-
     }
 
     @Override
@@ -174,5 +211,23 @@ public class EduCommentAdapter extends RecyclerView.Adapter<EduCommentAdapter.Co
     public void setParentActivity(Activity parentActivity) {
         this.parentActivity = parentActivity;
     }
+
+    public void setContext(Context context){this.context = context;}
+
+//    public void performActionOnVisibleItem(int position) {
+//        if (position >= 0 && position < commentList.size()) {
+//            Comments comment = commentList.get(position);
+//            if (!comment.isAuthorRead()) {
+//                if (comment.getAuthorId().equals(userId)) comment.setAuthorRead(true);
+////                notifyItemChanged(position); // Refresh the specific item
+//            }
+//            if (!comment.isRepliedUserRead()) {
+//                if (comment.getReplyUserId().equals(userId)) comment.setRepliedUserRead(true);
+//            }
+//            firestoreManager.updateReadStatus(comment);
+//            notifyDataSetChanged();
+//        }
+//    }
+
 }
 

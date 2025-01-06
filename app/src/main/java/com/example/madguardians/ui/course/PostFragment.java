@@ -1,9 +1,6 @@
 package com.example.madguardians.ui.course;
 
 import static android.content.Context.MODE_PRIVATE;
-
-import static com.example.madguardians.comment.ReportFragment.newReport;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -22,13 +20,13 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.madguardians.R;
-import com.example.madguardians.comment.ReportFragment;
-import com.example.madguardians.comment.User_CommentFragment;
 import com.example.madguardians.comment.adapter.Listener;
 import com.example.madguardians.database.Comments;
 import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.firebase.PostFB;
+import com.example.madguardians.utilities.AdapterCourse;
 import com.example.madguardians.utilities.FirebaseController;
+import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.UploadCallback;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -423,6 +421,7 @@ public class PostFragment extends Fragment implements Listener.onHelpdeskListene
         void onSuccess(String courseId);
         void onFailure(Exception e);
     }
+
     private void checkAndUpdateReadStatus(MediaFB pdfMedia, FirestoreCallback callback) {
         String postId = post.getPostId(); // Get PostId
 

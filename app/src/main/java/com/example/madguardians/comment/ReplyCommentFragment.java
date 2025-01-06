@@ -104,6 +104,7 @@ public class ReplyCommentFragment extends DialogFragment {
                                     repliedComment.getUserId(),
                                     repliedComment.getComment(),
                                     false,
+                                    false,
                                     post.getUserId(),
                                     Timestamp.now());
                             firestoreManager.insertComment(comment);

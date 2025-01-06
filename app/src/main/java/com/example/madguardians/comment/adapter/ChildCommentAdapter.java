@@ -4,11 +4,13 @@ import static com.example.madguardians.comment.ReportFragment.newReport;
 import static com.example.madguardians.comment.RootCommentFragment.newRootComment;
 import static com.example.madguardians.comment.adapter.FirestoreComment.getDateTimestamp;
 
+import android.content.Context;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.madguardians.R;
 import com.example.madguardians.comment.ReportFragment;
 import com.example.madguardians.comment.RootCommentFragment;
@@ -26,6 +29,7 @@ import com.example.madguardians.database.Comments;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapter.CommentViewHolder>
                                  implements Listener.OnViewMorePressedListener{
@@ -37,6 +41,7 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
     Listener.OnReportListener reportListener;
     RootCommentAdapter rootCommentAdapter;
     Listener.OnAdapterItemUpdateListener adapterUpdateListener;
+    Context context;
 
     public void setParentClassInstance(RootCommentAdapter rootCommentAdapter){
         this.rootCommentAdapter = rootCommentAdapter;
@@ -51,6 +56,10 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
         this.userId = userId;
     }
 
+    public ChildCommentAdapter(Context context){
+        this.context = context;
+    }
+
     @Override
 //    public CommentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     public CommentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -62,10 +71,21 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
 
     @Override
     public void onBindViewHolder(CommentViewHolder holder, int position) {
+        holder.itemView.setVisibility(View.GONE);
+
+        // Track loading status for all elements
+        AtomicInteger loadingCounter = new AtomicInteger(3); // Adjust based on the number of async tasks (e.g., images to load)
+
         Log.w("Child Comment", "Synced");
         Comments comment = commentList.get(position);
         firestoreManager = new FirestoreComment();
         rootCommentAdapter.setOnViewMoreListener(ChildCommentAdapter.this);
+
+        int sizeInPixels = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                45,
+                context.getResources().getDisplayMetrics()
+        );
         firestoreManager.getUser(comment.getUserId(), user -> {
             if (user!=null&&user.getProfilePic().equals("url link of default profile pic")){
                 Glide.with(holder.itemView.getContext())
@@ -73,6 +93,8 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
                         .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
                         .circleCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(sizeInPixels, sizeInPixels)
                         .into(holder.userProfile);
             }
             else{
@@ -81,10 +103,15 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
                         .placeholder(R.drawable.ic_profile)
                         .error(R.drawable.ic_profile)
                         .circleCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(sizeInPixels, sizeInPixels)
                         .into(holder.userProfile);
             }
             holder.username.setText(user.getName());
 
+            if (loadingCounter.decrementAndGet() == 0) {
+                holder.itemView.setVisibility(View.VISIBLE); // Show item when all tasks complete
+            }
         });
         firestoreManager.isUserEducator(comment.getUserId(), isEducator -> {
             if (isEducator) {
@@ -99,6 +126,10 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
             }else {
                 holder.educatorLabel.setVisibility(View.GONE);
             }
+
+            if (loadingCounter.decrementAndGet() == 0) {
+                holder.itemView.setVisibility(View.VISIBLE); // Show item when all tasks complete
+            }
         });
 
         holder.commentTime.setText(getDateTimestamp(comment.getTimestamp()));
@@ -112,6 +143,9 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
 
         firestoreManager.getUser(comment.getReplyUserId(), user -> {
             holder.repliedUser.setText(user.getName());
+            if (loadingCounter.decrementAndGet() == 0) {
+                holder.itemView.setVisibility(View.VISIBLE); // Show item when all tasks complete
+            }
         });
 
         String fullText = comment.getComment();
@@ -267,5 +301,33 @@ public class ChildCommentAdapter extends RecyclerView.Adapter<ChildCommentAdapte
             }
         }
         return -1;
+    }
+
+//    public void performActionOnVisibleItem(int position) {
+//        if (position >= 0 && position < commentList.size()) {
+//            Comments comment = commentList.get(position);
+//            if (!comment.isAuthorRead()) {
+//                if (comment.getAuthorId().equals(userId)) comment.setAuthorRead(true);
+////                notifyItemChanged(position); // Refresh the specific item
+//            }
+//            if (!comment.isRepliedUserRead()) {
+//                if (comment.getReplyUserId().equals(userId)) comment.setRepliedUserRead(true);
+//            }
+//            firestoreManager.updateReadStatus(comment);
+//            notifyDataSetChanged();
+//        }
+//    }
+
+    public Comments getItemAtPosition(int i){
+        return commentList.get(i);
+    }
+
+    public List<Comments> getCommentList(){
+        return commentList;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return commentList.get(position).getCommentId().hashCode();
     }
 }

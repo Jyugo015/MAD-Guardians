@@ -36,4 +36,7 @@ public class Listener {
         void helpdeskAdded();
     }
 
+    public interface ScrollListener{
+        void onScrollChild(Comments comment);
+    }
 }

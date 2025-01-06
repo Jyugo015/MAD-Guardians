@@ -32,6 +32,7 @@
     <string name="upload_images">Upload Images</string>
     <string name="upload_videos">Upload Videos</string>
     <string name="upload_pdfs">Upload PDFs</string>
+    <string name="verified">Verified</string>
     <string name="discard">Discard</string>
     <string name="image">Image</string>
     <string name="video">Video</string>

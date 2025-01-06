@@ -24,6 +24,10 @@ import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.NetworkAvailability;
 import com.example.madguardians.database.UserDao;
+import com.example.madguardians.firebase.CourseFB;
+import com.example.madguardians.firebase.FolderFB;
+import com.example.madguardians.firebase.MediaFB;
+import com.example.madguardians.firebase.PostFB;
 
 public class MainActivity extends AppCompatActivity {
     private AppDatabase database;
@@ -55,6 +59,13 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+//        MediaFB.initialiseMediaSetId();
+//        MediaFB.initialiseMedia();
+//        CourseFB.initializeCourseList();
+//        PostFB.intializePosts();
+//        FolderFB.initialiseFolders();
+//        DomainFB.initialiseDomains();
 
 //        DomainDao domainDao = database.domainDao();
 

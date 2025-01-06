@@ -132,8 +132,9 @@ public class AllAppointmentsFragment extends Fragment {
                     if (task.isSuccessful() && task.getResult() != null) {
                         for (DocumentSnapshot document : task.getResult()) {
                             AppointmentModel appointment = document.toObject(AppointmentModel.class);
+                            Log.e("User Appointment: ",userName+"check");
                             if (appointment != null) {
-                                populateAppointmentDetails(appointment, document, date, counselorName);
+                                populateAppointmentDetails(appointment, document, date, userName);
                             }
                         }
                     }
@@ -179,6 +180,6 @@ public class AllAppointmentsFragment extends Fragment {
 
 
     private String getFormattedDate(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+        return new SimpleDateFormat("yyyy-M-d").format(date);
     }
 }

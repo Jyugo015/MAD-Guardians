@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -21,7 +23,6 @@ public class PostFB implements Serializable{
     private String imageSetId;
     private String videoSetId;
     private String fileSetId;
-    private String quizId;
     private String domainId;
     private String folderId;
     private String date;
@@ -30,7 +31,7 @@ public class PostFB implements Serializable{
 
     private static final String TAG = "PostFB";
 
-    public PostFB(String postId, String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String quizId, String domainId, String folderId, String date) {
+    public PostFB(String postId, String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String domainId, String folderId, String date) {
         this.postId = postId;
         this.userId = userId;
         this.title = title;
@@ -38,7 +39,6 @@ public class PostFB implements Serializable{
         this.imageSetId = imageSetId;
         this.videoSetId = videoSetId;
         this.fileSetId = fileSetId;
-        this.quizId = quizId;
         this.domainId = domainId;
         this.folderId = folderId;
         this.date = date;
@@ -50,8 +50,12 @@ public class PostFB implements Serializable{
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), postId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> result) {
-                Log.d("TAG", "onSuccess: size " + result.size());
-                callback.onSuccess(mapHashMapToPost(result.get(0)));
+                if (result != null && ! result.isEmpty()) {
+                    Log.d("TAG", "onSuccess: size " + result.size());
+                    callback.onSuccess(mapHashMapToPost(result.get(0)));
+                } else {
+                    callback.onFailure(new NullPointerException("No post is found for this id"));
+                }
             }
             @Override
             public void onFailure(Exception e) {
@@ -68,20 +72,19 @@ public class PostFB implements Serializable{
         String imageSetId = (String) data.get("imageSetId");
         String videoSetId = (String) data.get("videoSetId");
         String fileSetId = (String) data.get("fileSetId");
-        String quizId = (String) data.get("quizId");
         String domainId = (String) data.get("domainId");
         String folderId = (String) data.get("folderId");
         String date = (String) data.get("date");
-        return new PostFB(postId, userId, title, description, imageSetId, videoSetId, fileSetId, quizId, domainId, folderId, date);
+        return new PostFB(postId, userId, title, description, imageSetId, videoSetId, fileSetId, domainId, folderId, date);
     }
 
     public static void intializePosts() {
         Log.d("TAG", "initializeCourseList: here1");
         ArrayList<HashMap<String, Object>> hashMapList = new ArrayList<>();
-        hashMapList.add(createPostData("U0001",  "Java1",  "This is description 1",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002",  FirebaseController.findStarting(FirebaseController.QUIZ) + "00001",   FirebaseController.findStarting(FirebaseController.FOLDER) + "00001",  "11/12/2024"));
-        hashMapList.add(createPostData("U0001",  "Java2",  "This is description 2",  null,  null,  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002",  FirebaseController.findStarting(FirebaseController.QUIZ) + "00001",   FirebaseController.findStarting(FirebaseController.FOLDER) + "00002",  "11/12/2024"));
-        hashMapList.add(createPostData("U0001",  "Java3",  "This is description 3",  null,  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002",  FirebaseController.findStarting(FirebaseController.QUIZ) + "00001",   FirebaseController.findStarting(FirebaseController.FOLDER) + "00001",  "11/12/2024"));
-        hashMapList.add(createPostData("U0002",  "Java4",  "This is description 4",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001",  null,  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002",  FirebaseController.findStarting(FirebaseController.QUIZ) + "00001",    FirebaseController.findStarting(FirebaseController.FOLDER) + "00001",  "11/12/2024"));
+        hashMapList.add(createPostData("U0001",  "Germany 1",  "This is Germany 1",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00001",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00002",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00003",   FirebaseController.findStarting(FirebaseController.FOLDER) + "00001",  "10/12/2024"));
+        hashMapList.add(createPostData("U0001",  "Germany 2",  "This is Germany 2",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00004",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00005",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00006",   FirebaseController.findStarting(FirebaseController.FOLDER) + "00001",  "11/11/2024"));
+        hashMapList.add(createPostData("U0001",  "Germany 3",  "This is Germany 3",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00007",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00008",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00009",    FirebaseController.findStarting(FirebaseController.FOLDER) + "00001",  "14/12/2024"));
+//        hashMapList.add(createPostData("U0002",  "Java4",  "This is description 4",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00010",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00011",  FirebaseController.findStarting(FirebaseController.MEDIASET) + "00012",    FirebaseController.findStarting(FirebaseController.FOLDER) + "00002",  "25/12/2024"));
         for (HashMap<String, Object> dataHashMap:hashMapList) {
             insertPost(dataHashMap, new UploadCallback<String>() {
                 public void onSuccess(String result) {}
@@ -110,14 +113,15 @@ public class PostFB implements Serializable{
                         FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
                             @Override
                             public void onSuccess(HashMap<String, Object> result) {
-                                Log.d("initializeDomainList", "onSuccess");
+                                Log.d("initializePostList", "onSuccess");
                                 insertQueue.poll();
+                                postIdCallbackQueue.poll();
                                 postIdCallback.onSuccess((String) result.get(FirebaseController.getIdName(TABLE_NAME)));
                                 processQueue();
                             }
                             @Override
                             public void onFailure(Exception e) {
-                                Log.e("initializeDomainList", "onFailure");
+                                Log.e("initializePostList", "onFailure");
                                 insertQueue.poll();
                                 postIdCallback.onFailure(e);
                                 processQueue();
@@ -152,21 +156,21 @@ public class PostFB implements Serializable{
         }
     }
 
-    public static void updatePost(HashMap<String, Object> hashMap) {
-        String postId = (String) hashMap.get("postId");
-        FirebaseController.updateFirebase(TABLE_NAME, hashMap, new UploadCallback<HashMap<String, Object>>(){
-            @Override
-            public void onSuccess(HashMap<String, Object> result) {
-                Log.e(TAG, "onSuccess: updatePost " + postId);
-            }
-            @Override
-            public void onFailure(Exception e) {
-                Log.e(TAG, "onFailure: updatePost", e);
-            }
-        });
-    }
+//    public static void updatePost(HashMap<String, Object> hashMap) {
+//        String postId = (String) hashMap.get("postId");
+//        FirebaseController.updateFirebase(TABLE_NAME, hashMap, new UploadCallback<HashMap<String, Object>>(){
+//            @Override
+//            public void onSuccess(HashMap<String, Object> result) {
+//                Log.e(TAG, "onSuccess: updatePost " + postId);
+//            }
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.e(TAG, "onFailure: updatePost", e);
+//            }
+//        });
+//    }
 
-    public static HashMap<String, Object> createPostData(String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String quizId, String folderId, String date) {
+    public static HashMap<String, Object> createPostData(String userId, String title, String description, String imageSetId, String videoSetId, String fileSetId, String folderId, String date) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("userId", userId);
         data.put("title", title);
@@ -174,7 +178,6 @@ public class PostFB implements Serializable{
         data.put("imageSetId", imageSetId);
         data.put("videoSetId", videoSetId);
         data.put("fileSetId", fileSetId);
-        data.put("quizId", quizId);
         data.put("folderId", folderId);
         data.put("date", date);
         return data;
@@ -206,10 +209,6 @@ public class PostFB implements Serializable{
 
     public String getFileSetId() {
         return fileSetId;
-    }
-
-    public String getQuizId() {
-        return quizId;
     }
 
     public String getDomainId() {
