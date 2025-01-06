@@ -129,11 +129,24 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
                             if (postSnapshot.exists()) {
                                 Post post = postSnapshot.toObject(Post.class);
                                 if (post != null) {
-                                    // Set Title
-                                    System.out.println("Reported post check:"+post.getPostId());
-                                    holder.tvCourseTitle.setText(post.getTitle() != null ? post.getTitle() : "No Title");
+                                    // Fetch User details using userId
+                                    if (post.getUserId() != null) {
+                                        userRef.document(post.getUserId()).get()
+                                                .addOnSuccessListener(userSnapshot -> {
+                                                    if (userSnapshot.exists()) {
+                                                        String userName = userSnapshot.getString("name");
+                                                        holder.tvAuthorName.setText(userName != null ? userName : "Unknown Author");
+                                                    } else {
+                                                        holder.tvAuthorName.setText("User Not Found");
+                                                    }
+                                                })
+                                                .addOnFailureListener(e -> holder.tvAuthorName.setText("Error fetching user"));
+                                    } else {
+                                        holder.tvAuthorName.setText("User Not Associated");
+                                    }
                                     // link to post
-//                                    holder.tvCourseTitle.setOnClickListener(v -> navigateToFragment(v, "post", post.getPostId()));
+                                    System.out.println("PostID:"+post.getPostId());
+                                    holder.tvCourseTitle.setOnClickListener(v -> navigateToFragment(v, "post", post.getPostId()));
 
                                     // Set Image if available
                                     if (post.getImageSetId() != null) {
