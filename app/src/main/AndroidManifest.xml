@@ -31,7 +31,8 @@
             android:name=".NavVewBnv"
             android:exported="false"
             android:label="@string/title_activity_nav_vew_bnv"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustNothing|stateHidden"/>
         <activity
             android:name=".NavVewBnvStaff"
             android:exported="false"

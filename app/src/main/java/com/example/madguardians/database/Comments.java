@@ -23,9 +23,14 @@ public class Comments implements Serializable{
     private String rootComment;
     @Nullable
     private String replyUserId;
+    @Nullable
+    private String replyText;
+    @NonNull
+    private boolean authorRead;
+
     @NonNull
     @ColumnInfo(defaultValue = "0")
-    private boolean isRead;
+    private boolean repliedUserRead;
     @NonNull
     private String authorId;
     @NonNull
@@ -33,15 +38,18 @@ public class Comments implements Serializable{
 
     // Constructor
     public Comments(@NonNull String commentId, @Nullable String userId, @NonNull String postId,
-                   @NonNull String comment, @Nullable String rootComment, @Nullable String replyUserId,
-                   boolean isRead, String authorId, @NonNull Timestamp timestamp) {
+                    @NonNull String comment, @Nullable String rootComment, @Nullable String replyUserId,
+                    @Nullable String replyText, boolean authorRead, boolean repliedUserRead,
+                    String authorId, @NonNull Timestamp timestamp) {
         this.commentId = commentId;
         this.userId = userId;
         this.postId = postId;
         this.comment = comment;
         this.rootComment = rootComment;
         this.replyUserId = replyUserId;
-        this.isRead = isRead;
+        this.replyText = replyText;
+        this.authorRead = authorRead;
+        this.repliedUserRead = repliedUserRead;
         this.authorId = authorId;
         this.timestamp = timestamp;
     }
@@ -108,14 +116,29 @@ public class Comments implements Serializable{
         this.replyUserId = replyUserId;
     }
 
-    // Getter and Setter for isRead
-    public boolean isRead() {
-        return isRead;
+    @Nullable
+    public String getReplyText() {
+        return replyText;
     }
 
+    public void setReplyText(@Nullable String replyText) {
+        this.replyText = replyText;
+    }
 
-    public void setRead(boolean read) {
-        isRead = read;
+    public boolean isAuthorRead() {
+        return authorRead;
+    }
+
+    public void setAuthorRead(boolean authorRead) {
+        this.authorRead = authorRead;
+    }
+
+    public boolean isRepliedUserRead() {
+        return repliedUserRead;
+    }
+
+    public void setRepliedUserRead(boolean repliedUserRead) {
+        this.repliedUserRead = repliedUserRead;
     }
 
     @NonNull

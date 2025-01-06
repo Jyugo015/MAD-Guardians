@@ -39,25 +39,33 @@ public class Tab3ReportedCommentFragment extends BaseTab3Fragment<Helpdesk> impl
             fetchData(); // Use staffId as needed
         }
     }
+
+    @Override
     protected void fetchData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("helpdesk")
-                .whereNotEqualTo("helpdeskStatus", "pending") // Filter by 'pending' status
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        List<Helpdesk> helpdeskReportedCommentList = new ArrayList<>();
-                        System.out.println("Pending Documents found: " + task.getResult().size());
-                        Log.d("Firestore", "Documents found: " + task.getResult().size());
+                .whereNotEqualTo("helpdeskStatus", "pending") // Filter documents not having 'pending' status
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        System.out.println("Error fetching Helpdesk data: " + e.getMessage());
+                        Log.d("Firestore", "Error fetching Helpdesk data: " + e.getMessage());
+                        showToast("Error fetching Helpdesk data: " + e.getMessage());
+                        return;
+                    }
 
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                        List<Helpdesk> helpdeskReportedCommentList = new ArrayList<>();
+                        System.out.println("Documents found (not 'pending'): " + queryDocumentSnapshots.size());
+                        Log.d("Firestore", "Documents found: " + queryDocumentSnapshots.size());
+
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             Helpdesk helpdesk = document.toObject(Helpdesk.class);
 
                             // Additional local filter for commentId > ""
                             if (helpdesk.getCommentId() != null && !helpdesk.getCommentId().isEmpty()) {
                                 helpdeskReportedCommentList.add(helpdesk);
-                                System.out.println("Comment: "+helpdesk.getCommentId());
+                                System.out.println("Comment: " + helpdesk.getCommentId());
                             }
                         }
 
@@ -77,17 +85,62 @@ public class Tab3ReportedCommentFragment extends BaseTab3Fragment<Helpdesk> impl
                             updateRecyclerViewAdapter(helpdeskReportedCommentList);
                         }
                     } else {
-                        System.out.println("Failed to retrieve Helpdesk records.");
-                        Log.d("Firestore", "Task unsuccessful or no result: " + task.getException());
-                        showToast("Failed to retrieve Helpdesk records.");
+                        System.out.println("No Helpdesk records found (not 'pending').");
+                        Log.d("Firestore", "No Helpdesk records found (not 'pending').");
+                        showToast("No Helpdesk records found (not 'pending').");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    System.out.println("Error fetching Helpdesk data: " + e.getMessage());
-                    Log.d("Firestore", "Error fetching Helpdesk data: " + e.getMessage());
-                    showToast("Error fetching Helpdesk data: " + e.getMessage());
                 });
     }
+
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("helpdesk")
+//                .whereNotEqualTo("helpdeskStatus", "pending") // Filter by 'pending' status
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<Helpdesk> helpdeskReportedCommentList = new ArrayList<>();
+//                        System.out.println("Pending Documents found: " + task.getResult().size());
+//                        Log.d("Firestore", "Documents found: " + task.getResult().size());
+//
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            Helpdesk helpdesk = document.toObject(Helpdesk.class);
+//
+//                            // Additional local filter for commentId > ""
+//                            if (helpdesk.getCommentId() != null && !helpdesk.getCommentId().isEmpty()) {
+//                                helpdeskReportedCommentList.add(helpdesk);
+//                                System.out.println("Comment: "+helpdesk.getCommentId());
+//                            }
+//                        }
+//
+//                        // Sort the list by Timestamp locally
+//                        helpdeskReportedCommentList.sort((o1, o2) -> {
+//                            if (o1.getTimestamp() == null || o2.getTimestamp() == null) return 0;
+//                            return o2.getTimestamp().compareTo(o1.getTimestamp()); // Descending order
+//                        });
+//
+//                        if (helpdeskReportedCommentList.isEmpty()) {
+//                            System.out.println("No reported comments available.");
+//                            Log.d("Firestore", "No reported comments available.");
+//                            showToast("No reported comments available.");
+//                        } else {
+//                            System.out.println("Updating adapter with " + helpdeskReportedCommentList.size() + " items.");
+//                            Log.d("Firestore", "Updating adapter with " + helpdeskReportedCommentList.size() + " items.");
+//                            updateRecyclerViewAdapter(helpdeskReportedCommentList);
+//                        }
+//                    } else {
+//                        System.out.println("Failed to retrieve Helpdesk records.");
+//                        Log.d("Firestore", "Task unsuccessful or no result: " + task.getException());
+//                        showToast("Failed to retrieve Helpdesk records.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    System.out.println("Error fetching Helpdesk data: " + e.getMessage());
+//                    Log.d("Firestore", "Error fetching Helpdesk data: " + e.getMessage());
+//                    showToast("Error fetching Helpdesk data: " + e.getMessage());
+//                });
+//    }
 
     //    protected void fetchData() {
 //        FirebaseFirestore db = FirebaseFirestore.getInstance();

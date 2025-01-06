@@ -48,12 +48,22 @@ public class ChatFragment extends Fragment {
     private TextView otherUsername;
     private RecyclerView recyclerView;
     private ImageView imageView;
+    String userName;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
         Bundle bundle = getArguments();
+        String userID = FirebaseUtil.currentUserId(getContext());
+        FirebaseUtil.getUserNameById(userID).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                userName = task.getResult();
+                Log.d("Username", userName != null ? "Retrieved: " + userName : "No such user");
+            } else {
+                Log.d("Username", "Failed to retrieve username");
+            }
+        });
         if (bundle != null) {
             counselorName = bundle.getString("counselorName");
             counselorID = bundle.getString("counselorID");
@@ -131,9 +141,11 @@ public class ChatFragment extends Fragment {
             if (task.isSuccessful()) {
                 messageInput.setText("");
                 if(counselorID != null){
-                    notificationUtils.createTestNotification(counselorID, message);}
+                    Log.e("Check Counselor name: ", userName + message);
+                    notificationUtils.createTestNotification(counselorID, userName+": "+message);}
                 else {
-                    notificationUtils.createTestNotification(otherUserId,message);
+                    Log.e("Check Other User name: ", userName + message);
+                    notificationUtils.createTestNotification(otherUserId,userName+": " +message);
                 }
 
             }

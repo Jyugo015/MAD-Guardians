@@ -43,18 +43,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MediasHandler {
-
-//    public interface MediaHandleCallback {
-//        void onMediaSelected(String filePath, String fileType);
-//    }
     private final Context context;
     private final ActivityResultLauncher<Intent> activityResultLauncher;
-//    private final MediaHandleCallback callback;
     private AdapterMedia mediaAdapter;
     private List<Uri> selectedMedias;
     private List<String> mediaURLs = new ArrayList<>();
-//    private List<String> VideoURLs = new ArrayList<>();
-//    private List<String> PdfURLs = new ArrayList<>();
     private String mediaType;
     private Cloudinary cloudinary;
     private static final String TAG = "MediasHandler";
@@ -265,32 +258,6 @@ public class MediasHandler {
             Log.e("Worker", "Failed to delete temporary file");
         }
     }
-
-//    private void handleUploadedURL(String imageUrl, String database) {
-//        Log.d(TAG, "handleUploadedURL: Wow still can work!");
-//    }
-
-    // Display Image
-//    public static void displayImage(Context context, String imageUrl, ImageView imageView) {
-//        Log.d("Cloudinary URL", imageUrl);
-//        Glide.with(context).load(imageUrl).into(imageView);
-//    }
-//
-//    // Display PDF
-//    public static void displayPDF(String pdfUrl, WebView webView) {
-//        Log.d("Cloudinary URL", pdfUrl);
-//        webView.loadUrl("https://docs.google.com/gview?embedded=true&url=" + pdfUrl);
-//    }
-//
-//    public static void playVideo(String videoUrl, ExoPlayer player) {
-////        mediaItem = MediaItem.fromUri(Uri.parse(toHTTPS("http://res.cloudinary.com/dmgpozfee/video/upload/v1731385187/cgtajcgfoloqc4calfov.mp4")));
-//        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(videoUrl));
-//        player.setMediaItem(mediaItem);
-//
-//        player.prepare();
-//        player.setVolume(1.0f);
-//        player.play();
-//    }
 
     private void removeMedia(Uri uri) {
             selectedMedias.remove(uri);

@@ -75,7 +75,7 @@ public class AllAppointmentsFragment extends Fragment {
         }
 
         // counselor list
-        String[] counselors = { "Mr. John Lee","Test Counselor 1", "Ms. Aisha Rahim", "Dr. Emily Wong", "Mr. Michael Tan"};
+        String[] counselors = {"Test Counselor 1", "Mr. John Lee", "Ms. Aisha Rahim", "Dr. Emily Wong", "Mr. Michael Tan"};
 
         isCounselor(new FirebaseUtil.SimpleCallback() {
             @Override
@@ -85,7 +85,6 @@ public class AllAppointmentsFragment extends Fragment {
                         fetchAppointmentsSchedule(date);
                     } else {
                         for (String counselor : counselors) {
-
                             fetchUserAppointments(date, counselor);
                         }
                     }
@@ -140,9 +139,9 @@ public class AllAppointmentsFragment extends Fragment {
                         Log.d("Debug", "Appointments found: " + task.getResult().size());
                         for (DocumentSnapshot document : task.getResult()) {
                             AppointmentModel appointment = document.toObject(AppointmentModel.class);
+                            Log.e("User Appointment: ",userName+"check");
                             if (appointment != null) {
                                 populateAppointmentDetails(appointment, document, date, counselorName);
-                            }else{Log.e("Error user Appointment","no appointment is found");
                             }
                         }
                     } else {
@@ -174,7 +173,6 @@ public class AllAppointmentsFragment extends Fragment {
                                 appointmentAdapter.notifyDataSetChanged();
                             }
                         }
-                        Log.d("PopulateDetails", "Appointment populated for user: " + appointment.getUserName());
 
                         // Check if today is the appointment date
                         String todayDate = getFormattedDate(new Date());
@@ -183,7 +181,6 @@ public class AllAppointmentsFragment extends Fragment {
                             NotificationUtils notificationUtils = new NotificationUtils();
                             String message = "You have an appointment with " + counselorName + " today at " + document.getString("time") + ".";
                             notificationUtils.createTestNotification(userDoc.getId(), message);
-
                         }
                     }
                 })

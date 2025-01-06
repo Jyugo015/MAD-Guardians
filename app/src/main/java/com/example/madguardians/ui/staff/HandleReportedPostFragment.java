@@ -43,11 +43,21 @@ public class HandleReportedPostFragment extends Fragment {
         tab1Args.putString("staffId", staffId);
         tab1.setArguments(tab1Args);
 
+        Tab2ReportedPostFragment tab2 = new Tab2ReportedPostFragment();
+        Bundle tab2Args = new Bundle();
+        tab2Args.putString("staffId", staffId);
+        tab2.setArguments(tab2Args);
+
+        Tab3ReportedPostFragment tab3 = new Tab3ReportedPostFragment();
+        Bundle tab3Args = new Bundle();
+        tab3Args.putString("staffId", staffId);
+        tab3.setArguments(tab3Args);
+
         // Set up the adapter for ViewPager2
         ViewPageAdapter adapter = new ViewPageAdapter(requireActivity());
         adapter.addFragment(tab1, "All");
-        adapter.addFragment(new Tab1ReportedPostFragment(), "Pending");
-        adapter.addFragment(new Tab1ReportedPostFragment(), "Completed");
+        adapter.addFragment(tab2, "Pending");
+        adapter.addFragment(tab3, "Completed");
         viewPager.setAdapter(adapter);
 
         // Use TabLayoutMediator to link TabLayout and ViewPager2

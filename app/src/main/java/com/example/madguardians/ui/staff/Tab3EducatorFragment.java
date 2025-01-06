@@ -15,6 +15,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,34 +41,93 @@ public class Tab3EducatorFragment extends BaseTab3Fragment<VerEducator>
             fetchData(); // Use staffId as needed
         }
     }
+
     @Override
     protected void fetchData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("verEducator")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        logError("Error fetching VerEducators", e);
+                        showToast("Error fetching VerEducators: " + e.getMessage());
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                         List<VerEducator> tempList = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             VerEducator verEducator = document.toObject(VerEducator.class);
-                            verEducator.setVerEducatorId(document.getId());
+
+                            // Exclude "pending" status records
                             if (!"pending".equals(verEducator.getVerifiedStatus())) {
+                                // Handle the domainId field
+                                Object domainId = document.get("domainId");
+                                if (domainId instanceof String) {
+                                    // Convert single String to List<String>
+                                    List<String> domainIdList = Collections.singletonList((String) domainId);
+                                    verEducator.setDomainId(domainIdList);  // Set it to the VerEducator object
+                                } else if (domainId instanceof List) {
+                                    // If it's already a List, do nothing
+                                    List<String> domainIdList = (List<String>) domainId;
+                                    verEducator.setDomainId(domainIdList);
+                                }
+
+                                verEducator.setVerEducatorId(document.getId());
                                 tempList.add(verEducator);
                             }
                         }
-                        Log.d("FetchData", "Total pending VerEducators: " + tempList.size());
+
+                        Log.d("FetchData", "Total VerEducators: " + tempList.size());
                         updateRecyclerViewAdapter(tempList);
                     } else {
-                        showToast("Failed to retrieve VerEducators.");
+                        Log.d("FetchData", "No VerEducators found.");
+                        showToast("No VerEducators found.");
                     }
-                })
-                .addOnFailureListener(e -> {
-                    logError("Error fetching VerEducators", e);
-                    showToast("Error fetching VerEducators: " + e.getMessage());
                 });
     }
+
+//    @Override
+//    protected void fetchData() {
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("verEducator")
+//                .orderBy("timestamp", Query.Direction.DESCENDING)
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && task.getResult() != null) {
+//                        List<VerEducator> tempList = new ArrayList<>();
+//                        for (QueryDocumentSnapshot document : task.getResult()) {
+//                            VerEducator verEducator = document.toObject(VerEducator.class);
+//
+//                            if (!"pending".equals(verEducator.getVerifiedStatus())) {
+//                                // Handle the domainId field
+//                                Object domainId = document.get("domainId");
+//                                if (domainId instanceof String) {
+//                                    // Convert single String to List<String>
+//                                    List<String> domainIdList = Collections.singletonList((String) domainId);
+//                                    verEducator.setDomainId(domainIdList);  // Set it to the VerEducator object
+//                                } else if (domainId instanceof List) {
+//                                    // If it's already a List, do nothing
+//                                    List<String> domainIdList = (List<String>) domainId;
+//                                    verEducator.setDomainId(domainIdList);
+//                                }
+//                                verEducator.setVerEducatorId(document.getId());
+//                                tempList.add(verEducator);
+//                            }
+//                        }
+//                        Log.d("FetchData", "Total pending VerEducators: " + tempList.size());
+//                        updateRecyclerViewAdapter(tempList);
+//                    } else {
+//                        showToast("Failed to retrieve VerEducators.");
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    logError("Error fetching VerEducators", e);
+//                    showToast("Error fetching VerEducators: " + e.getMessage());
+//                });
+//    }
 
     @Override
     protected void updateRecyclerViewAdapter(List<VerEducator> data) {
@@ -113,21 +173,21 @@ public class Tab3EducatorFragment extends BaseTab3Fragment<VerEducator>
                     adapter.notifyItemRemoved(position);
 
                     // Handle related data deletion
-                    if (verEducator.getImageSetId() != null) {
-                        firestore.collection("images")
-                                .document(verEducator.getImageSetId())
-                                .delete()
-                                .addOnSuccessListener(aVoid1 -> showToast("Deleted associated ImageSet: " + verEducator.getImageSetId()))
-                                .addOnFailureListener(e -> showToast("Failed to delete associated ImageSet: " + verEducator.getImageSetId()));
-                    }
-
-                    if (verEducator.getFileSetId() != null) {
-                        firestore.collection("files")
-                                .document(verEducator.getFileSetId())
-                                .delete()
-                                .addOnSuccessListener(aVoid2 -> showToast("Deleted associated FileSet: " + verEducator.getFileSetId()))
-                                .addOnFailureListener(e -> showToast("Failed to delete associated FileSet: " + verEducator.getFileSetId()));
-                    }
+//                    if (verEducator.getImageSetId() != null) {
+//                        firestore.collection("images")
+//                                .document(verEducator.getImageSetId())
+//                                .delete()
+//                                .addOnSuccessListener(aVoid1 -> showToast("Deleted associated ImageSet: " + verEducator.getImageSetId()))
+//                                .addOnFailureListener(e -> showToast("Failed to delete associated ImageSet: " + verEducator.getImageSetId()));
+//                    }
+//
+//                    if (verEducator.getFileSetId() != null) {
+//                        firestore.collection("files")
+//                                .document(verEducator.getFileSetId())
+//                                .delete()
+//                                .addOnSuccessListener(aVoid2 -> showToast("Deleted associated FileSet: " + verEducator.getFileSetId()))
+//                                .addOnFailureListener(e -> showToast("Failed to delete associated FileSet: " + verEducator.getFileSetId()));
+//                    }
                 })
                 .addOnFailureListener(e -> {
                     showToast("Failed to delete VerEducator: " + verEducator.getVerEducatorId());

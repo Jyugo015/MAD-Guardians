@@ -53,6 +53,13 @@
         <action
             android:id="@+id/action_nav_profile_to_viewAllAchievementsFragment"
             app:destination="@id/viewAllAchievementsFragment" />
+
+        <action
+            android:id="@+id/action_nav_profile_to_Edu_CommentFragment"
+            app:destination="@id/Edu_CommentFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_viewAllLearningHistoryFragment"
+            app:destination="@id/viewAllLearningHistoryFragment" />
     </fragment>
 
     <fragment
@@ -65,7 +72,17 @@
         android:id="@+id/nav_post"
         android:name="com.example.madguardians.ui.course.PostFragment"
         android:label="Courses"
-        tools:layout="@layout/fragment_post"/>
+        tools:layout="@layout/fragment_post">
+
+        <action
+            android:id="@+id/nav_user_comment"
+            app:destination="@id/User_CommentFragment"/>
+
+        <argument
+            android:name="post"
+            app:argType="com.example.madguardians.firebase.PostFB"/>
+
+    </fragment>
 
     <fragment
         android:id="@+id/nav_pdf"
@@ -191,4 +208,38 @@
         android:name="com.example.madguardians.ViewAllAchievementsFragment"
         android:label="View All Achievements"
         tools:layout="@layout/fragment_view_all_achievements" />
+    <fragment
+        android:id="@+id/Edu_CommentFragment"
+        android:name="com.example.madguardians.comment.Edu_CommentFragment"
+        android:label="User's Comment" >
+
+        <action
+            android:id="@+id/nav_edu_user_comment"
+            app:destination="@id/User_CommentFragment"/>
+
+        <argument
+            android:name="post"
+            app:argType="com.example.madguardians.firebase.PostFB"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/User_CommentFragment"
+        android:name="com.example.madguardians.comment.User_CommentFragment"
+        android:label="Comments">
+
+        <argument
+            android:name="post"
+            app:argType="com.example.madguardians.firebase.PostFB"/>
+
+        <argument
+            android:name="comment"
+            app:argType="com.example.madguardians.database.Comments"/>
+
+    </fragment>
+    <fragment
+        android:id="@+id/viewAllLearningHistoryFragment"
+        android:name="com.example.madguardians.viewAllLearningHistoryFragment"
+        android:label="viewAllLearningHistoryFragment" />
+
 </navigation>
