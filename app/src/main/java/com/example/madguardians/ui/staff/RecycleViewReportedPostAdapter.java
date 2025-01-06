@@ -170,7 +170,7 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
                                     // Set click listener to navigate to the fragment with the Post object
                                     holder.tvCourseTitle.setOnClickListener(v -> {
                                         Bundle bundle = new Bundle();
-                                        bundle.putSerializable("post", post); // Ensure Post implements Serializable or Parcelable
+                                        bundle.putString("postId", (String) post.getPostId());
                                         Navigation.findNavController(v).navigate(R.id.nav_post, bundle);
                                     });
                                 }
@@ -257,6 +257,7 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
 private void navigateToFragment(View view, String type, Object media) {
     Bundle bundle = new Bundle();
 
+    Log.d("TAG", "navigateToFragment: id: " + (String) media);
     if ("image".equalsIgnoreCase(type) || "video".equalsIgnoreCase(type) || "pdf".equalsIgnoreCase(type)) {
         // media is expected to be a String mediaId
         if (media instanceof String) {
@@ -269,7 +270,7 @@ private void navigateToFragment(View view, String type, Object media) {
     } else if ("post".equalsIgnoreCase(type)) {
         // media is expected to be a PostFB object
         if (media instanceof PostFB) {
-            bundle.putSerializable("post", (PostFB)media); // Use putSerializable for Serializable objects
+            bundle.putString("postId", (String) media);
             Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
         } else {
             Log.e("navigateToFragment", "Expected PostFB for post, got: " + media.getClass().getName());

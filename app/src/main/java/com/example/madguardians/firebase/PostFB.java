@@ -47,6 +47,7 @@ public class PostFB implements Serializable{
     public PostFB(){}
 
     public static void getPost(String postId, UploadCallback<PostFB> callback) {
+        Log.d(TAG, "getPost: postId = " + postId);
         FirebaseController.getMatchedCollection(TABLE_NAME, FirebaseController.getIdName(TABLE_NAME), postId, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
             public void onSuccess(List<HashMap<String, Object>> result) {
