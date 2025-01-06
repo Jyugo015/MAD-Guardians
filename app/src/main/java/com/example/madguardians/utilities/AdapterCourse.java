@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,7 +20,6 @@ import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
 import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.firebase.DomainFB;
-import com.example.madguardians.ui.staff.VerPost;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -35,6 +35,7 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
     private List<CourseFB> courseFBList;
     private List<CourseFB> originalCourseFBList;
     private OnItemClickListener listener;
+    private static final String TAG = "AdapterCourse";
     public AdapterCourse(List<CourseFB> courseFBList, OnItemClickListener listener) {
         this.courseFBList = courseFBList;
         this.originalCourseFBList = courseFBList;
@@ -68,25 +69,27 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
         holder.date.setText(courseFB.getDate());
         showImage(holder, courseFB);
         // check if it is verified
-        if (isVerified(courseFB)) {
-            holder.verifyStatus.setImageResource(R.drawable.ic_verified);
-        } else {
-            holder.verifyStatus.setImageResource(R.drawable.ic_verifying);
-        }
+        isVerified(courseFB, new UploadCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean isVerified) {
+                courseFB.setVerified(isVerified);
+                Log.d(TAG, "onSuccess: isVerified: " + isVerified);;
+                holder.verifyStatus.setImageResource((isVerified) ? R.drawable.ic_verified : R.drawable.ic_verifying);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, "onFailure: ", e);
+            }
+        });
 
         checkCollectionStatus(courseFB, holder.button_collection, holder.itemView.getContext());
         holder.button_collection.setOnClickListener(v -> toggleCollection(courseFB, holder.button_collection));
 
         // Handle button clicks
         holder.button_start.setOnClickListener(v -> listener.onStartClick(courseFB));
-//        holder.button_collection.setOnClickListener(v -> listener.onCollectionClick(courseFB));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
-    // zw
-    private boolean isVerified(CourseFB courseFB) {return true;}
-    // check each post one by one (post1, post2, post3)
-    public void isVerified(CourseFB courseFB, UploadCallback<Boolean> callback) {
+    private void isVerified(CourseFB courseFB, UploadCallback<Boolean> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("verPosts")
@@ -298,6 +301,29 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
         notifyDataSetChanged();
     }
 
+    public void filterCoursesBySearch(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            courseFBList = originalCourseFBList;
+        } else {
+            courseFBList = originalCourseFBList.stream()
+                    .filter(course -> course.getTitle().toLowerCase().contains(query.toLowerCase()) ||
+                            (course.getAuthor() != null && course.getAuthor().toLowerCase().contains(query.toLowerCase())))
+                    .collect(Collectors.toList());
+        }
+        notifyDataSetChanged();
+    }
+
+    public void filterCoursesByVerified (boolean isVerified) {
+        Log.d("TAG", "filterCoursesByVerified: " + isVerified);
+        if (isVerified) {
+            courseFBList = originalCourseFBList.stream()
+                    .filter(courseFB -> courseFB.isVerified() == isVerified)
+                    .collect(Collectors.toList());
+        } else {
+            courseFBList = originalCourseFBList;
+        }
+        notifyDataSetChanged();
+    }
     public void updateCourseList(List<CourseFB> cours) {
         courseFBList.clear();
         courseFBList.addAll(cours);
@@ -324,6 +350,5 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
 
     public interface OnItemClickListener {
         void onStartClick(CourseFB courseFB);
-        void onCollectionClick(CourseFB courseFB);
     }
 }

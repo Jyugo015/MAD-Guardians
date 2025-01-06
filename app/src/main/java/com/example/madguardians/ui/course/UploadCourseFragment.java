@@ -2,7 +2,9 @@ package com.example.madguardians.ui.course;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -75,8 +77,12 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             Log.d(TAG, "onCreate: domainId " + domainId);
             Log.d(TAG, "onCreate: folderId " + folderId);
         }
-//        WorkManager.initialize(getContext(), getWorkManagerConfiguration());
-        userId = "U0001";
+        userId = getUserId();
+    }
+
+    private String getUserId() {
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("user_preferences", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("user_id", null);
     }
 
     @Override

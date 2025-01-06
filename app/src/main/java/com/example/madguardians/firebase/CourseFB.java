@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class CourseFB {
     private String folderId;
     private String domainId;
     private String date;
+    private boolean isVerified = false;
     private static final String TAG = "Course";
 
     private static Queue<HashMap<String, Object>> insertCourseQueue = new LinkedList<>();
@@ -152,12 +155,13 @@ public class CourseFB {
         ArrayList<CourseFB> courseFBList = new ArrayList<>();
         FirebaseController.getAllCollection(TABLE_NAME, null, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
-            public void onSuccess(List<HashMap<String, Object>> result) {
-                for (HashMap<String, Object> data : result) {
-                    courseFBList.add(mapHashMapToCourse(data));
+            public void onSuccess(List<HashMap<String, Object>> fullCourses) {
+                if (fullCourses != null && ! fullCourses.isEmpty()) {
+                    for (HashMap<String, Object> course : fullCourses) {
+                        courseFBList.add(mapHashMapToCourse(course));
+                    }
+                    callback.onSuccess(courseFBList);
                 }
-                Log.d(TAG, "onSuccess: size = " + courseFBList.size());
-                callback.onSuccess(courseFBList);
             }
             @Override
             public void onFailure(Exception e) {
@@ -273,5 +277,14 @@ public class CourseFB {
         String date = dateFormat.format(new Date());
         Log.d(TAG, "generateDate: " + date);
         return date;
+    }
+
+    public boolean isVerified() {
+        Log.d(TAG, "isVerified: " + isVerified);
+        return isVerified;
+    }
+
+    public void setVerified(boolean verified) {
+        isVerified = verified;
     }
 }
