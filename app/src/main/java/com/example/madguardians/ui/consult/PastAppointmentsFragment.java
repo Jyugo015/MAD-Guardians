@@ -68,7 +68,7 @@ public class PastAppointmentsFragment extends Fragment {
         Calendar calendar = Calendar.getInstance();
 
         // Generate 14 past dates
-        for (int i = -14; i <= 0; i++) {
+        for (int i = -14; i <= -1; i++) {
             Calendar tempCalendar = (Calendar) calendar.clone();
             tempCalendar.add(Calendar.DAY_OF_YEAR, i);
             dateList.add(getFormattedDate(tempCalendar.getTime()));
