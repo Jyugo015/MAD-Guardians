@@ -5,6 +5,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+
+import com.example.madguardians.comment.adapter.Listener;
 import com.example.madguardians.notification.NotificationUtils;
 import com.example.madguardians.ui.staff.VerEducator;
 import com.example.madguardians.database.VerEducatorDao;
@@ -24,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
-        implements RecycleViewEducatorAdapter.OnHandleEducatorActionListener {
+        implements RecycleViewEducatorAdapter.OnHandleEducatorActionListener, Listener.OnDomainClickListener {
 
     private RecycleViewEducatorAdapter adapter;
     private NotificationUtils notificationUtils;
@@ -36,6 +40,7 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         notificationUtils = new NotificationUtils();
 //        System.out.println("Hi");
         if (getArguments() != null) {
@@ -257,6 +262,20 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
 //        dialog.show(getChildFragmentManager(), "ViewProofDialogFragment");
 //        showToast("view proof clicked");
     }
+
+    @Override
+    public void onDomainClicked(VerEducator educator, int position) {
+        CheckDomainDialogFragment dialog = CheckDomainDialogFragment.newInstance(educator.getVerEducatorId());
+        dialog.setDomainListener(Tab1EducatorFragment.this);
+//                if (context instanceof AppCompatActivity) {
+        Log.w("tvdomain","got run");
+//        FragmentManager fragmentManager = ((AppCompatActivity) context).getSupportFragmentManager();
+        dialog.show(getParentFragmentManager(), "CheckDomainDialogFragment");
+//                } else {
+        Log.e("DialogError", "Context is not an instance of AppCompatActivity");
+//                }
+    }
+
     private void handleEducatorAction(VerEducator verEducator, String verifiedStatus, String actionName) {
         if (verEducator == null || getContext() == null) {
             logError(actionName + " failed: Null educator or context", null);
@@ -322,5 +341,18 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
     private void logError(String message, Exception e) {
         Log.e("Tab1EducatorFragment", message, e);
         if (e != null) e.printStackTrace(); // Optional: Use proper logging for production
+    }
+
+    @Override
+    public void onDomainClick(VerEducator educator) {
+        CheckDomainDialogFragment dialog = CheckDomainDialogFragment.newInstance(educator.getVerEducatorId());
+        dialog.setDomainListener(Tab1EducatorFragment.this);
+//                if (context instanceof AppCompatActivity) {
+        Log.w("tvdomain","got run");
+//        FragmentManager fragmentManager = ((AppCompatActivity) context).getSupportFragmentManager();
+        dialog.show(getParentFragmentManager(), "CheckDomainDialogFragment");
+//                } else {
+        Log.e("DialogError", "Context is not an instance of AppCompatActivity");
+//                }
     }
 }

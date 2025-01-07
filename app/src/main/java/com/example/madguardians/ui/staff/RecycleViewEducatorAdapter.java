@@ -2,6 +2,7 @@ package com.example.madguardians.ui.staff;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +12,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.madguardians.ApproveEducatorDialogFragment;
 import com.example.madguardians.R;
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Media;
@@ -37,6 +41,7 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
     private OnHandleEducatorActionListener onHandleEducatorActionListener;
     private final FirebaseFirestore firestore;
     private final CollectionReference userRef;
+    private List<String> selectedDomainIds = new ArrayList<>();
     // Constructor
     public RecycleViewEducatorAdapter(List<VerEducator> verEducatorList, Context context, OnHandleEducatorActionListener onHandleEducatorActionListener) {
         this.educatorList = verEducatorList!=null?verEducatorList:new ArrayList<>();
@@ -118,15 +123,32 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
                 }
             });
 
-            holder.btnApprove.setOnClickListener(v -> {
+//            holder.btnApprove.setOnClickListener(v -> {
+//                if (onHandleEducatorActionListener != null) {
+//                    onHandleEducatorActionListener.onApprovedClicked(verEducator, position);
+//                    firestore.collection("verPost")
+//                            .document(verEducator.getVerEducatorId())
+//                            .update("verifiedStatus", "approved");
+//
+//                    notifyItemChanged(position);
+//                }
+//            });
+            holder.tVDomain.setOnClickListener(v -> {
                 if (onHandleEducatorActionListener != null) {
-                    onHandleEducatorActionListener.onApprovedClicked(verEducator, position);
-                    firestore.collection("verPost")
-                            .document(verEducator.getVerEducatorId())
-                            .update("verifiedStatus", "approved");
-                    notifyItemChanged(position);
+                    onHandleEducatorActionListener.onDomainClicked(verEducator, position);
                 }
+
+                CheckDomainDialogFragment dialog = CheckDomainDialogFragment.newInstance(verEducator.getVerEducatorId());
+
+//                if (context instanceof AppCompatActivity) {
+                    Log.w("tvdomain","got run");
+                    FragmentManager fragmentManager = ((AppCompatActivity) context).getSupportFragmentManager();
+                    dialog.show(fragmentManager, "CheckDomainDialogFragment");
+//                } else {
+                    Log.e("DialogError", "Context is not an instance of AppCompatActivity");
+//                }
             });
+
         } else {
 
             holder.btnDelete.setOnClickListener(v -> {
@@ -153,8 +175,27 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
             }
         });
         holder.tvViewProof.setOnClickListener(v -> navigateToFragment(v, "pdf", verEducator.getMediaId()));
+//        holder.tVDomain.setOnClickListener();
     }
+//    public void showApproveDialog(v->showApproveDialog()) {
+//        ApproveEducatorDialogFragment dialog = ApproveEducatorDialogFragment.newInstance(selectedDomainIds);
+//        dialog.setOnApproveListener(selectedDomains -> {
+//            // selectedDomains is a List<Domain> passed from the dialog
+//            selectedDomainIds = selectedDomains;
+//            updateSelectDomainButtonText();
+//        });
+//        dialog.show(getParentFragmentManager(), "ApproveEducatorDialogFragment");
+//    }
+//    private void updateSelectDomainButtonText() {
+//        if (selectedDomainIds.isEmpty()) {
+//            selectDomainButton.setText("Select Domains");
+//        } else {
+//            selectDomainButton.setText("Selected (" + selectedDomainIds.size() + ")");
+//        }
+//    }
+    private void updateSelectDomainButtonText() {
 
+    }
     private void navigateToFragment(View view, String typeMedia, String mediaId) {
         Bundle bundle = new Bundle();
         bundle.putString("mediaId", mediaId);
@@ -175,7 +216,7 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
 
     public static class PostViewHolder extends RecyclerView.ViewHolder {
         ImageView ivPost;
-        TextView tvEducatorName, tvDate, tvStatus, tvViewProof;
+        TextView tvEducatorName, tvDate, tvStatus, tvViewProof, tVDomain;
         Button btnReject, btnApprove, btnDelete;
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -187,6 +228,7 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
             btnApprove = itemView.findViewById(R.id.BTNApprove);
             btnDelete = itemView.findViewById(R.id.BTNDelete);
             tvViewProof = itemView.findViewById(R.id.TVViewProof);
+            tVDomain = itemView.findViewById(R.id.TVDomain);
         }
     }
 
@@ -196,5 +238,6 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
         void onDeleteClicked(VerEducator educator, int position);
         void onEducatorNameClicked(VerEducator educator, int position);
         void onViewProofClicked(VerEducator educator, int position);
+        void onDomainClicked(VerEducator educator, int position);
     }
 }

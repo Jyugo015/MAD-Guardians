@@ -1,6 +1,8 @@
 package com.example.madguardians.comment.adapter;
 
 import com.example.madguardians.database.Comments;
+import com.example.madguardians.database.Domain;
+import com.example.madguardians.ui.staff.VerEducator;
 
 public class Listener {
 
@@ -38,5 +40,9 @@ public class Listener {
 
     public interface ScrollListener{
         void onScrollChild(Comments comment);
+    }
+
+    public interface OnDomainClickListener{
+        void onDomainClick(VerEducator educator);
     }
 }
