@@ -3,6 +3,7 @@ package com.example.madguardians;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.example.madguardians.databinding.ActivityNavVewBnvStaffBinding;
+import com.example.madguardians.ui.consult.utils_lo.FirebaseUtil;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
@@ -30,6 +32,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.madguardians.databinding.ActivityNavVewBnvBinding;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -220,6 +223,28 @@ protected void onCreate(Bundle savedInstanceState) {
     }
 
     private void logout() {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        DocumentReference counselorRef = firestore.collection("counselors").document(userId);
+
+        // Check if the document exists first before updating
+        counselorRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                // If the document exists, update the 'online' field to false
+                counselorRef.update("online", false)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d("Counselor Status", "Online status updated to false");
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("Counselor Status", "Error updating online status", e);
+                        });
+            } else {
+                Log.e("Counselor checking", "User ID not found in counselors collection");
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("Firestore", "Error checking counselor existence", e);
+        });
+
+
         new AlertDialog.Builder(this)
                 .setTitle("Logout")
                 .setMessage("Are you sure you want to log out?")
