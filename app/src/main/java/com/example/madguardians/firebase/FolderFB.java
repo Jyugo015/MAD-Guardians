@@ -105,14 +105,13 @@ public class FolderFB {
     public static void initialiseFolders() {
         Log.d("TAG", "initialiseFolders: here1");
         ArrayList<HashMap<String, Object>> hashMapList = new ArrayList<>();
-        String userId = "U0001";
-        hashMapList.add(createFolderData(userId, "Language", "D00001"));
-        hashMapList.add(createFolderData(userId, "Computer Science", "D00002"));
-        hashMapList.add(createFolderData(userId, "Physics", "D00003"));
-        hashMapList.add(createFolderData(userId, "Chemistry", "D00004"));
-        hashMapList.add(createFolderData(userId, "Biology", "D00005"));
-        hashMapList.add(createFolderData(userId, "Mathematics", "D00006"));
-        hashMapList.add(createFolderData(userId, "Music", "D00007"));
+        hashMapList.add(createFolderData("U0001", "Language", "D00001"));
+        hashMapList.add(createFolderData("U0002", "Computer Science", "D00002"));
+        hashMapList.add(createFolderData("U0003", "Physics", "D00003"));
+        hashMapList.add(createFolderData("U0004", "Chemistry", "D00004"));
+        hashMapList.add(createFolderData("U0005", "Biology", "D00005"));
+        hashMapList.add(createFolderData("U0006", "Mathematics", "D00006"));
+        hashMapList.add(createFolderData("U0007", "Music", "D00007"));
         for (HashMap<String, Object> dataHashMap:hashMapList) {
             insertFolder(dataHashMap);
         }

@@ -107,7 +107,18 @@ public class CourseOverviewFragment extends Fragment {
                 public void onFailure(Exception e) {}
             });
             TVDate.setText("Date: " + courseFB.getDate());
-            TVAuthor.setText(courseFB.getAuthor());
+            FirebaseController.getMatchedCollection(FirebaseController.USER, FirebaseController.getIdName(FirebaseController.USER), courseFB.getAuthor(), new UploadCallback<List<HashMap<String, Object>>>() {
+                @Override
+                public void onSuccess(List<HashMap<String, Object>> result) {
+                    if (result == null || result.isEmpty()) return;
+                    HashMap<String, Object> user = result.get(0);
+                    TVAuthor.setText((String) user.get("name"));
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("TAG", "onFailure: ", e);
+                }
+            });
             TVDescription.setText(courseFB.getDescription());
             MediaHandler.displayImage(getContext(), courseFB.getCoverImage(), IVCover);
             ToggleButton TBCollection = view.findViewById(R.id.TBCollection);

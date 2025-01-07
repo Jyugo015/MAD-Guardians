@@ -25,6 +25,7 @@ import com.example.madguardians.database.FirestoreManager;
 import com.example.madguardians.database.NetworkAvailability;
 import com.example.madguardians.database.UserDao;
 import com.example.madguardians.firebase.CourseFB;
+import com.example.madguardians.firebase.DomainFB;
 import com.example.madguardians.firebase.FolderFB;
 import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.firebase.PostFB;
