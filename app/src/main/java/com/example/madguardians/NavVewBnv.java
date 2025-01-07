@@ -223,32 +223,34 @@ protected void onCreate(Bundle savedInstanceState) {
     }
 
     private void logout() {
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        DocumentReference counselorRef = firestore.collection("counselors").document(userId);
-
-        // Check if the document exists first before updating
-        counselorRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                // If the document exists, update the 'online' field to false
-                counselorRef.update("online", false)
-                        .addOnSuccessListener(aVoid -> {
-                            Log.d("Counselor Status", "Online status updated to false");
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.e("Counselor Status", "Error updating online status", e);
-                        });
-            } else {
-                Log.e("Counselor checking", "User ID not found in counselors collection");
-            }
-        }).addOnFailureListener(e -> {
-            Log.e("Firestore", "Error checking counselor existence", e);
-        });
 
 
         new AlertDialog.Builder(this)
                 .setTitle("Logout")
                 .setMessage("Are you sure you want to log out?")
                 .setPositiveButton("Yes", (dialog, which) -> {
+                    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+                    DocumentReference counselorRef = firestore.collection("counselors").document(userId);
+
+                    // Check if the document exists first before updating
+                    counselorRef.get().addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            // If the document exists, update the 'online' field to false
+                            counselorRef.update("online", false)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d("Counselor Status", "Online status updated to false");
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("Counselor Status", "Error updating online status", e);
+                                    });
+                        } else {
+                            Log.e("Counselor checking", "User ID not found in counselors collection");
+                        }
+                    }).addOnFailureListener(e -> {
+                        Log.e("Firestore", "Error checking counselor existence", e);
+                    });
+
+
                     // For example, clear shared preferences or a session manager
                     SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();

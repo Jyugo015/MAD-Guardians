@@ -50,12 +50,19 @@ public class AppointmentSetFragment extends Fragment {
         recyclerView = view.findViewById(R.id.time_slot_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        long todayInMillis = System.currentTimeMillis(); // Get today's timestamp
+         // Get today's timestamp
         calanderView = view.findViewById(R.id.calendarView);
-        calanderView.setMinDate(todayInMillis); // Set the minimum selectable date to today
+        // Set the minimum date to today's midnight
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long todayInMillis = calendar.getTimeInMillis();
+        calanderView.setMinDate(todayInMillis);// Set the minimum selectable date to today
 
         // Get today's date
-        Calendar calendar = Calendar.getInstance();
+
         selectedDate = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
 
         // Set default selection to today's date
