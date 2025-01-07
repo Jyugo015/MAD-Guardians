@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -198,14 +199,15 @@ public class CounselorAdapter extends RecyclerView.Adapter<CounselorAdapter.Coun
                                             "bookStatus", true       // Set the slot as booked
                                     )
                                     .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(context, "Appointment booked successfully!", Toast.LENGTH_SHORT).show();
                                         Log.d("Firestore", "Booking successful");
+                                        NotificationUtils notificationUtils = new NotificationUtils();
+                                        String message = "You will have an appointment with " + userName + " at " + selectedTimeSlot + " on "+selectedDate;
+                                        notificationUtils.createTestNotification(counselorID, message);
                                     })
                                     .addOnFailureListener(e -> {
                                         Log.e("Firestore", "Booking failed: " + e.getMessage());
                                     });
-
-                            NotificationUtils notificationUtils = new NotificationUtils();
-                            notificationUtils.createTestNotification(counselorID,"Appointment slot on "+selectedTimeSlot+" is booked");
 
 
                         } else {
