@@ -294,9 +294,11 @@ public class User_CommentFragment extends Fragment implements Listener.CommentLi
 
     @Override
     public void onReport(Comments comment) {
-        ReportFragment reportFragment = newReport(comment);
-        reportFragment.show(getParentFragmentManager(), "ReportFragment");
-        reportFragment.setHelpedeskListener(User_CommentFragment.this);
+        if (!comment.getUserId().equals(userId)){
+            ReportFragment reportFragment = newReport(comment);
+            reportFragment.show(getParentFragmentManager(), "ReportFragment");
+            reportFragment.setHelpedeskListener(User_CommentFragment.this);
+        }
     }
 
     @Override

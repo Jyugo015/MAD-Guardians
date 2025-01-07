@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,6 +43,7 @@ public class ReportFragment extends DialogFragment implements Listener.OnIssueLi
     RecyclerView recyclerView;
     ReportAdapter adapter;
     IssueViewModel viewModel;
+    ImageView closeButton;
     LiveData<List<Issue>> issueLiveData;
     private Listener.onHelpdeskListener listener;
     private static final String ARG_COMMENT = "";
@@ -56,6 +58,7 @@ public class ReportFragment extends DialogFragment implements Listener.OnIssueLi
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.issue_recycler_view);
+        closeButton = view.findViewById(R.id.ic_close);
         sharedPreferences = getContext().getSharedPreferences("user_preferences", MODE_PRIVATE);
         userId = sharedPreferences.getString("user_id", null);
         // Retrieve the post object
@@ -63,6 +66,12 @@ public class ReportFragment extends DialogFragment implements Listener.OnIssueLi
             comment = (Comments) getArguments().getSerializable(ARG_COMMENT);
             commentId = comment.getCommentId();
         }
+        closeButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               dismiss();
+           }
+        });
         adapter = new ReportAdapter();
         adapter.setUserId(userId);
         adapter.setCommentId(commentId);
