@@ -33,7 +33,7 @@ import java.util.Map;
 public class ConsultFragment extends Fragment {
 
     private FragmentConsultBinding binding;
-
+    private String userID;
     private String counselorID;
     private String counselorName;
 
@@ -47,19 +47,21 @@ public class ConsultFragment extends Fragment {
         View root = binding.getRoot();
         TextView chatResponse = binding.chatResponse.findViewById(R.id.chat_response);
         TextView directingResponse = binding.directingResponse.findViewById(R.id.directing_response);
+        userID = FirebaseUtil.currentUserId(getContext());
 
 //        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 //        Map<String, Object> counselorData = new HashMap<>();
-//        counselorData.put("online", true);
-//        counselorData.put("skill", "Career Guidance Counselor");
-//        counselorData.put("name", "Mr. John Lee");
-//        counselorData.put("experience", "8 years experience");
+//        counselorData.put("online", false);
+//        counselorData.put("skill", "Mental Health Specialist");
+//        counselorData.put("name", "Test Counselor 1");
+//        counselorData.put("experience", "30 years experience");
 //
 //        firestore.collection("counselors")
-//                .document("U0018")
+//                .document("U0025")
 //                .set(counselorData, SetOptions.merge()) // Ensures it updates or adds missing fields
 //                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Document updated successfully!"))
 //                .addOnFailureListener(e -> Log.e("Firestore", "Error updating document", e));
+
         isCounselor(new FirebaseUtil.SimpleCallback() {
             @Override
             public void onResult(boolean isCounselor) {
@@ -67,6 +69,11 @@ public class ConsultFragment extends Fragment {
 
                 if (isCounselor) {
                     binding.chatbotMessage.setText("Good day Counselor. What is your plan today?");
+
+                    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+                    firestore.collection("counselors")
+                            .document(userID)
+                            .update("online",true);
 
                 } else {
                     Log.e("Counselor checking","not a counselor");
@@ -189,6 +196,8 @@ public class ConsultFragment extends Fragment {
                     }
                     callback.onResult(false);
                 });
+
+
 
     }
 

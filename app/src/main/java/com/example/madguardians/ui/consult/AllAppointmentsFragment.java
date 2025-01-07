@@ -82,7 +82,7 @@ public class AllAppointmentsFragment extends Fragment {
             public void onResult(boolean isCounselor) {
                 for (String date : dateList) {
                     if (isCounselor) {
-                            fetchAppointmentsSchedule(date);
+                        fetchAppointmentsSchedule(date);
                     } else {
                         for (String counselor : counselors) {
                             fetchUserAppointments(date, counselor);
@@ -100,6 +100,9 @@ public class AllAppointmentsFragment extends Fragment {
 
     private void fetchAppointmentsSchedule(String date) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+        Log.d("FetchUserAppointments", "Date: " + date + ", User: " + userName);
+
 
         firestore.collection("appointments")
                 .document(date)
@@ -122,21 +125,27 @@ public class AllAppointmentsFragment extends Fragment {
 
     private void fetchUserAppointments(String date, String counselorName) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        Log.d("FetchUserAppointments", "Date: " + date + ", Counselor: " + counselorName + ", User: " + userName);
+
 
         firestore.collection("appointments")
                 .document(date)
                 .collection(counselorName)
                 .whereEqualTo("userName", userName)
+                .whereEqualTo("bookStatus", true)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
+                        Log.d("Debug", "Appointments found: " + task.getResult().size());
                         for (DocumentSnapshot document : task.getResult()) {
                             AppointmentModel appointment = document.toObject(AppointmentModel.class);
                             Log.e("User Appointment: ",userName+"check");
                             if (appointment != null) {
-                                populateAppointmentDetails(appointment, document, date, userName);
+                                populateAppointmentDetails(appointment, document, date, counselorName);
                             }
                         }
+                    } else {
+                        Log.d("Debug", "No appointments found for date: " + date + ", counselor: " + counselorName);
                     }
                 })
                 .addOnFailureListener(e -> Log.e("Error", "Failed to fetch user appointments: " + e.getMessage()));

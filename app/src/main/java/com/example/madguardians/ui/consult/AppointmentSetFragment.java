@@ -50,13 +50,23 @@ public class AppointmentSetFragment extends Fragment {
         recyclerView = view.findViewById(R.id.time_slot_recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        long todayInMillis = System.currentTimeMillis();
-
-        timeSlotList = new ArrayList<>();
+         // Get today's timestamp
         calanderView = view.findViewById(R.id.calendarView);
+        // Set the minimum date to today's midnight
         Calendar calendar = Calendar.getInstance();
-        calanderView.setMinDate(todayInMillis);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long todayInMillis = calendar.getTimeInMillis();
+        calanderView.setMinDate(todayInMillis);// Set the minimum selectable date to today
+
+        // Get today's date
+
         selectedDate = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
+
+        // Set default selection to today's date
+        calanderView.setDate(todayInMillis, false, true);
 
         calanderView.setOnDateChangeListener((calendarView, year, month, dayOfMonth) -> {
             selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
@@ -72,6 +82,7 @@ public class AppointmentSetFragment extends Fragment {
                 adapter.notifyItemChanged(position); // Notify the change for that item
             });
             recyclerView.setAdapter(adapter); // Set the new adapter
+            recyclerView.setVisibility(View.VISIBLE);
         });
 
         String userID = FirebaseUtil.currentUserId(getContext());
@@ -85,10 +96,14 @@ public class AppointmentSetFragment extends Fragment {
         });
 
         doneButton = view.findViewById(R.id.done_btn);
-        doneButton.setOnClickListener(v -> bookSelectedSlots(selectedDate));
+        doneButton.setOnClickListener(v -> {
+            bookSelectedSlots(selectedDate);
+            recyclerView.setVisibility(View.GONE);
+        });
 
         return view;
     }
+
 
     private List<TimeSlotModel> generateTimeSlots() {
         List<TimeSlotModel> list = new ArrayList<>();
@@ -134,38 +149,39 @@ public class AppointmentSetFragment extends Fragment {
             firestore.collection("appointments")
                     .document(selectedDate)
                     .collection(userName)
-                    .whereEqualTo("time", timeSlot.getTime())
-                    .whereEqualTo("setterName", timeSlot.getSetterName())
+                    .document(timeSlot.getTime()) // Directly check by document ID (time)
                     .get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            if (task.getResult().isEmpty()) {
+                            if (!task.getResult().exists()) {
+                                // Slot is available, proceed with booking
                                 Map<String, Object> bookingData = new HashMap<>();
                                 bookingData.put("time", timeSlot.getTime());
                                 bookingData.put("counselorName", timeSlot.getSetterName());
                                 bookingData.put("timestamp", timeSlot.getTimestamp());
-                                bookingData.put("bookStatus", timeSlot.isBookStatus());
                                 bookingData.put("userName", timeSlot.getGetterName());
 
                                 firestore.collection("appointments")
                                         .document(selectedDate)
                                         .collection(userName)
-                                        .document(timeSlot.getTime())
+                                        .document(timeSlot.getTime()) // Use time as the document ID
                                         .set(bookingData)
-                                        .addOnSuccessListener(documentReference -> {
+                                        .addOnSuccessListener(aVoid -> {
                                             Log.d("Firestore", "Booking successful");
+                                            Toast.makeText(getContext(), "Slot booked successfully!", Toast.LENGTH_SHORT).show();
                                         })
                                         .addOnFailureListener(e -> {
                                             Log.e("Firestore", "Booking failed: " + e.getMessage());
                                         });
-                                Toast.makeText(getContext(), "Slots booked successfully!", Toast.LENGTH_SHORT).show();
                             } else {
-                                Toast.makeText(getContext(), "You already have an appointment at this time.", Toast.LENGTH_SHORT).show();
+                                // Slot already exists
+                                Toast.makeText(getContext(), "This slot is already booked.", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Log.e("Firestore", "Error checking existing appointments: " + task.getException().getMessage());
                         }
                     });
+
         }
         selectedTimeSlots.clear();
         adapter.notifyDataSetChanged(); // Refresh adapter after booking

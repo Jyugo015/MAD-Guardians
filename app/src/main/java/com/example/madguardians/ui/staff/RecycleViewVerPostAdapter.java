@@ -1,6 +1,8 @@
 package com.example.madguardians.ui.staff;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,12 +11,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
 import com.example.madguardians.database.Media;
 import com.example.madguardians.database.User;
+import com.example.madguardians.firebase.PostFB;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -85,7 +89,8 @@ public class RecycleViewVerPostAdapter extends RecyclerView.Adapter<RecycleViewV
                     // Set Post details
                     holder.tvCourseTitle.setText(post.getTitle() != null ? post.getTitle() : "No Title");
                     holder.tvDate.setText(post.getDate() != null ? post.getDate() : "No Date");
-
+                    //link to post
+                    holder.tvCourseTitle.setOnClickListener(v -> navigateToFragment(v, "post", post.getPostId()));
                     // Fetch Media details using mediaSetId
                     if (post.getImageSetId() != null) {
                         firestore.collection("media")
@@ -110,7 +115,12 @@ public class RecycleViewVerPostAdapter extends RecyclerView.Adapter<RecycleViewV
                     } else {
                         holder.ivPost.setImageResource(R.drawable.placeholder_image); // Default image
                     }
-
+                    // Set click listener to navigate to the fragment with the Post object
+                    holder.tvCourseTitle.setOnClickListener(v -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("postId", (String) post.getPostId());
+                        Navigation.findNavController(v).navigate(R.id.nav_post, bundle);
+                    });
                     // Fetch User details using userId
                     userRef.document(post.getUserId()).get().addOnSuccessListener(userSnapshot -> {
                         if (userSnapshot.exists()) {
@@ -173,6 +183,22 @@ public class RecycleViewVerPostAdapter extends RecyclerView.Adapter<RecycleViewV
         });
     }
 
+    private void navigateToFragment(View view, String type, Object media) {
+        Bundle bundle = new Bundle();
+
+        if ("post".equalsIgnoreCase(type)) {
+            // media is expected to be a PostFB object
+            if (media instanceof PostFB) {
+                bundle.putString("postId", (String) media);
+                Navigation.findNavController(view).navigate(R.id.nav_post, bundle);
+            } else {
+                Log.e("navigateToFragment", "Expected PostFB for post, got: " + media.getClass().getName());
+            }
+        }
+        else {
+            Log.e("navigateToFragment", "Invalid type provided: " + type);
+        }
+    }
 
     @Override
     public int getItemCount() {

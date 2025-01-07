@@ -17,11 +17,13 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -94,9 +96,9 @@ public class EditProfileFragment extends Fragment {
 
         // Initialize UI elements
         ETname = rootView.findViewById(R.id.ETname);
-        mail = rootView.findViewById(R.id.mail);
+//        mail = rootView.findViewById(R.id.mail);
         ETnumber = rootView.findViewById(R.id.ETnumber);
-        email = rootView.findViewById(R.id.email);
+//        email = rootView.findViewById(R.id.email);
         phone_number = rootView.findViewById(R.id.phone_number);
         profileImageView = rootView.findViewById(R.id.profile);
         verifiedContainer = rootView.findViewById(R.id.verifiedContainer);
@@ -227,13 +229,13 @@ public class EditProfileFragment extends Fragment {
 
                         if (document.exists()) {
                             String name = document.getString("name");
-                            String emailText = document.getString("email");
+//                            String emailText = document.getString("email");
                             String phoneNo = document.getString("phoneNo");
                             String profilePicUrl = document.getString("profilePic");
 
                             // Update UI with user data
                             if (name != null) ETname.setText(name);
-                            if (emailText != null) mail.setText(emailText);
+//                            if (emailText != null) mail.setText(emailText);
                             if (phoneNo != null) ETnumber.setText(phoneNo);
 
                             if (profilePicUrl == null || profilePicUrl.equals("url link of default profile pic")) {
@@ -255,10 +257,10 @@ public class EditProfileFragment extends Fragment {
 
     private void saveProfile() {
         String name = ETname.getText().toString();
-        String emailText = mail.getText().toString();
+//        String emailText = mail.getText().toString();
         String phoneNumber = ETnumber.getText().toString();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(emailText) || TextUtils.isEmpty(phoneNumber)) {
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(phoneNumber)) {
             Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -278,22 +280,22 @@ public class EditProfileFragment extends Fragment {
                         }
                     }
 
-                    db.collection("user")
-                            .whereEqualTo("email", emailText)
-                            .get()
-                            .addOnCompleteListener(emailTask -> {
-                                if (emailTask.isSuccessful() && !emailTask.getResult().isEmpty()) {
-                                    for (QueryDocumentSnapshot document : emailTask.getResult()) {
-                                        if (!document.getId().equals(userId)) {
-                                            Toast.makeText(getContext(), "Email is already registered by another user", Toast.LENGTH_SHORT).show();
-                                            return;
-                                        }
-                                    }
-                                }
+//                    db.collection("user")
+//                            .whereEqualTo("email", emailText)
+//                            .get()
+//                            .addOnCompleteListener(emailTask -> {
+//                                if (emailTask.isSuccessful() && !emailTask.getResult().isEmpty()) {
+//                                    for (QueryDocumentSnapshot document : emailTask.getResult()) {
+//                                        if (!document.getId().equals(userId)) {
+//                                            Toast.makeText(getContext(), "Email is already registered by another user", Toast.LENGTH_SHORT).show();
+//                                            return;
+//                                        }
+//                                    }
+//                                }
 
                                 Map<String, Object> updates = new HashMap<>();
                                 updates.put("name", name);
-                                updates.put("email", emailText);
+//                                updates.put("email", emailText);
                                 updates.put("phoneNo", phoneNumber);
 
                                 db.collection("user")
@@ -306,7 +308,7 @@ public class EditProfileFragment extends Fragment {
                                                 Toast.makeText(getContext(), "Failed to save profile", Toast.LENGTH_SHORT).show()
                                         );
                             });
-                });
+//                });
     }
 
     private void loadVerifiedStatus(String userId) {

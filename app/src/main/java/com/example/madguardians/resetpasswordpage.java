@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -25,6 +26,9 @@ import com.example.madguardians.database.User;
 import com.example.madguardians.database.UserDao;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class resetpasswordpage extends AppCompatActivity {
 
@@ -76,10 +80,20 @@ public class resetpasswordpage extends AppCompatActivity {
                     Toast.makeText(this, "Please enter a new password", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 // Check if passwords match
                 if (!newPassword.equals(confirmPasswordText)) {
                     Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (!isPasswordStrong(newPassword)) {
+                    showPasswordRequirementsDialog();
+                    return;
+                }
+
+                String hashedPassword = hashPassword(newPassword);
+                if (hashedPassword == null) {
+                    Toast.makeText(this, "Error while hashing password. Please try again.", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -96,7 +110,7 @@ public class resetpasswordpage extends AppCompatActivity {
                                 // update new passwprd
                                 db.collection("user")
                                         .document(userId)
-                                        .update("password", newPassword)
+                                        .update("password", hashedPassword)
                                         .addOnSuccessListener(aVoid -> {
                                             Toast.makeText(resetpasswordpage.this, "Password reset successfully", Toast.LENGTH_SHORT).show();
 
@@ -128,6 +142,44 @@ public class resetpasswordpage extends AppCompatActivity {
             toggleIcon.setImageResource(R.drawable.icon_password_seen); // Use your hidden icon
         }
         editText.setSelection(editText.getText().length()); // Move cursor to end
+    }
+    private void showPasswordRequirementsDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Invalid Password")
+                .setMessage("Password must:\n" +
+                        "- Be at least 8 characters\n" +
+                        "- Include 1 uppercase letter\n" +
+                        "- Include 1 lowercase letter\n" +
+                        "- Include 1 number\n" +
+                        "- Include 1 special character")
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private boolean isPasswordStrong(String password) {
+        String passwordPattern = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$";
+        return password.matches(passwordPattern);
+    }
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            String salt = "RandomSalt1234";
+            String saltedPassword = password + salt;
+
+            byte[] hashedBytes = digest.digest(saltedPassword.getBytes());
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashedBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void configureSignUpButton() {

@@ -209,6 +209,12 @@ public class Tab3EducatorFragment extends BaseTab3Fragment<VerEducator>
         ViewProofDialogFragment dialog = ViewProofDialogFragment.newInstance();
         dialog.show(getChildFragmentManager(), "ViewProofDialogFragment");
     }
+
+    @Override
+    public void onDomainClicked(VerEducator educator, int position) {
+
+    }
+
     private void handleEducatorAction(VerEducator verEducator, String verifiedStatus, String actionName) {
         if (verEducator == null || getContext() == null) {
             logError(actionName + " failed: Null educator or context", null);
@@ -295,4 +301,5 @@ public class Tab3EducatorFragment extends BaseTab3Fragment<VerEducator>
         Log.e("Tab3EducatorFragment", message, e);
         if (e != null) e.printStackTrace(); // Optional: Use proper logging for production
     }
+
 }
