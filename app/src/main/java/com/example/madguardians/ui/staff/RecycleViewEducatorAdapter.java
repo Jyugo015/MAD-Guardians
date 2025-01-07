@@ -123,16 +123,16 @@ public class RecycleViewEducatorAdapter extends RecyclerView.Adapter<RecycleView
                 }
             });
 
-//            holder.btnApprove.setOnClickListener(v -> {
-//                if (onHandleEducatorActionListener != null) {
-//                    onHandleEducatorActionListener.onApprovedClicked(verEducator, position);
-//                    firestore.collection("verPost")
-//                            .document(verEducator.getVerEducatorId())
-//                            .update("verifiedStatus", "approved");
-//
-//                    notifyItemChanged(position);
-//                }
-//            });
+            holder.btnApprove.setOnClickListener(v -> {
+                if (onHandleEducatorActionListener != null) {
+                    onHandleEducatorActionListener.onApprovedClicked(verEducator, position);
+                    firestore.collection("verPost")
+                            .document(verEducator.getVerEducatorId())
+                            .update("verifiedStatus", "approved");
+
+                    notifyItemChanged(position);
+                }
+            });
             holder.tVDomain.setOnClickListener(v -> {
                 if (onHandleEducatorActionListener != null) {
                     onHandleEducatorActionListener.onDomainClicked(verEducator, position);
