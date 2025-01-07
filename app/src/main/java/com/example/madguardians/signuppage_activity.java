@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.example.madguardians.database.AppDatabase;
 import com.example.madguardians.database.Executor;
 import com.example.madguardians.database.FirestoreManager;
@@ -24,6 +26,9 @@ import com.example.madguardians.notification.NotificationUtils;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class signuppage_activity extends Activity {
 		private EditText nameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
@@ -106,6 +111,16 @@ public class signuppage_activity extends Activity {
 				Toast.makeText(this, "Invalid email format. Please enter a valid email address.", Toast.LENGTH_SHORT).show();
 				return;
 			}
+			if (!isPasswordStrong(password)) {
+				showPasswordRequirementsDialog();
+				return;
+			}
+
+			String hashedPassword = hashPassword(password);
+			if (hashedPassword == null) {
+				Toast.makeText(this, "Error while hashing password. Please try again.", Toast.LENGTH_SHORT).show();
+				return;
+			}
 
 //			Executor.executeTask(() -> {
 //		     String userId = generateUserId();
@@ -163,12 +178,29 @@ public class signuppage_activity extends Activity {
 										if (nameTask.isSuccessful() && !nameTask.getResult().isEmpty()) {
 											Toast.makeText(this, "Username already exists. Please choose another one.", Toast.LENGTH_SHORT).show();
 										} else {
-											generateUserIdAndSave(name, email, password);
+											generateUserIdAndSave(name, email, hashedPassword);
 										}
 									});
 						}
 					});
 		}
+	private void showPasswordRequirementsDialog() {
+		new AlertDialog.Builder(this)
+				.setTitle("Invalid Password")
+				.setMessage("Password must:\n" +
+						"- Be at least 8 characters\n" +
+						"- Include 1 uppercase letter\n" +
+						"- Include 1 lowercase letter\n" +
+						"- Include 1 number\n" +
+						"- Include 1 special character")
+				.setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+				.show();
+	}
+
+	private boolean isPasswordStrong(String password) {
+		String passwordPattern = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$";
+		return password.matches(passwordPattern);
+	}
 
 	private void generateUserIdAndSave(String name, String email, String password) {
 		db.collection("user")
@@ -201,6 +233,28 @@ public class signuppage_activity extends Activity {
 				}
 			});
 		}
+
+	private String hashPassword(String password) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+			String salt = "RandomSalt1234";
+			String saltedPassword = password + salt;
+
+			byte[] hashedBytes = digest.digest(saltedPassword.getBytes());
+
+			StringBuilder hexString = new StringBuilder();
+			for (byte b : hashedBytes) {
+				String hex = Integer.toHexString(0xff & b);
+				if (hex.length() == 1) hexString.append('0');
+				hexString.append(hex);
+			}
+			return hexString.toString();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 
 }
