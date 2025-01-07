@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Tab1ReportedPostFragment extends BaseTab1Fragment<Helpdesk> implements RecycleViewReportedPostAdapter.OnReportedPostActionListener {
+public class Tab1ReportedPostFragment extends BaseTab1Fragment<Helpdesk> implements RecycleViewReportedPostAdapter.OnReportedPostActionListener{
     private RecycleViewReportedPostAdapter adapter;
     private NotificationUtils notificationUtils;
     private List<Helpdesk> helpdeskList = new ArrayList<>();
