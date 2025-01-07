@@ -51,10 +51,23 @@
         app:layout_constraintTop_toTopOf="@+id/CVOuter" />
 
     <TextView
+        android:id="@+id/TVDomain"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="96dp"
+        android:layout_marginTop="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="Requested Doamin"
+        android:textSize="10sp"
+        app:layout_constraintStart_toEndOf="@+id/TVViewProof"
+        app:layout_constraintTop_toBottomOf="@+id/TVEducatorName" />
+
+    <TextView
         android:id="@+id/TVViewProof"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:clickable="true"
         android:focusable="true"
         android:text="@string/view_proof"
@@ -65,7 +78,7 @@
         android:id="@+id/TVRequestEDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="44dp"
         android:text="Date"
         android:textSize="8sp"
         app:layout_constraintEnd_toEndOf="@+id/TVEducatorName"
@@ -117,4 +130,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/BTNReject" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
