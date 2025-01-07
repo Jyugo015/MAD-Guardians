@@ -5,9 +5,13 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+
+import com.example.madguardians.firebase.FolderFB;
 import com.example.madguardians.notification.NotificationUtils;
 import com.example.madguardians.ui.staff.VerEducator;
 import com.example.madguardians.database.VerEducatorDao;
+import com.example.madguardians.utilities.FirebaseController;
+import com.example.madguardians.utilities.UploadCallback;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,9 +34,12 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
     private NotificationUtils notificationUtils;
     private List<VerEducator> verEducatorList = new ArrayList<>();
     private String staffId;
+    private static final String TAG = "TAB1_EDUCATOR_FRAGMENT";
+
     public Tab1EducatorFragment() {
 
     }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -314,6 +321,27 @@ public class Tab1EducatorFragment extends BaseTab1Fragment<VerEducator>
                     logError("Failed to retrieve VerEducator", e);
                     showToast("Failed to " + actionName.toLowerCase() + ": " + e.getMessage());
                 });
+
+        // If approved, add folder to the user
+        if (verifiedStatus.equals("approved")) {
+            // getDomainId
+            List<String> domainIds = verEducator.getDomainId();
+            for (String domainId : domainIds) {
+                FirebaseController.getMatchedCollection(FirebaseController.DOMAIN, FirebaseController.getIdName(FirebaseController.DOMAIN), domainId, new UploadCallback<List<HashMap<String, Object>>>() {
+                    @Override
+                    public void onSuccess(List<HashMap<String, Object>> result) {
+                        if (result != null && !result.isEmpty()) {
+                            HashMap<String, Object> data = result.get(0);
+                            String domainName = (String) data.get("domainName");
+                            HashMap<String, Object> dataHashMap = FolderFB.createFolderData(verEducator.getUserId(), domainName, domainId);
+                            FolderFB.insertFolder(dataHashMap);
+                        }
+                    }
+                    @Override
+                    public void onFailure(Exception e) {Log.e(TAG, "onFailure: ", e);}
+                });
+            }
+        }
     }
 
     private void showToast(String message) {

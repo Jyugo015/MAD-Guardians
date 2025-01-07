@@ -1,6 +1,7 @@
 package com.example.madguardians.ui.home;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import androidx.appcompat.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -26,9 +28,11 @@ import com.example.madguardians.firebase.FolderFB;
 import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.firebase.PostFB;
 import com.example.madguardians.utilities.AdapterCourse;
+import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,14 +42,6 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private RecyclerView RVCourse;
     private AdapterCourse courseAdapter;
     private Spinner SPDomain;
@@ -68,10 +64,6 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
     // TODO: Rename and change types and number of parameters
     public static HomeFragment newInstance(String param1, String param2) {
         HomeFragment fragment = new HomeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
@@ -79,14 +71,6 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         courseAdapter = new AdapterCourse(courseFBList, HomeFragment.this);
-
-        Log.d("TAG", "onCreate: start1");
-//        CourseFB.initializeCourseList();
-//        DomainFB.initialiseDomains();
-//        PostFB.intializePosts();
-//        MediaFB.initialiseMedia();
-//        FolderFB.initialiseFolders();
-        Log.d("TAG", "onCreate: start2");
     }
 
     @Override
@@ -110,12 +94,46 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
         RVCourse = view.findViewById(R.id.RVCourse);
         SPDomain = view.findViewById(R.id.SNDomain);
         RVCourse.setLayoutManager(new LinearLayoutManager(getContext()));
-//        courseList = courseDao.getAll();
         RVCourse.setAdapter(courseAdapter);
 
+        SearchView searchView = view.findViewById(R.id.search_bar);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                courseAdapter.filterCoursesBySearch(query);
+                return true;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                courseAdapter.filterCoursesBySearch(newText);
+                return true;
+            }
+        });
+
+        CheckBox checkbox_verified = view.findViewById(R.id.CBVerified);
+        checkbox_verified.setOnClickListener(v -> {
+            courseAdapter.filterCoursesByVerified(checkbox_verified.isChecked());
+        });
+
+        // check if user is verified to upload
         ImageView BTNUpload = view.findViewById(R.id.BTNUpload);
-        BTNUpload.setOnClickListener(v -> {
-            Navigation.findNavController(view).navigate(R.id.nav_domains);
+        FirebaseController.getMatchedCollection(FirebaseController.FOLDER, "userId", getUserId(), new UploadCallback<List<HashMap<String, Object>>>() {
+            @Override
+            public void onSuccess(List<HashMap<String, Object>> result) {
+                if (result == null || result.isEmpty()) {
+                    BTNUpload.setVisibility(View.GONE);
+                } else {
+                    BTNUpload.setVisibility(View.VISIBLE);
+                    BTNUpload.setOnClickListener(v -> {
+                        Navigation.findNavController(view).navigate(R.id.nav_domains);
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("HomeFragment", "onFailure: ", e);
+            }
         });
 
         DomainFB.getDomains(new UploadCallback<List<DomainFB>>() {
@@ -128,18 +146,17 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
             }
             @Override
             public void onFailure(Exception e) {
-
+                Log.e("HomeFragment", "onFailure: ", e);
             }
         });
 
         return view;
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    private String getUserId() {
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("user_preferences", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("user_id", null);
     }
-
 
     @Override
     public void onStartClick(CourseFB courseFB) {
@@ -147,11 +164,6 @@ public class HomeFragment extends Fragment implements AdapterCourse.OnItemClickL
         Bundle bundle = new Bundle();
         bundle.putString("courseId", courseFB.getCourseId());
         Navigation.findNavController(this.getView()).navigate(R.id.nav_course_overview, bundle);
-    }
-
-    @Override
-    public void onCollectionClick(CourseFB courseFB) {
-
     }
 
     private class CustomSpinnerAdapter extends ArrayAdapter<DomainFB> {

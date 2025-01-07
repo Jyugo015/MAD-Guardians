@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -28,6 +29,8 @@ public class FirebaseController {
     public static final String COLLECTION = "collection";
     public static final String QUIZ = "quiz";
     public static final String FOLDER = "folder";
+    public static final String HELPDESK = "helpdesk";
+    public static final String VER_EDUCATOR = "verEducator";
     public static final String TAG = "FirebaseController";
 
     public static void insertFirebase(String tableName, String id, HashMap<String, Object> dataHashMap, UploadCallback callback) {
@@ -223,6 +226,32 @@ public class FirebaseController {
         else if (tableName.equals(FOLDER)) return "F";
         else if (tableName.equals(USER)) return "U";
         else if (tableName.equals(QUIZ)) return "Q";
+        else if (tableName.equals(HELPDESK)) return "H";
+        else if (tableName.equals(VER_EDUCATOR)) return "VE";
         else return "";
+    }
+
+    public static String findUpperBound(String prefix) {
+        if (prefix == null || prefix.isEmpty()) return "";
+        char lastChar = prefix.charAt(prefix.length()-1);
+        char nextChar = (char) (lastChar + 1);
+        Log.d(TAG, "findUpperBound: " + prefix.substring(0, prefix.length()-1) + nextChar);
+        return prefix.substring(0, prefix.length()-1) + nextChar;
+    }
+    public static void getReportedIds(String tableName, UploadCallback<List<String>> reportCallback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FirebaseController.HELPDESK)
+                .whereGreaterThanOrEqualTo("reportedItemId", FirebaseController.findStarting(tableName))
+                .whereLessThan("reportedItemId", FirebaseController.findUpperBound(FirebaseController.findStarting(tableName)))
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<String> reportedCourses = new ArrayList<>();
+                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+                        if (document.getString("helpdeskStatus").equals("kept"))
+                            reportedCourses.add(document.getString("reportedItemId"));
+                    }
+                    reportCallback.onSuccess(reportedCourses);
+                })
+                .addOnFailureListener(e -> reportCallback.onFailure(e));
     }
 }

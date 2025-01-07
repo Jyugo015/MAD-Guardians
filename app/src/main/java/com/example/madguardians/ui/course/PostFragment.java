@@ -1,7 +1,6 @@
 package com.example.madguardians.ui.course;
 
 import static android.content.Context.MODE_PRIVATE;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -20,9 +20,13 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.madguardians.R;
+import com.example.madguardians.comment.adapter.Listener;
+import com.example.madguardians.database.Comments;
 import com.example.madguardians.firebase.MediaFB;
 import com.example.madguardians.firebase.PostFB;
+import com.example.madguardians.utilities.AdapterCourse;
 import com.example.madguardians.utilities.FirebaseController;
+import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.UploadCallback;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -42,7 +46,7 @@ import java.util.Map;
  * Use the {@link PostFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PostFragment extends Fragment {
+public class PostFragment extends Fragment implements Listener.onHelpdeskListener{
 
     private PostFB post;
     private View view;
@@ -167,7 +171,8 @@ public class PostFragment extends Fragment {
             connectToComment();
         });
         BTNReport.setOnClickListener(v -> {
-            reportPost(post.getPostId());
+//            reportPost(post.getPostId());
+            onReport(post);
         });
     }
 
@@ -236,12 +241,21 @@ public class PostFragment extends Fragment {
 
         ////////////////////////////////////////////////////////////////////////////////
         BTNReport.setOnClickListener(v -> {
-            reportMedia(media.getMediaId());
+//            reportMedia(media.getMediaId());
+            onReport(post);
         });
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
     // zw
+
+    public void onReport(PostFB postFB) {
+//        ReportDialogFragment reportDialogFragment = newReport(postFB);
+        ReportDialogFragment reportDialogFragment=ReportDialogFragment.newReport(postFB);
+        reportDialogFragment.show(getParentFragmentManager(), "ReportDialogFragment");
+        reportDialogFragment.setHelpedeskListener(PostFragment.this);
+    }
+
     private void reportPost(String postId) {
         // Call generateNextHelpdeskId to fetch the next available ID
         generateNextHelpdeskId("helpdesk", new OnIdGeneratedListener() {
@@ -341,6 +355,11 @@ public class PostFragment extends Fragment {
                 });
     }
 
+    @Override
+    public void helpdeskAdded() {
+        Toast.makeText(getContext(), "Post/Media Reported", Toast.LENGTH_SHORT).show();
+    }
+
     // Callback Interface
     public interface OnIdGeneratedListener {
         void onIdGenerated(String newId);
@@ -402,6 +421,7 @@ public class PostFragment extends Fragment {
         void onSuccess(String courseId);
         void onFailure(Exception e);
     }
+
     private void checkAndUpdateReadStatus(MediaFB pdfMedia, FirestoreCallback callback) {
         String postId = post.getPostId(); // Get PostId
 

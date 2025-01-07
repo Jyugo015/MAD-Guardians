@@ -1,7 +1,5 @@
 package com.example.madguardians.utilities;
 
-import static java.security.AccessController.getContext;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -9,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,7 +20,6 @@ import com.bumptech.glide.Glide;
 import com.example.madguardians.R;
 import com.example.madguardians.firebase.CourseFB;
 import com.example.madguardians.firebase.DomainFB;
-import com.example.madguardians.ui.staff.VerPost;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -37,6 +35,7 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
     private List<CourseFB> courseFBList;
     private List<CourseFB> originalCourseFBList;
     private OnItemClickListener listener;
+    private static final String TAG = "AdapterCourse";
     public AdapterCourse(List<CourseFB> courseFBList, OnItemClickListener listener) {
         this.courseFBList = courseFBList;
         this.originalCourseFBList = courseFBList;
@@ -68,33 +67,29 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
             }
         });
         holder.date.setText(courseFB.getDate());
-//        holder.views.setText(course.getViews());
-//        holder.comments.setText(course.getComments());
         showImage(holder, courseFB);
         // check if it is verified
-        if (isVerified(courseFB)) {
-            holder.verifyStatus.setImageResource(R.drawable.ic_verified);
-        } else {
-            holder.verifyStatus.setImageResource(R.drawable.ic_verifying);
-        }
-        // check if it id collected
-//        if (isCollected(courseFB)) {
-//            holder.button_collection.setChecked(true);
-//        }
+        isVerified(courseFB, new UploadCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean isVerified) {
+                courseFB.setVerified(isVerified);
+                Log.d(TAG, "onSuccess: isVerified: " + isVerified);;
+                holder.verifyStatus.setImageResource((isVerified) ? R.drawable.ic_verified : R.drawable.ic_verifying);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, "onFailure: ", e);
+            }
+        });
+
         checkCollectionStatus(courseFB, holder.button_collection, holder.itemView.getContext());
         holder.button_collection.setOnClickListener(v -> toggleCollection(courseFB, holder.button_collection));
 
-
         // Handle button clicks
         holder.button_start.setOnClickListener(v -> listener.onStartClick(courseFB));
-//        holder.button_collection.setOnClickListener(v -> listener.onCollectionClick(courseFB));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
-    // zw
-    private boolean isVerified(CourseFB courseFB) {return true;}
-    // check each post one by one (post1, post2, post3)
-    public void isVerified(CourseFB courseFB, UploadCallback<Boolean> callback) {
+    private void isVerified(CourseFB courseFB, UploadCallback<Boolean> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("verPosts")
@@ -282,8 +277,6 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
         void onCollectionIdGenerated(String collectionId);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
-
     private void showImage(CourseViewHolder holder, CourseFB courseFB) {
         Glide.with(holder.itemView.getContext()).load(courseFB.getCoverImage()).placeholder(R.drawable.placeholder_image).error(R.drawable.error_image).into(holder.image_cover);
     }
@@ -308,6 +301,29 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
         notifyDataSetChanged();
     }
 
+    public void filterCoursesBySearch(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            courseFBList = originalCourseFBList;
+        } else {
+            courseFBList = originalCourseFBList.stream()
+                    .filter(course -> course.getTitle().toLowerCase().contains(query.toLowerCase()) ||
+                            (course.getAuthor() != null && course.getAuthor().toLowerCase().contains(query.toLowerCase())))
+                    .collect(Collectors.toList());
+        }
+        notifyDataSetChanged();
+    }
+
+    public void filterCoursesByVerified (boolean isVerified) {
+        Log.d("TAG", "filterCoursesByVerified: " + isVerified);
+        if (isVerified) {
+            courseFBList = originalCourseFBList.stream()
+                    .filter(courseFB -> courseFB.isVerified() == isVerified)
+                    .collect(Collectors.toList());
+        } else {
+            courseFBList = originalCourseFBList;
+        }
+        notifyDataSetChanged();
+    }
     public void updateCourseList(List<CourseFB> cours) {
         courseFBList.clear();
         courseFBList.addAll(cours);
@@ -315,7 +331,7 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
     }
 
     public class CourseViewHolder extends RecyclerView.ViewHolder {
-        TextView title, author, date, views, comments;
+        TextView title, author, date;
         ImageView image_cover, verifyStatus;
         Button button_start;
         ToggleButton button_collection;
@@ -325,8 +341,6 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
             title = itemView.findViewById(R.id.TVTitle);
             author = itemView.findViewById(R.id.TVAuthor);
             date = itemView.findViewById(R.id.TVDate);
-            views = itemView.findViewById(R.id.TVView);
-            comments = itemView.findViewById(R.id.TVComment);
             image_cover = itemView.findViewById(R.id.IVCover);
             verifyStatus = itemView.findViewById(R.id.IVVerify);
             button_start = itemView.findViewById(R.id.BTNStart);
@@ -336,6 +350,5 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
 
     public interface OnItemClickListener {
         void onStartClick(CourseFB courseFB);
-        void onCollectionClick(CourseFB courseFB);
     }
 }

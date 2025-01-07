@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class CourseFB {
     private String folderId;
     private String domainId;
     private String date;
+    private boolean isVerified = false;
     private static final String TAG = "Course";
 
     private static Queue<HashMap<String, Object>> insertCourseQueue = new LinkedList<>();
@@ -35,6 +38,7 @@ public class CourseFB {
     private CourseFB(){
         // Default constructor required for Firebase
     }
+
     private CourseFB(String courseId, String title, @Nullable String author, @Nullable String description, @Nullable String coverImage, @Nullable String post1, @Nullable String post2, @Nullable String post3, @Nullable String domainId, @Nullable String folderId, @Nullable String date) {
         this.courseId = courseId;
         this.title = title;
@@ -48,6 +52,7 @@ public class CourseFB {
         this.folderId = folderId;
         this.date = date;
     }
+
     public static void insertCourse(HashMap<String, Object> data, UploadCallback<String> callback) {
         Log.d(TAG, "insertCourse: ");
         insertCourseQueue.add(data);
@@ -56,6 +61,7 @@ public class CourseFB {
             processQueue(callback);
         }
     }
+
     private static void processQueue(UploadCallback<String> callback) {
         if (!insertCourseQueue.isEmpty()) {
             Log.d(TAG, "insertCourse: start ");
@@ -149,12 +155,13 @@ public class CourseFB {
         ArrayList<CourseFB> courseFBList = new ArrayList<>();
         FirebaseController.getAllCollection(TABLE_NAME, null, new UploadCallback<List<HashMap<String, Object>>>(){
             @Override
-            public void onSuccess(List<HashMap<String, Object>> result) {
-                for (HashMap<String, Object> data : result) {
-                    courseFBList.add(mapHashMapToCourse(data));
+            public void onSuccess(List<HashMap<String, Object>> fullCourses) {
+                if (fullCourses != null && ! fullCourses.isEmpty()) {
+                    for (HashMap<String, Object> course : fullCourses) {
+                        courseFBList.add(mapHashMapToCourse(course));
+                    }
+                    callback.onSuccess(courseFBList);
                 }
-                Log.d(TAG, "onSuccess: size = " + courseFBList.size());
-                callback.onSuccess(courseFBList);
             }
             @Override
             public void onFailure(Exception e) {
@@ -167,11 +174,20 @@ public class CourseFB {
     public static void initializeCourseList() {
         Log.d(TAG, "initializeCourseList: here1");
         ArrayList<HashMap<String, Object>> courseHashMapList = new ArrayList<>();
-        courseHashMapList.add(createCourseData("Python","U0001", "This is Java", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00001", "F00001", generateDate()));
-        courseHashMapList.add(createCourseData("Java", "U0002", "This is Python", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00004", "P00002","P00003", "D00001", "F00002", generateDate()));
-        courseHashMapList.add(createCourseData("C++", "U0003", "This is C++", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00002", "F00003", generateDate()));
-        courseHashMapList.add(createCourseData("JavaScript", "U0004", "This is JavaScript", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00004", generateDate()));
-        courseHashMapList.add(createCourseData("PHP", "U0005", "This is PHP", "https://res.cloudinary.com/dmgpozfee/image/upload/v1732898099/vfp2hoinnc2udodmftyv.jpg","P00001", "P00002","P00003", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Germany Basic","U0001", "Welcome to Germany lessons!", "https://res.cloudinary.com/dmgpozfee/image/upload/cover_deo762.png","P00001", "P00002","P00003", "D00001", "F00001", generateDate()));
+        courseHashMapList.add(createCourseData("French", "U0001", "Let's learn French", "https://res.cloudinary.com/dmgpozfee/image/upload/cover_ileep9.jpg","P00004", "P00005","P00006", "D00001", "F00001", generateDate()));
+        courseHashMapList.add(createCourseData("Java", "U0002", "This is Java", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736190703/cover_ekbkah.png","P00007", "P00008","P00009", "D00002", "F00003", generateDate()));
+        courseHashMapList.add(createCourseData("Python", "U0002", "Python is fun!", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736190903/cover_fvej4l.jpg","P00010", "P00011","P00012", "D00002", "F00004", generateDate()));
+        courseHashMapList.add(createCourseData("Light", "U0003", "Do you really know light?", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736191269/cover_kgfgad.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Gravity", "U0003", "Mystery force", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736191421/cover_ljuzqm.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Chemical Equilibrium", "U0004", "Let's get chanted by the chemistry", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736191666/cover_y1xzv6.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Nuclear", "U0004", "Don't be afraid", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736191834/cover_vexoex.png","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Plant", "U0005", "What gives you inner peace", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736191981/cover_pfanji.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Cellular Biology", "U0005", "Uncover the cell", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192090/cover_otpzdq.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Algebra", "U0006", "Let's find the unknowns", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192385/cover_ipnk09.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Statistics", "U0006", "What secrets do digits hold?", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192523/cover_vipmpe.png","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Piano", "U0007", "Makes melody as remedy", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192635/cover_msqsix.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Guitar", "U0007", "Strumming and picking the strings", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192773/cover_qaigc8.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
         Log.d(TAG, "initializeCourseList: here2");
         for (HashMap<String, Object> dataHashMap:courseHashMapList) {
             insertCourse(dataHashMap, new UploadCallback<String>() {
@@ -187,7 +203,6 @@ public class CourseFB {
         }
     }
 
-
     private static CourseFB mapHashMapToCourse(HashMap<String, Object> data) {
         CourseFB courseFB = new CourseFB();
         courseFB.title = ((String) data.get("title"));
@@ -201,32 +216,7 @@ public class CourseFB {
         courseFB.folderId = ((String) data.get("folderId"));
         courseFB.date = ((String) data.get("date"));
         courseFB.courseId = ((String) data.get("courseId"));
-//        Log.d("mapHashMapToCourse", "title: " + course.title);
-//        Log.d("mapHashMapToCourse", "author: " + course.author);
-//        Log.d("mapHashMapToCourse", "description: " + course.description);
-//        Log.d("mapHashMapToCourse", "coverImage: " + course.coverImage);
-//        Log.d("mapHashMapToCourse", "post1: " + course.post1);
-//        Log.d("mapHashMapToCourse", "post2: " + course.post2);
-//        Log.d("mapHashMapToCourse", "post3: " + course.post3);
-//        Log.d("mapHashMapToCourse", "folderId: " + course.folderId);
-//        Log.d("mapHashMapToCourse", "date: " + course.date);
-//        Log.d("mapHashMapToCourse", "courseId: " + course.courseId);
         return courseFB;
-    }
-    private static HashMap<String, Object> mapCourseToHashMap(CourseFB courseFB) {
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("title", courseFB.getTitle());
-        data.put("author", courseFB.getCourseId());
-        data.put("description", courseFB.getCourseId());
-        data.put("coverImage", courseFB.getCourseId());
-        data.put("post1", courseFB.getCourseId());
-        data.put("post2", courseFB.getCourseId());
-        data.put("post3", courseFB.getCourseId());
-        data.put("domainId", courseFB.getDomainId());
-        data.put("folderId", courseFB.getCourseId());
-        data.put("date", courseFB.getCourseId());
-        data.put("courseId", courseFB.getCourseId());
-        return data;
     }
 
     public static HashMap<String, Object> createCourseData(String title, String author,
@@ -296,5 +286,14 @@ public class CourseFB {
         String date = dateFormat.format(new Date());
         Log.d(TAG, "generateDate: " + date);
         return date;
+    }
+
+    public boolean isVerified() {
+        Log.d(TAG, "isVerified: " + isVerified);
+        return isVerified;
+    }
+
+    public void setVerified(boolean verified) {
+        isVerified = verified;
     }
 }

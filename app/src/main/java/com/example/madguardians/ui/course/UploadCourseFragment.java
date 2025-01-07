@@ -2,7 +2,9 @@ package com.example.madguardians.ui.course;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -75,8 +77,12 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             Log.d(TAG, "onCreate: domainId " + domainId);
             Log.d(TAG, "onCreate: folderId " + folderId);
         }
-//        WorkManager.initialize(getContext(), getWorkManagerConfiguration());
-        userId = "U0001";
+        userId = getUserId();
+    }
+
+    private String getUserId() {
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("user_preferences", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("user_id", null);
     }
 
     @Override
@@ -111,16 +117,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             bundle.putString("folderId", folderId);
             Navigation.findNavController(view).navigate(R.id.nav_upload_post, bundle);
         });
-//        btnLevel2.setOnClickListener(v -> {
-//            Bundle bundle = new Bundle();
-//            bundle.putInt("level", 2);
-//            Navigation.findNavController(view).navigate(R.id.nav_upload_post, bundle);
-//        });
-//        btnLevel3.setOnClickListener(v -> {
-//            Bundle bundle = new Bundle();
-//            bundle.putInt("level", 3);
-//            Navigation.findNavController(view).navigate(R.id.nav_upload_post, bundle);
-//        });
+
         btnConfirm.setOnClickListener(v -> {
             if (! validateCourse()) {
                 Toast.makeText(getContext(),"Please complete title / description / cover image", Toast.LENGTH_SHORT).show();
@@ -130,6 +127,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
                 Navigation.findNavController(getView()).navigate(R.id.nav_home);
             }
         });
+
         btnCancel.setOnClickListener(v -> {
             clearHistory();
             Navigation.findNavController(view).navigate(R.id.nav_home);
@@ -150,6 +148,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
     private boolean validateCourse() {
         if (ETTitle.getText().toString().isEmpty() || ETDescription.getText().toString().isEmpty() || courseViewModel.getCoverImageUri() == null) return false;
         ArrayList<PostViewModel> posts = PostViewModel.selectedMedias;
+
         if (posts.isEmpty()) {
             Toast.makeText(getContext(), "Please upload at least one post", Toast.LENGTH_SHORT).show();
             return false;
@@ -158,6 +157,7 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
         boolean isPost1Set = false;
         boolean isPost2Set = false;
         boolean isPost3Set = false;
+
         // check if all post have title and descriptions
         for (PostViewModel p:posts) {
             if (p.getTitle().isEmpty() || p.getDescription().isEmpty()) {

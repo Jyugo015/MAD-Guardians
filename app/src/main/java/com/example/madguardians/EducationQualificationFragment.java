@@ -33,11 +33,16 @@ import android.widget.Toast;
 
 import com.example.madguardians.database.CloudinaryUploadWorker;
 import com.example.madguardians.database.Domain;
+import com.example.madguardians.firebase.MediaFB;
+import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.MediaHandler;
 import com.example.madguardians.utilities.MediasHandler;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +90,7 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
                 }
         );
         pdfHandler = new MediaHandler(getContext(), pdfPickerLauncher, this);
-
+        updateSelectDomainButtonText();
         // Trigger pdf selection
         uploadButton.setOnClickListener(v -> pdfHandler.selectPDF());
         // Handle the select domain button click
@@ -109,14 +114,24 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
 
     // Call this method when the user selects domains and clicks Confirm in the dialog
     public void onDomainSelectionConfirmed(List<String> selectedDomainIds) {
-        this.selectedDomainIds = selectedDomainIds;  // Update the selected domain IDs
-        if (pdfUri == null) {
-            Toast.makeText(getContext(), "Please upload a PDF first.", Toast.LENGTH_SHORT).show();
+        if (selectedDomainIds == null || selectedDomainIds.isEmpty()) {
+            Toast.makeText(getContext(), "Please select at least one domain.", Toast.LENGTH_SHORT).show();
+            return;
         }
+        this.selectedDomainIds = selectedDomainIds;  // Update the selected domain IDs
+        updateSelectDomainButtonText(); // Update button text after selection
     }
     /////////////////////////////////////////////////xy//////////////////////////////////////////////
     private void uploadPdfAndSaveData() {
         // Upload the PDF and get its URL
+        if (pdfUri == null) {
+            Toast.makeText(getContext(), "Please upload a PDF first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (selectedDomainIds == null || selectedDomainIds.isEmpty()) {
+            Toast.makeText(getContext(), "Please select at least one domain.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         pdfHandler.uploadPdfInBackground(pdfUri, webView, new UploadCallback<String>() {
             @Override
             public void onSuccess(String pdfUrl) {
@@ -131,32 +146,84 @@ public class EducationQualificationFragment extends Fragment implements MediaHan
     /////////////////////////////////////////////////xy//////////////////////////////////////////////
     private void saveDataToFirestore(String pdfUrl) {
         String staffId = null; // Set to null by default
+        String verifiedStatus = "pending";
 
-        // Prepare the data to save
-        // Prepare the data to save
-        Map<String, Object> data = new HashMap<>();
-        data.put("userId", userId);
-        data.put("pdfUrl", pdfUrl);
-        data.put("domainId", selectedDomainIds);  // Store only domainIds
-        data.put("staffId", staffId);
-        data.put("timestamp", FieldValue.serverTimestamp());
+        HashMap<String, Object> mediaHashMap = new HashMap<>();
+        mediaHashMap.put("url", pdfUrl);
+        mediaHashMap.put("tableName", FirebaseController.PDF);
+        mediaHashMap.put("isLast", true); // to get the mediaId callback
+        MediaFB.insertMedia(mediaHashMap, new UploadCallback<String>() {
+            @Override
+            public void onSuccess(String mediaId) {
+                // Fetch the current highest verEducatorId
+                firestore.collection("verEducator")
+                        .orderBy("verEducatorId", Query.Direction.DESCENDING)
+                        .limit(1)
+                        .get()
+                        .addOnSuccessListener(queryDocumentSnapshots -> {
+                            String newVerEducatorId = generateNewId(queryDocumentSnapshots);
+                            Log.d(TAG, "Saving data with domainIds: " + selectedDomainIds);
 
-        // Save the data to Firestore
-        firestore.collection("verEducator").add(data)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(getContext(), "Data saved successfully.", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Failed to save data.", Toast.LENGTH_SHORT).show();
-                });
+                            // Prepare the data to save
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("userId", userId);
+                            data.put("mediaId", mediaId);
+                            data.put("domainId", selectedDomainIds);  // Store only domainIds
+                            data.put("staffId", staffId);
+                            data.put("timestamp", FieldValue.serverTimestamp());
+                            data.put("verifiedStatus", verifiedStatus);
+                            data.put("verEducatorId", newVerEducatorId); // Add the new verEducatorId
+
+                            // Save the data to Firestore
+                            firestore.collection("verEducator").document(newVerEducatorId)
+                                    .set(data)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(getContext(), "Data saved successfully.", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(getContext(), "Failed to save data.", Toast.LENGTH_SHORT).show();
+                                    });
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(getContext(), "Failed to fetch current verEducatorId.", Toast.LENGTH_SHORT).show();
+                        });
+            }
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, "onFailure: ", e);
+            }
+        });
+
     }
 
+    private String generateNewId(QuerySnapshot queryDocumentSnapshots) {
+        String newVerEducatorId = "VE00001"; // Default ID if no records exist
+        if (!queryDocumentSnapshots.isEmpty()) {
+            DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+            String lastId = document.getString("verEducatorId");
+            if (lastId != null && lastId.startsWith("VE")) {
+                // Increment the numeric part of the last ID
+                int currentId = Integer.parseInt(lastId.substring(2));
+                newVerEducatorId = String.format("VE%05d", currentId + 1);
+            }
+        }
+        return newVerEducatorId;
+    }
     public void showApproveDialog() {
-        ApproveEducatorDialogFragment dialog = ApproveEducatorDialogFragment.newInstance();
+        ApproveEducatorDialogFragment dialog = ApproveEducatorDialogFragment.newInstance(selectedDomainIds);
         dialog.setOnApproveListener(selectedDomains -> {
             // selectedDomains is a List<Domain> passed from the dialog
-            onDomainSelectionConfirmed(selectedDomains);
+            selectedDomainIds = selectedDomains;
+            updateSelectDomainButtonText();
         });
         dialog.show(getParentFragmentManager(), "ApproveEducatorDialogFragment");
+    }
+
+    private void updateSelectDomainButtonText() {
+        if (selectedDomainIds.isEmpty()) {
+            selectDomainButton.setText("Select Domains");
+        } else {
+            selectDomainButton.setText("Selected (" + selectedDomainIds.size() + ")");
+        }
     }
 }

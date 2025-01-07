@@ -26,8 +26,12 @@ public class ApproveEducatorDialogFragment extends DialogFragment {
 
     private OnConfirmListener listener;
 
-    public static ApproveEducatorDialogFragment newInstance() {
-        return new ApproveEducatorDialogFragment();
+    public static ApproveEducatorDialogFragment newInstance(List<String> selectedDomainIds) {
+        ApproveEducatorDialogFragment fragment = new ApproveEducatorDialogFragment();
+        Bundle args = new Bundle();
+        args.putStringArrayList("selectedDomainIds", new ArrayList<>(selectedDomainIds)); // 传递已选中的 domainId 列表
+        fragment.setArguments(args);
+        return fragment;
     }
 
     public void setOnApproveListener(OnConfirmListener listener) {
@@ -39,6 +43,10 @@ public class ApproveEducatorDialogFragment extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the custom dialog layout
         View view = inflater.inflate(R.layout.fragment_approve_educator_dialog, container, false);
+
+        List<String> selectedDomainIds = getArguments() != null ?
+                getArguments().getStringArrayList("selectedDomainIds") : new ArrayList<>();
+
 
         // Close button
         ImageView closeButton = view.findViewById(R.id.ic_close);
@@ -63,16 +71,17 @@ public class ApproveEducatorDialogFragment extends DialogFragment {
                 new Domain("D00003", "Physics"),
                 new Domain("D00004", "Chemistry"),
                 new Domain("D00005", "Biology"),
-                new Domain("D00006", "Mathematics")
+                new Domain("D00006", "Mathematics"),
+                new Domain("D00007", "Music")
         );
-        ApproveAdapter adapter = new ApproveAdapter(domains);
+        ApproveAdapter adapter = new ApproveAdapter(domains, selectedDomainIds);;
         recyclerView.setAdapter(adapter);
 
         // Confirm button
         view.findViewById(R.id.button_confirm).setOnClickListener(v -> {
-            List<String> selectedDomainIds = adapter.getSelectedDomainIds();  // Get selected domainIds
+            List<String> selectedDomainIdsToSave = adapter.getSelectedDomainIds();
             if (listener != null) {
-                listener.onConfirmed(selectedDomainIds);  // Pass the domainIds to the listener
+                listener.onConfirmed(selectedDomainIdsToSave);  // Pass the domainIds to the listener
             }
             dismiss();  // Dismiss the dialog
         });
@@ -85,11 +94,11 @@ public class ApproveEducatorDialogFragment extends DialogFragment {
         private final List<Domain> domains;
         private final List<Boolean> selected; // Track which checkboxes are selected
 
-        public ApproveAdapter(List<Domain> domains) {
+        public ApproveAdapter(List<Domain> domains, List<String> initiallySelectedDomainIds) {
             this.domains = domains;
             this.selected = new ArrayList<>();
-            for (int i = 0; i < domains.size(); i++) {
-                selected.add(false); // Initialize all as unselected
+            for (Domain domain : domains) {
+                selected.add(initiallySelectedDomainIds.contains(domain.getDomainId())); // Initialize all as unselected
             }
         }
 
@@ -104,6 +113,7 @@ public class ApproveEducatorDialogFragment extends DialogFragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Domain domain = domains.get(position);
+            holder.checkBox.setOnCheckedChangeListener(null);
             holder.checkBox.setText(domain.getDomainName());
             holder.checkBox.setChecked(selected.get(position));
 
