@@ -93,7 +93,7 @@ public class RootCommentFragment extends DialogFragment {
                         if (lastCommentId != null) {
                             Log.d("Result", "Last Comment ID: " + lastCommentId);
                             Comments comment = new Comments(
-                                    getNumericPart(lastCommentId)>9999?"COM"+ String.valueOf(getNumericPart(lastCommentId)):"COM" + String.format("%04d", getNumericPart(lastCommentId)),
+                                    getNumericPart(lastCommentId)>999999?"COM"+ String.valueOf(getNumericPart(lastCommentId)):"COM" + String.format("%06d", getNumericPart(lastCommentId)),
                                     userId,
                                     post.getPostId(),
                                     rootComment,
