@@ -48,6 +48,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
@@ -211,6 +213,11 @@ public class loginpage_activity extends Activity {
 //				});
 //			}
 //		}).start();
+		String hashedPassword = hashPassword(password);
+		if (hashedPassword == null) {
+			Toast.makeText(this, "Error while hashing password. Please try again.", Toast.LENGTH_SHORT).show();
+			return;
+		}
 		// Query Firestore for user
 		db.collection("user")
 				.whereEqualTo("email", email)
@@ -222,7 +229,7 @@ public class loginpage_activity extends Activity {
 							String userId = document.getString("userId");
 							int strikeLoginDays = document.contains("strikeLoginDays") ? document.getLong("strikeLoginDays").intValue() : 0;
 
-							if (storedPassword != null && storedPassword.equals(password)) {
+							if (storedPassword != null && storedPassword.equals(hashedPassword)) {
 								handleSuccessfulLogin(document, userId, strikeLoginDays);
 								return;
 							}
@@ -267,6 +274,27 @@ public class loginpage_activity extends Activity {
 		Intent intent = new Intent(loginpage_activity.this, NavVewBnvStaff.class);
 		startActivity(intent);
 		finish();
+	}
+	private String hashPassword(String password) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+			String salt = "RandomSalt1234";
+			String saltedPassword = password + salt;
+
+			byte[] hashedBytes = digest.digest(saltedPassword.getBytes());
+
+			StringBuilder hexString = new StringBuilder();
+			for (byte b : hashedBytes) {
+				String hex = Integer.toHexString(0xff & b);
+				if (hex.length() == 1) hexString.append('0');
+				hexString.append(hex);
+			}
+			return hexString.toString();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	private void handleSuccessfulLogin(QueryDocumentSnapshot document, String userId, int strikeLoginDays) {
 		// Login successful
