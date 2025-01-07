@@ -174,6 +174,7 @@ public class CourseFB {
     public static void initializeCourseList() {
         Log.d(TAG, "initializeCourseList: here1");
         ArrayList<HashMap<String, Object>> courseHashMapList = new ArrayList<>();
+        String userId = "U0001";
         courseHashMapList.add(createCourseData("Germany Basic","U0001", "Welcome to Germany lessons!", "https://res.cloudinary.com/dmgpozfee/image/upload/cover_deo762.png","P00001", "P00002","P00003", "D00001", "F00001", generateDate()));
         courseHashMapList.add(createCourseData("French", "U0001", "Let's learn French", "https://res.cloudinary.com/dmgpozfee/image/upload/cover_ileep9.jpg","P00004", "P00005","P00006", "D00001", "F00001", generateDate()));
         courseHashMapList.add(createCourseData("Java", "U0002", "This is Java", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736190703/cover_ekbkah.png","P00007", "P00008","P00009", "D00002", "F00003", generateDate()));
@@ -185,7 +186,7 @@ public class CourseFB {
         courseHashMapList.add(createCourseData("Plant", "U0005", "What gives you inner peace", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736191981/cover_pfanji.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
         courseHashMapList.add(createCourseData("Cellular Biology", "U0005", "Uncover the cell", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192090/cover_otpzdq.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
         courseHashMapList.add(createCourseData("Algebra", "U0006", "Let's find the unknowns", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192385/cover_ipnk09.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
-        courseHashMapList.add(createCourseData("Statistics", "U0006", "What secrets do digits hold?", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192523/cover_vipmpe.png","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
+        courseHashMapList.add(createCourseData("Statistics", "U0006" ,"What secrets do digits hold?", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192523/cover_vipmpe.png","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
         courseHashMapList.add(createCourseData("Piano", "U0007", "Makes melody as remedy", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192635/cover_msqsix.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
         courseHashMapList.add(createCourseData("Guitar", "U0007", "Strumming and picking the strings", "https://res.cloudinary.com/dmgpozfee/image/upload/v1736192773/cover_qaigc8.jpg","P00001", "P00013","P00014", "D00003", "F00005", generateDate()));
         Log.d(TAG, "initializeCourseList: here2");
