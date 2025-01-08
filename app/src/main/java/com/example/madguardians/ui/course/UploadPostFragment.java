@@ -96,7 +96,6 @@ public class UploadPostFragment extends Fragment{
         Button btnImages = view.findViewById(R.id.BTNImages);
         Button btnVideos = view.findViewById(R.id.BTNVideos);
         Button btnPDFs = view.findViewById(R.id.BTNPDFs);
-        Button btnQuiz = view.findViewById(R.id.BTNQuizs);
         Button btnConfirm = view.findViewById(R.id.BTNConfirm);
         Button btnCancel = view.findViewById(R.id.BTNCancel);
 
@@ -116,9 +115,6 @@ public class UploadPostFragment extends Fragment{
         });
         btnPDFs.setOnClickListener(v -> {
             pdfsHandler.selectPDFs();
-        });
-        btnQuiz.setOnClickListener(v-> {
-            Toast.makeText(getContext(), "Connecting to quiz", Toast.LENGTH_SHORT).show();
         });
         btnConfirm.setOnClickListener(v -> {
             if (isValidate())
