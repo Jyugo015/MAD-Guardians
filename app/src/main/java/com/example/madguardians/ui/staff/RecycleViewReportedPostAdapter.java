@@ -129,6 +129,7 @@ public class RecycleViewReportedPostAdapter extends RecyclerView.Adapter<Recycle
                             if (postSnapshot.exists()) {
                                 Post post = postSnapshot.toObject(Post.class);
                                 if (post != null) {
+                                    holder.tvCourseTitle.setText(post.getDescription());
                                     // Fetch User details using userId
                                     if (post.getUserId() != null) {
                                         userRef.document(post.getUserId()).get()
