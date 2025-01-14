@@ -4,11 +4,13 @@ import android.util.Log;
 
 import com.example.madguardians.utilities.FirebaseController;
 import com.example.madguardians.utilities.UploadCallback;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -149,13 +151,40 @@ public class PostFB implements Serializable{
             if (dataHashMap.get(FirebaseController.getIdName(TABLE_NAME)) == null) {
                 FirebaseController.generateDocumentId(TABLE_NAME, new UploadCallback<String>() {
                     @Override
-                    public void onSuccess(String id) {
-                        FirebaseController.insertFirebase(TABLE_NAME, id, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
+                    public void onSuccess(String postId) {
+                        FirebaseController.insertFirebase(TABLE_NAME, postId, dataHashMap, new UploadCallback<HashMap<String, Object>>() {
                             @Override
                             public void onSuccess(HashMap<String, Object> result) {
                                 Log.d("initializePostList", "onSuccess");
                                 insertQueue.poll();
                                 postIdCallbackQueue.poll();
+                                FirebaseController.generateDocumentId(FirebaseController.VER_POST, new UploadCallback<String>() {
+                                    @Override
+                                    public void onSuccess(String verPostId) {
+                                        HashMap<String, Object> verPostHashMap = new HashMap<>();
+                                        verPostHashMap.put(FirebaseController.getIdName(FirebaseController.VER_POST), verPostId);
+                                        verPostHashMap.put(FirebaseController.getIdName(FirebaseController.POST), postId);
+                                        verPostHashMap.put("timestamp", new Timestamp(new Date()));
+                                        verPostHashMap.put("verifiedStatus", "pending");
+                                        verPostHashMap.put(FirebaseController.getIdName(FirebaseController.VER_POST), verPostId);
+                                        FirebaseController.insertFirebase(FirebaseController.VER_POST, verPostId, verPostHashMap, new UploadCallback<HashMap<String, Object>>() {
+                                            @Override
+                                            public void onSuccess(HashMap<String, Object> result) {
+                                                Log.d(TAG, "onSuccess: " + verPostHashMap);
+                                            }
+
+                                            @Override
+                                            public void onFailure(Exception e) {
+
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onFailure(Exception e) {
+
+                                    }
+                                });
                                 postIdCallback.onSuccess((String) result.get(FirebaseController.getIdName(TABLE_NAME)));
                                 processQueue();
                             }

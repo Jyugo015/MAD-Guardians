@@ -163,12 +163,10 @@ public class UploadCourseFragment extends Fragment implements MediaHandler.Media
             if (p.getTitle().isEmpty() || p.getDescription().isEmpty()) {
                 Toast.makeText(getContext(), "Please complete title / description for post " + p.getLevel(), Toast.LENGTH_SHORT).show();
                 return false;
-            }
-            if (p.getImagesUri().isEmpty() && p.getVideosUri().isEmpty() && p.getPdfsUri().isEmpty()) {
+            } else if (p.getImagesUri().isEmpty() && p.getVideosUri().isEmpty() && p.getPdfsUri().isEmpty()) {
                 Toast.makeText(getContext(), "Please upload at least one media for post " + p.getLevel(), Toast.LENGTH_SHORT).show();
                 return false;
-            }
-            if (p.isUploading()) {
+            } else if (p.isUploading()) {
                 Toast.makeText(getContext(), "Please wait for the post " + p.getLevel() + " to be uploaded.", Toast.LENGTH_SHORT).show();
                 return false;
             }

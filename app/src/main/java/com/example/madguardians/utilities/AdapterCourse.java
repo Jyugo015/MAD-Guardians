@@ -92,21 +92,58 @@ public class AdapterCourse extends RecyclerView.Adapter<AdapterCourse.CourseView
     private void isVerified(CourseFB courseFB, UploadCallback<Boolean> callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        db.collection("verPosts")
+        db.collection("verPost")
                 .whereEqualTo("postId", courseFB.getPost1())
                 .limit(1) // Assuming only one VerPost per post
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
+                .addOnSuccessListener(queryDocumentSnapshots1 -> {
+                    if (!queryDocumentSnapshots1.isEmpty()) {
                         // Extract the VerPost data
-                        Map<String, Object> data = queryDocumentSnapshots.getDocuments().get(0).getData();
-                        if (data != null && "approved".equalsIgnoreCase((String) data.get("verifiedStatus"))) {
+                        Map<String, Object> data1 = queryDocumentSnapshots1.getDocuments().get(0).getData();
+                        if (data1 != null && "approved".equalsIgnoreCase((String) data1.get("verifiedStatus"))) {
                             callback.onSuccess(true); // Post is verified
-                        } else {
-                            callback.onSuccess(false); // Post is not verified
-                        }
+                        } else if (courseFB.getPost2() != null) {
+                            db.collection("verPost")
+                                    .whereEqualTo("postId", courseFB.getPost2())
+                                    .limit(1) // Assuming only one VerPost per post
+                                    .get()
+                                    .addOnSuccessListener(queryDocumentSnapshots2 -> {
+                                        if (!queryDocumentSnapshots2.isEmpty()) {
+                                            // Extract the VerPost data
+                                            Map<String, Object> data2 = queryDocumentSnapshots2.getDocuments().get(0).getData();
+                                            if (data2 != null && "approved".equalsIgnoreCase((String) data2.get("verifiedStatus"))) {
+                                                callback.onSuccess(true); // Post is verified
+                                            } else if (courseFB.getPost3() != null) {
+                                                db.collection("verPost")
+                                                        .whereEqualTo("postId", courseFB.getPost3())
+                                                        .limit(1) // Assuming only one VerPost per post
+                                                        .get()
+                                                        .addOnSuccessListener(queryDocumentSnapshots3 -> {
+                                                            if (!queryDocumentSnapshots3.isEmpty()) {
+                                                                // Extract the VerPost data
+                                                                Map<String, Object> data3 = queryDocumentSnapshots3.getDocuments().get(0).getData();
+                                                                if (data3 != null && "approved".equalsIgnoreCase((String) data3.get("verifiedStatus"))) {
+                                                                    callback.onSuccess(true); // Post is verified
+                                                                } else callback.onSuccess(false);
+                                                            } else callback.onSuccess(false);
+                                                        })
+                                                        .addOnFailureListener(e -> {
+                                                            Log.e("isVerified", "Failed to check verification status: " + e.getMessage(), e);
+                                                            callback.onFailure(e); // Handle failure case
+                                                        });
+                                            } else callback.onSuccess(false);
+                                        } else {
+                                            callback.onSuccess(false); // No VerPost found, consider it not verified
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("isVerified", "Failed to check verification status: " + e.getMessage(), e);
+                                        callback.onFailure(e); // Handle failure case
+                                    });
+                        } else callback.onSuccess(false);
                     } else {
-                        callback.onSuccess(false); // No VerPost found, consider it not verified
+                         // No VerPost found, consider it not verified
+                        callback.onSuccess(false);
                     }
                 })
                 .addOnFailureListener(e -> {
