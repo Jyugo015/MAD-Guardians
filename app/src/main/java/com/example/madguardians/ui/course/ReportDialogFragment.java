@@ -48,7 +48,7 @@ public class ReportDialogFragment extends DialogFragment implements Listener.OnI
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.comment_report, container, false);
+        return inflater.inflate(R.layout.post_report, container, false);
     }
 
     @Override
