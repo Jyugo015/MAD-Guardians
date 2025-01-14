@@ -250,7 +250,7 @@ public class PostFragment extends Fragment implements Listener.onHelpdeskListene
     // zw
 
     public void onReport(PostFB postFB) {
-//        ReportDialogFragment reportDialogFragment = newReport(postFB);
+        //report post or media(pdf/video/image) if there is any issue
         ReportDialogFragment reportDialogFragment=ReportDialogFragment.newReport(postFB);
         reportDialogFragment.show(getParentFragmentManager(), "ReportDialogFragment");
         reportDialogFragment.setHelpedeskListener(PostFragment.this);
